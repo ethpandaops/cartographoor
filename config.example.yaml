@@ -1,0 +1,55 @@
+# Network Status Service Configuration
+
+# Logging configuration
+logging:
+  level: info
+
+# Discovery configuration
+discovery:
+  # Discovery interval (default: 1h)
+  interval: 1h
+  
+  # GitHub discovery configuration
+  github:
+    # List of repositories to check for networks
+    repositories:
+      - ethpandaops/dencun-devnets
+      # Add more repositories as needed
+    
+    # GitHub API token (optional)
+    # token: ghp_your_github_token
+
+# S3 storage configuration
+storage:
+  # S3 bucket name
+  bucketName: ethpandaops-networks
+  
+  # S3 key (path) for the networks.json file
+  key: networks.json
+  
+  # AWS region
+  region: us-east-1
+  
+  # S3-compatible endpoint (optional, for non-AWS S3 implementations)
+  # endpoint: https://s3.example.com
+  
+  # Access credentials (optional, can use AWS environment variables or instance profile)
+  # accessKey: your_access_key
+  # secretKey: your_secret_key
+  
+  # Force path style addressing (for some S3-compatible services)
+  # forcePathStyle: true
+  
+  # Disable SSL (not recommended for production)
+  # disableSSL: false
+  
+  # Content type for the uploaded file
+  contentType: application/json
+  
+  # Access control list for the uploaded file (optional)
+  # acl: public-read
+  
+  # Retry configuration
+  retryDuration: 5s
+  maxRetries: 3
+  backoffJitterPercent: 20
