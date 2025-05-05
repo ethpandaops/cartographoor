@@ -15,7 +15,9 @@ import (
 )
 
 const (
-	networkConfigDir = "network-configs"
+	networkConfigDir     = "network-configs"
+	kubernetesDir        = "kubernetes"
+	kubernetesArchiveDir = "kubernetes-archive"
 )
 
 // Provider implements the discovery.Provider interface for GitHub.
@@ -91,7 +93,7 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 			if namePrefix != "" {
 				networkName = namePrefix + originalNetworkName
 			}
-			
+
 			p.log.WithFields(logrus.Fields{
 				"owner":           owner,
 				"repo":            repo,
@@ -99,13 +101,37 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 				"prefixedNetwork": networkName,
 			}).Debug("Found network")
 
+			// Determine network status by checking if it's in kubernetes/ or kubernetes-archive/
+			status := "unknown"
+
+			// Check if network exists in kubernetes directory (active).
+			kubePath := path.Join(kubernetesDir, originalNetworkName)
+
+			_, _, resp, err := client.Repositories.GetContents(ctx, owner, repo, kubePath, nil)
+			if err == nil || (resp != nil && resp.StatusCode != 404) {
+				status = "active"
+			} else {
+				// Check if network exists in kubernetes-archive directory (inactive).
+				archivePath := path.Join(kubernetesArchiveDir, originalNetworkName)
+
+				_, _, resp, err := client.Repositories.GetContents(ctx, owner, repo, archivePath, nil)
+				if err == nil || (resp != nil && resp.StatusCode != 404) {
+					status = "inactive"
+				}
+			}
+
+			p.log.WithFields(logrus.Fields{
+				"network": networkName,
+				"status":  status,
+			}).Debug("Network status determined")
+
 			// Create network
 			network := discovery.Network{
 				Name:        originalNetworkName, // Keep original name in the network object
 				Repository:  repoPath,
 				Path:        path.Join(netConfigPath, originalNetworkName),
 				URL:         *content.HTMLURL,
-				Status:      "active",
+				Status:      status,
 				LastUpdated: time.Now(), // ideally would use last commit time
 			}
 
