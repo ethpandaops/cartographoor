@@ -1,19 +1,19 @@
 .PHONY: build run clean test lint
 
 # Build settings
-BINARY_NAME=network-status
+BINARY_NAME=cartographoor
 BUILD_DIR=build
-MAIN_PATH=./cmd/network-status
+MAIN_PATH=./cmd/cartographoor
 
 # Build the binary
 build:
-	@echo "Building network-status..."
+	@echo "Building cartographoor..."
 	@mkdir -p $(BUILD_DIR)
 	@go build -o $(BUILD_DIR)/$(BINARY_NAME) $(MAIN_PATH)
 
 # Run the application
 run: build
-	@echo "Running network-status..."
+	@echo "Running cartographoor..."
 	@$(BUILD_DIR)/$(BINARY_NAME) run --config=config.example.yaml
 
 # Clean build artifacts

@@ -1,10 +1,10 @@
-# Network Status
+# Cartographoor
 
 A service that discovers active networks in the ethpandaops ecosystem.
 
 ## Overview
 
-Network Status is a Go application that periodically scans and discovers active Ethereum networks maintained by the ethpandaops team. It aggregates network information and uploads it to S3 as a structured JSON file, making it easier to maintain an up-to-date view of available networks.
+Cartographoor is a Go application that periodically scans and discovers active Ethereum networks maintained by the ethpandaops team. It aggregates network information and uploads it to S3 as a structured JSON file, making it easier to maintain an up-to-date view of available networks.
 
 ## Features
 
@@ -92,31 +92,31 @@ When the application starts, it will replace `${VAR}` with the corresponding env
 
 ```bash
 # Run with default configuration (continuous mode)
-network-status run
+cartographoor run
 
 # Run with custom configuration
-network-status run --config=/path/to/config.yaml
+cartographoor run --config=/path/to/config.yaml
 
 # Run once and exit
-network-status run --once
+cartographoor run --once
 
 # Run in debug mode 
-network-status run --logging.level=debug
+cartographoor run --logging.level=debug
 ```
 
 ### Docker
 
-Network Status is available as a Docker image from GitHub Container Registry:
+Cartographoor is available as a Docker image from GitHub Container Registry:
 
 ```bash
 # Pull the latest image
-docker pull ghcr.io/ethpandaops/network-status:latest
+docker pull ghcr.io/ethpandaops/cartographoor:latest
 
 # Run with a custom config
-docker run -v /path/to/config.yaml:/app/config/config.yaml ghcr.io/ethpandaops/network-status:latest
+docker run -v /path/to/config.yaml:/app/config/config.yaml ghcr.io/ethpandaops/cartographoor:latest
 
 # Run once and exit
-docker run -v /path/to/config.yaml:/app/config/config.yaml ghcr.io/ethpandaops/network-status:latest run --once
+docker run -v /path/to/config.yaml:/app/config/config.yaml ghcr.io/ethpandaops/cartographoor:latest run --once
 ```
 
 You can also use Docker Compose:
@@ -125,8 +125,8 @@ You can also use Docker Compose:
 version: '3.8'
 
 services:
-  network-status:
-    image: ghcr.io/ethpandaops/network-status:latest
+  cartographoor:
+    image: ghcr.io/ethpandaops/cartographoor:latest
     restart: unless-stopped
     volumes:
       - ./config.yaml:/app/config/config.yaml

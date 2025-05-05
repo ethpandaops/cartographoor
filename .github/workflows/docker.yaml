@@ -33,7 +33,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/ethpandaops/network-status
+            ghcr.io/ethpandaops/cartographoor
           tags: |
             type=ref,event=branch
             type=ref,event=pr

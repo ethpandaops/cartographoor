@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/ethpandaops/cartographoor/cmd/network-status/cmd"
+	"github.com/ethpandaops/cartographoor/cmd/cartographoor/cmd"
 	"github.com/sirupsen/logrus"
 )
 

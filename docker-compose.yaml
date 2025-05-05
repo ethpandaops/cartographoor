@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  network-status:
+  cartographoor:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: network-status
+    container_name: cartographoor
     restart: unless-stopped
     volumes:
       - ./config.example.yaml:/app/config/config.yaml

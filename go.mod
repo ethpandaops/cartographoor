@@ -1,4 +1,4 @@
-module github.com/ethpandaops/network-status
+module github.com/ethpandaops/cartographoor
 
 go 1.24.1
 

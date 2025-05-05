@@ -11,7 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 
-	"github.com/ethpandaops/network-status/pkg/discovery"
+	"github.com/ethpandaops/cartographoor/pkg/discovery"
 )
 
 const (

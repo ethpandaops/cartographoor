@@ -8,7 +8,7 @@ import (
 	"time"
 
 	gh "github.com/google/go-github/v53/github"
-	"github.com/ethpandaops/network-status/pkg/discovery"
+	"github.com/ethpandaops/cartographoor/pkg/discovery"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

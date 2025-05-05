@@ -16,7 +16,7 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -o network-status ./cmd/network-status
+RUN CGO_ENABLED=0 GOOS=linux go build -a -o cartographoor ./cmd/cartographoor
 
 # Use a minimal alpine image for the final image
 FROM alpine:3.19
@@ -28,7 +28,7 @@ RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 
 # Copy the binary from the builder stage
-COPY --from=builder /app/network-status /app/network-status
+COPY --from=builder /app/cartographoor /app/cartographoor
 
 # Create a directory for config
 RUN mkdir -p /app/config
@@ -37,5 +37,5 @@ RUN mkdir -p /app/config
 EXPOSE 8080
 
 # Command to run
-ENTRYPOINT ["/app/network-status"]
+ENTRYPOINT ["/app/cartographoor"]
 CMD ["run", "--config=/app/config/config.yaml"]
