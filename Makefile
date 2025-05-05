@@ -5,6 +5,9 @@ BINARY_NAME=cartographoor
 BUILD_DIR=build
 MAIN_PATH=./cmd/cartographoor
 
+# Note: We've fully migrated to the cartographoor name
+# The legacy network-status name has been deprecated
+
 # Build the binary
 build:
 	@echo "Building cartographoor..."

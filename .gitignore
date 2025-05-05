@@ -1,12 +1,9 @@
-**/.claude/settings.local.json
-
 # Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-/cartographoor
 
 # Test binary, built with `go test -c`
 *.test
@@ -14,18 +11,33 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Output logs
-*.log
+# Dependency directories (remove the comment below if you want to check in your lock files)
+vendor/
 
-# IDE configs
+# Go workspace file
+go.work
+
+# Build directory
+build/
+
+# Configuration files (except examples)
+config.yaml
+config.yml
+\!config.example.yaml
+
+# IDE specific files
 .idea/
 .vscode/
 *.swp
 *.swo
 
-# Go workspace file
-go.work
+# macOS specific files
+.DS_Store
 
-# Local development files
-*.env
-*.local
+# Log files
+*.log
+
+# Environment variable files
+.env
+EOF < /dev/null
+**/.claude/settings.local.json

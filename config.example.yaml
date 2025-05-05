@@ -1,4 +1,4 @@
-# Network Status Service Configuration
+# Cartographoor Service Configuration
 
 # Logging configuration
 logging:
@@ -16,16 +16,9 @@ discovery:
   github:
     # List of repositories to check for networks
     repositories:
-      # Simple example with no prefix
-      - name: ethpandaops/dencun-devnets
-        
       # Example with a network name prefix (e.g. "devnet-4" becomes "dencun-devnet-4")
       - name: ethpandaops/dencun-devnets
         namePrefix: dencun-
-      
-      # Example with a different repository and prefix
-      # - name: ethpandaops/eleel-testnet
-      #   namePrefix: holesky-
     
     # GitHub API token (optional)
     # token: ghp_your_github_token

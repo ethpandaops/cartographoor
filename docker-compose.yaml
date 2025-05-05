@@ -8,8 +8,64 @@ services:
     container_name: cartographoor
     restart: unless-stopped
     volumes:
-      - ./config.example.yaml:/app/config/config.yaml
+      - ./config.yaml:/app/config/config.yaml
     environment:
-      - NETWORK_STATUS_LOGGING_LEVEL=debug
-    # Uncomment this to run once and exit
-    # command: run --once --config=/app/config/config.yaml
+      # Logging configuration
+      - CARTOGRAPHOOR_LOGGING_LEVEL=debug
+      
+      # S3 credentials for local Minio
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+      - AWS_REGION=us-east-1
+      - S3_BUCKET_NAME=ethpandaops-networks
+      - S3_ENDPOINT=http://minio:9000
+    
+    # Run Options
+    command: run --config=/app/config/config.yaml
+    depends_on:
+      minio-createbucket:
+        condition: service_completed_successfully
+  
+  # Minio service (S3-compatible storage)
+  minio:
+    image: minio/minio:latest
+    container_name: cartographoor-minio
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+      # Enable anonymous access
+      - MINIO_BROWSER_REDIRECT_URL=http://localhost:9001
+      - MINIO_DOMAIN=localhost
+      # Make all buckets public by default
+      - MINIO_BROWSER=on
+      - MINIO_ANONYMOUS_POLICY=download
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+  
+  # Service to create the bucket in Minio
+  minio-createbucket:
+    image: minio/mc:latest
+    container_name: cartographoor-minio-setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/ethpandaops-networks --ignore-existing;
+      /usr/bin/mc anonymous set download myminio/ethpandaops-networks;
+      /usr/bin/mc policy set public myminio/ethpandaops-networks;
+      exit 0;
+      "
+
+volumes:
+  minio-data:

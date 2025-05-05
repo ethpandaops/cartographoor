@@ -33,8 +33,8 @@ func newRunCmd(log *logrus.Logger) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "run",
-		Short: "Run the network status service",
-		Long:  `Run the network status service to discover Ethereum networks and upload to S3`,
+		Short: "Run the Cartographoor service",
+		Long:  `Run the Cartographoor service to discover Ethereum networks and upload to S3`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			v := viper.New()
 
@@ -47,7 +47,7 @@ func newRunCmd(log *logrus.Logger) *cobra.Command {
 				}
 			}
 
-			v.SetEnvPrefix("NETWORK_STATUS")
+			v.SetEnvPrefix("CARTOGRAPHOOR")
 			v.AutomaticEnv()
 
 			if err := v.Unmarshal(cfg); err != nil {
