@@ -13,12 +13,12 @@ import (
 // MockProvider is a mock discovery provider for testing.
 type MockProvider struct {
 	name     string
-	networks []Network
+	networks map[string]Network
 	err      error
 }
 
 // NewMockProvider creates a new mock provider.
-func NewMockProvider(name string, networks []Network, err error) *MockProvider {
+func NewMockProvider(name string, networks map[string]Network, err error) *MockProvider {
 	return &MockProvider{
 		name:     name,
 		networks: networks,
@@ -32,7 +32,7 @@ func (p *MockProvider) Name() string {
 }
 
 // Discover returns the mock networks or error.
-func (p *MockProvider) Discover(ctx context.Context, config Config) ([]Network, error) {
+func (p *MockProvider) Discover(ctx context.Context, config Config) (map[string]Network, error) {
 	if p.err != nil {
 		return nil, p.err
 	}
@@ -51,9 +51,9 @@ func TestDiscoveryService(t *testing.T) {
 	service, err := NewService(log, cfg)
 	require.NoError(t, err)
 
-	// Create mock networks
-	networks := []Network{
-		{
+	// Create mock networks as a map with network names as keys
+	networks := map[string]Network{
+		"devnet-10": {
 			Name:        "devnet-10",
 			Repository:  "ethpandaops/dencun-devnets",
 			Path:        "network-configs/devnet-10",
@@ -61,7 +61,7 @@ func TestDiscoveryService(t *testing.T) {
 			Status:      "active",
 			LastUpdated: time.Now(),
 		},
-		{
+		"devnet-11": {
 			Name:        "devnet-11",
 			Repository:  "ethpandaops/dencun-devnets",
 			Path:        "network-configs/devnet-11",
@@ -98,8 +98,10 @@ func TestDiscoveryService(t *testing.T) {
 	// Validate result
 	require.Len(t, result.Networks, 2)
 	assert.Contains(t, []string{"mock"}, result.Providers[0].Name())
-	assert.Equal(t, "devnet-10", result.Networks[0].Name)
-	assert.Equal(t, "devnet-11", result.Networks[1].Name)
+	assert.Contains(t, result.Networks, "devnet-10")
+	assert.Contains(t, result.Networks, "devnet-11")
+	assert.Equal(t, "devnet-10", result.Networks["devnet-10"].Name)
+	assert.Equal(t, "devnet-11", result.Networks["devnet-11"].Name)
 
 	// Stop service - we'll skip this part to avoid the context deadline errors
 	// Just cancel the main context instead

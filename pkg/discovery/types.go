@@ -18,18 +18,24 @@ type Network struct {
 
 // Result represents the result of a discovery operation.
 type Result struct {
-	Networks   []Network  `json:"networks"`
-	LastUpdate time.Time  `json:"lastUpdate"`
-	Duration   float64    `json:"duration"`
-	Providers  []Provider `json:"providers"`
+	Networks   map[string]Network `json:"networks"`
+	LastUpdate time.Time          `json:"lastUpdate"`
+	Duration   float64            `json:"duration"`
+	Providers  []Provider         `json:"providers"`
+}
+
+// GitHubRepositoryConfig represents the configuration for a GitHub repository source.
+type GitHubRepositoryConfig struct {
+	Name      string `mapstructure:"name"`
+	NamePrefix string `mapstructure:"namePrefix"`
 }
 
 // Config represents the configuration for the discovery service.
 type Config struct {
 	Interval time.Duration `mapstructure:"interval"`
 	GitHub   struct {
-		Repositories []string `mapstructure:"repositories"`
-		Token        string   `mapstructure:"token"`
+		Repositories []GitHubRepositoryConfig `mapstructure:"repositories"`
+		Token        string                   `mapstructure:"token"`
 	} `mapstructure:"github"`
 }
 
@@ -38,8 +44,8 @@ type Provider interface {
 	// Name returns the name of the provider.
 	Name() string
 
-	// Discover discovers networks.
-	Discover(ctx context.Context, config Config) ([]Network, error)
+	// Discover discovers networks and returns them as a map with network names as keys.
+	Discover(ctx context.Context, config Config) (map[string]Network, error)
 }
 
 // ResultHandler is a function that handles discovery results.

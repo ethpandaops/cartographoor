@@ -63,7 +63,12 @@ discovery:
   interval: 1h
   github:
     repositories:
-      - ethpandaops/dencun-devnets
+      # Simple configuration
+      - name: ethpandaops/dencun-devnets
+      
+      # With name prefix (adds "dencun-" to each network name)
+      - name: ethpandaops/dencun-devnets
+        namePrefix: dencun-
 
 # S3 storage configuration
 storage:
@@ -163,8 +168,8 @@ The service produces a JSON file with the following structure:
 
 ```json
 {
-  "networks": [
-    {
+  "networks": {
+    "devnet-10": {
       "name": "devnet-10",
       "repository": "ethpandaops/dencun-devnets",
       "path": "network-configs/devnet-10",
@@ -172,8 +177,16 @@ The service produces a JSON file with the following structure:
       "status": "active",
       "lastUpdated": "2023-05-04T15:30:00Z"
     },
+    "dencun-devnet-4": {
+      "name": "devnet-4",
+      "repository": "ethpandaops/dencun-devnets",
+      "path": "network-configs/devnet-4",
+      "url": "https://github.com/ethpandaops/dencun-devnets/tree/main/network-configs/devnet-4",
+      "status": "active",
+      "lastUpdated": "2023-05-04T15:30:00Z"
+    },
     ...
-  ],
+  },
   "lastUpdate": "2023-05-04T15:30:00Z",
   "duration": 1.25,
   "providers": ["github"]

@@ -16,8 +16,16 @@ discovery:
   github:
     # List of repositories to check for networks
     repositories:
-      - ethpandaops/dencun-devnets
-      # Add more repositories as needed
+      # Simple example with no prefix
+      - name: ethpandaops/dencun-devnets
+        
+      # Example with a network name prefix (e.g. "devnet-4" becomes "dencun-devnet-4")
+      - name: ethpandaops/dencun-devnets
+        namePrefix: dencun-
+      
+      # Example with a different repository and prefix
+      # - name: ethpandaops/eleel-testnet
+      #   namePrefix: holesky-
     
     # GitHub API token (optional)
     # token: ghp_your_github_token

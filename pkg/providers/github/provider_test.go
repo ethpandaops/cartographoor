@@ -44,11 +44,16 @@ func TestProvider_Discover(t *testing.T) {
 	// Configure discovery
 	config := discovery.Config{
 		GitHub: struct {
-			Repositories []string `mapstructure:"repositories"`
-			Token        string   `mapstructure:"token"`
+			Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
+			Token        string                            `mapstructure:"token"`
 		}{
-			Repositories: []string{"ethpandaops/dencun-devnets"},
-			Token:        "",
+			Repositories: []discovery.GitHubRepositoryConfig{
+				{
+					Name:       "ethpandaops/dencun-devnets",
+					NamePrefix: "",
+				},
+			},
+			Token: "",
 		},
 	}
 
@@ -72,10 +77,77 @@ func TestProvider_Discover(t *testing.T) {
 		"sepolia-sf1": true,
 	}
 
-	for _, network := range networks {
-		assert.True(t, expectedNetworks[network.Name], "Unexpected network: %s", network.Name)
+	for key, network := range networks {
+		// Key should be the same as the original network name since we didn't use a prefix
+		assert.Equal(t, key, network.Name)
+		assert.True(t, expectedNetworks[key], "Unexpected network: %s", key)
 		assert.Equal(t, "ethpandaops/dencun-devnets", network.Repository)
 		assert.Equal(t, "network-configs/"+network.Name, network.Path)
+		assert.Contains(t, network.URL, "github.com/ethpandaops/dencun-devnets/tree/main/network-configs/")
+		assert.Equal(t, "active", network.Status)
+		assert.WithinDuration(t, time.Now(), network.LastUpdated, 10*time.Second)
+	}
+}
+
+func TestProvider_DiscoverWithPrefix(t *testing.T) {
+	log := logrus.New()
+	log.SetLevel(logrus.DebugLevel)
+
+	// Mock GitHub API server
+	ts := mockGitHubAPI(t)
+	defer ts.Close()
+
+	provider, err := NewProvider(log)
+	require.NoError(t, err)
+
+	// Create a custom GitHub client that uses our test server
+	httpClient := &http.Client{
+		Transport: &mockTransport{URL: ts.URL},
+	}
+	provider.client = gh.NewClient(httpClient)
+
+	// Configure discovery with a prefix
+	config := discovery.Config{
+		GitHub: struct {
+			Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
+			Token        string                            `mapstructure:"token"`
+		}{
+			Repositories: []discovery.GitHubRepositoryConfig{
+				{
+					Name:       "ethpandaops/dencun-devnets",
+					NamePrefix: "dencun-",
+				},
+			},
+			Token: "",
+		},
+	}
+
+	// Test discovery
+	networks, err := provider.Discover(context.Background(), config)
+	require.NoError(t, err)
+
+	// Validate the discovered networks
+	require.Len(t, networks, 9)
+
+	// Check specific networks with prefixes
+	expectedNetworks := map[string]string{
+		"dencun-devnet-10":   "devnet-10",
+		"dencun-devnet-11":   "devnet-11",
+		"dencun-devnet-12":   "devnet-12",
+		"dencun-devnet-4":    "devnet-4",
+		"dencun-devnet-5":    "devnet-5",
+		"dencun-gsf-1":       "gsf-1",
+		"dencun-gsf-2":       "gsf-2",
+		"dencun-msf-1":       "msf-1",
+		"dencun-sepolia-sf1": "sepolia-sf1",
+	}
+
+	for key, network := range networks {
+		originalName, exists := expectedNetworks[key]
+		assert.True(t, exists, "Unexpected network key: %s", key)
+		assert.Equal(t, originalName, network.Name, "Network name should be the original name without prefix")
+		assert.Equal(t, "ethpandaops/dencun-devnets", network.Repository)
+		assert.Equal(t, "network-configs/"+originalName, network.Path)
 		assert.Contains(t, network.URL, "github.com/ethpandaops/dencun-devnets/tree/main/network-configs/")
 		assert.Equal(t, "active", network.Status)
 		assert.WithinDuration(t, time.Now(), network.LastUpdated, 10*time.Second)
@@ -89,10 +161,10 @@ func TestProvider_Discover_NoRepositories(t *testing.T) {
 
 	config := discovery.Config{
 		GitHub: struct {
-			Repositories []string `mapstructure:"repositories"`
-			Token        string   `mapstructure:"token"`
+			Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
+			Token        string                            `mapstructure:"token"`
 		}{
-			Repositories: []string{},
+			Repositories: []discovery.GitHubRepositoryConfig{},
 			Token:        "",
 		},
 	}
@@ -111,11 +183,16 @@ func TestProvider_Discover_InvalidRepository(t *testing.T) {
 
 	config := discovery.Config{
 		GitHub: struct {
-			Repositories []string `mapstructure:"repositories"`
-			Token        string   `mapstructure:"token"`
+			Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
+			Token        string                            `mapstructure:"token"`
 		}{
-			Repositories: []string{"invalid-repo-format"},
-			Token:        "",
+			Repositories: []discovery.GitHubRepositoryConfig{
+				{
+					Name:       "invalid-repo-format",
+					NamePrefix: "",
+				},
+			},
+			Token: "",
 		},
 	}
 

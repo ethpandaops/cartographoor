@@ -162,53 +162,78 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 
 	if len(providers) == 0 {
 		s.log.Warn("No discovery providers registered")
-		return Result{}, nil
+		return Result{
+			Networks: make(map[string]Network),
+		}, nil
 	}
 
-	var (
-		networks  []Network
-		provNames []Provider
-		wg        sync.WaitGroup
-		mu        sync.Mutex
-	)
+	type providerResult struct {
+		networks map[string]Network
+		provider Provider
+		err      error
+	}
+
+	// Channel to collect results from provider goroutines
+	resultCh := make(chan providerResult, len(providers))
 
 	// Run discovery for each provider
 	for _, provider := range providers {
-		wg.Add(1)
 		go func(p Provider) {
-			defer wg.Done()
-
 			pLog := s.log.WithField("provider", p.Name())
 			pLog.Info("Running discovery provider")
 
-			ns, err := p.Discover(ctx, s.config)
+			networkMap, err := p.Discover(ctx, s.config)
 			if err != nil {
 				pLog.WithError(err).Error("Failed to discover networks")
+				resultCh <- providerResult{
+					networks: nil,
+					provider: p,
+					err:      err,
+				}
 				return
 			}
 
-			pLog.WithField("networks", len(ns)).Info("Discovery complete")
+			pLog.WithField("networks", len(networkMap)).Info("Discovery complete")
 
-			mu.Lock()
-			networks = append(networks, ns...)
-			provNames = append(provNames, p)
-			mu.Unlock()
+			resultCh <- providerResult{
+				networks: networkMap,
+				provider: p,
+				err:      nil,
+			}
 		}(provider)
 	}
 
-	wg.Wait()
+	// Collect results
+	allNetworks := make(map[string]Network)
+	var provNames []Provider
+
+	// Wait for all provider goroutines to complete
+	for i := 0; i < len(providers); i++ {
+		select {
+		case <-ctx.Done():
+			return Result{Networks: allNetworks}, ctx.Err()
+		case pr := <-resultCh:
+			if pr.err == nil && pr.networks != nil {
+				// Merge networks, newer ones will overwrite older ones with the same key
+				for key, network := range pr.networks {
+					allNetworks[key] = network
+				}
+				provNames = append(provNames, pr.provider)
+			}
+		}
+	}
 
 	// Create result
 	duration := time.Since(start).Seconds()
 	result := Result{
-		Networks:   networks,
+		Networks:   allNetworks,
 		LastUpdate: time.Now(),
 		Duration:   duration,
 		Providers:  provNames,
 	}
 
 	s.log.WithFields(logrus.Fields{
-		"networks": len(networks),
+		"networks": len(allNetworks),
 		"duration": duration,
 	}).Info("Discovery complete")
 

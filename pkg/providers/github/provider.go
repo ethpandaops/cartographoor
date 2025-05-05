@@ -39,7 +39,7 @@ func (p *Provider) Name() string {
 }
 
 // Discover discovers networks using GitHub.
-func (p *Provider) Discover(ctx context.Context, config discovery.Config) ([]discovery.Network, error) {
+func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[string]discovery.Network, error) {
 	if len(config.GitHub.Repositories) == 0 {
 		return nil, fmt.Errorf("no repositories configured")
 	}
@@ -47,10 +47,13 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) ([]dis
 	// Create GitHub client
 	client := p.getClient(ctx, config.GitHub.Token)
 
-	var networks []discovery.Network
+	networks := make(map[string]discovery.Network)
 
 	// Discover networks for each repository
-	for _, repoPath := range config.GitHub.Repositories {
+	for _, repoConfig := range config.GitHub.Repositories {
+		repoPath := repoConfig.Name
+		namePrefix := repoConfig.NamePrefix
+
 		parts := strings.Split(repoPath, "/")
 		if len(parts) != 2 {
 			p.log.WithField("repository", repoPath).Warn("Invalid repository path")
@@ -59,8 +62,9 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) ([]dis
 
 		owner, repo := parts[0], parts[1]
 		p.log.WithFields(logrus.Fields{
-			"owner": owner,
-			"repo":  repo,
+			"owner":      owner,
+			"repo":       repo,
+			"namePrefix": namePrefix,
 		}).Info("Discovering networks in repository")
 
 		// Check if network-configs directory exists
@@ -81,24 +85,31 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) ([]dis
 				continue
 			}
 
-			networkName := *content.Name
+			originalNetworkName := *content.Name
+			// Apply prefix if configured
+			networkName := originalNetworkName
+			if namePrefix != "" {
+				networkName = namePrefix + originalNetworkName
+			}
+			
 			p.log.WithFields(logrus.Fields{
-				"owner":   owner,
-				"repo":    repo,
-				"network": networkName,
+				"owner":           owner,
+				"repo":            repo,
+				"originalNetwork": originalNetworkName,
+				"prefixedNetwork": networkName,
 			}).Debug("Found network")
 
 			// Create network
 			network := discovery.Network{
-				Name:        networkName,
+				Name:        originalNetworkName, // Keep original name in the network object
 				Repository:  repoPath,
-				Path:        path.Join(netConfigPath, networkName),
+				Path:        path.Join(netConfigPath, originalNetworkName),
 				URL:         *content.HTMLURL,
 				Status:      "active",
 				LastUpdated: time.Now(), // ideally would use last commit time
 			}
 
-			networks = append(networks, network)
+			networks[networkName] = network
 		}
 	}
 
