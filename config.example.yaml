@@ -24,21 +24,21 @@ discovery:
 
 # S3 storage configuration
 storage:
-  # S3 bucket name
+  # S3 bucket name - environment variable example: ${S3_BUCKET_NAME}
   bucketName: ethpandaops-networks
   
   # S3 key (path) for the networks.json file
   key: networks.json
   
-  # AWS region
+  # AWS region - environment variable example: ${AWS_REGION}
   region: us-east-1
   
   # S3-compatible endpoint (optional, for non-AWS S3 implementations)
   # endpoint: https://s3.example.com
   
-  # Access credentials (optional, can use AWS environment variables or instance profile)
-  # accessKey: your_access_key
-  # secretKey: your_secret_key
+  # Access credentials using environment variables
+  # accessKey: ${AWS_ACCESS_KEY_ID}
+  # secretKey: ${AWS_SECRET_ACCESS_KEY}
   
   # Force path style addressing (for some S3-compatible services)
   # forcePathStyle: true

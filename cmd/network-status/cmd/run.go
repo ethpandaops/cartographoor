@@ -2,14 +2,18 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	
+	"github.com/ethpandaops/network-status/pkg/utils"
 
 	"github.com/ethpandaops/network-status/pkg/discovery"
 	"github.com/ethpandaops/network-status/pkg/providers/github"
@@ -36,7 +40,9 @@ func newRunCmd(log *logrus.Logger) *cobra.Command {
 
 			if cfg.ConfigFile != "" {
 				v.SetConfigFile(cfg.ConfigFile)
-				if err := v.ReadInConfig(); err != nil {
+				
+				// Read and process the config file with environment variable substitution
+				if err := readConfigWithEnvSubst(v); err != nil {
 					return err
 				}
 			}
@@ -156,5 +162,34 @@ func runOnce(ctx context.Context, log *logrus.Logger, discoveryService *discover
 	}
 
 	log.Info("Upload complete, exiting")
+	return nil
+}
+
+// readConfigWithEnvSubst reads a config file and performs environment variable substitution
+func readConfigWithEnvSubst(v *viper.Viper) error {
+	configFile := v.ConfigFileUsed()
+	if configFile == "" {
+		configFile = v.GetString("config")
+	}
+
+	if configFile == "" {
+		return nil
+	}
+
+	// Read the config file
+	configData, err := os.ReadFile(configFile)
+	if err != nil {
+		return fmt.Errorf("failed to read config file: %w", err)
+	}
+
+	// Substitute environment variables
+	processedConfig := utils.EnvSubstBytes(configData)
+
+	// Use ReadConfig instead of ReadInConfig to apply our processed config
+	err = v.ReadConfig(strings.NewReader(string(processedConfig)))
+	if err != nil {
+		return fmt.Errorf("failed to parse config: %w", err)
+	}
+
 	return nil
 }

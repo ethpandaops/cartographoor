@@ -72,6 +72,22 @@ storage:
   region: us-east-1
 ```
 
+### Environment Variable Substitution
+
+The configuration file supports environment variable substitution using the `${VAR}` syntax. This allows you to keep sensitive information like API tokens and credentials outside of your configuration files.
+
+For example:
+
+```yaml
+storage:
+  bucketName: ${S3_BUCKET_NAME}
+  region: ${AWS_REGION}
+  accessKey: ${AWS_ACCESS_KEY_ID}
+  secretKey: ${AWS_SECRET_ACCESS_KEY}
+```
+
+When the application starts, it will replace `${VAR}` with the corresponding environment variable value. If the environment variable is not set, the placeholder will remain unchanged.
+
 ## Usage
 
 ```bash
