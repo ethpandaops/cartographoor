@@ -75,11 +75,47 @@ storage:
 ## Usage
 
 ```bash
-# Run with default configuration
+# Run with default configuration (continuous mode)
 network-status run
 
 # Run with custom configuration
 network-status run --config=/path/to/config.yaml
+
+# Run once and exit
+network-status run --once
+
+# Run in debug mode 
+network-status run --logging.level=debug
+```
+
+### Docker
+
+Network Status is available as a Docker image from GitHub Container Registry:
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/ethpandaops/network-status:latest
+
+# Run with a custom config
+docker run -v /path/to/config.yaml:/app/config/config.yaml ghcr.io/ethpandaops/network-status:latest
+
+# Run once and exit
+docker run -v /path/to/config.yaml:/app/config/config.yaml ghcr.io/ethpandaops/network-status:latest run --once
+```
+
+You can also use Docker Compose:
+
+```yaml
+version: '3.8'
+
+services:
+  network-status:
+    image: ghcr.io/ethpandaops/network-status:latest
+    restart: unless-stopped
+    volumes:
+      - ./config.yaml:/app/config/config.yaml
+    environment:
+      - NETWORK_STATUS_LOGGING_LEVEL=info
 ```
 
 ## Development

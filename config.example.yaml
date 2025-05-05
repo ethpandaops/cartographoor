@@ -4,6 +4,9 @@
 logging:
   level: info
 
+# Run once and exit
+# runOnce: false
+
 # Discovery configuration
 discovery:
   # Discovery interval (default: 1h)

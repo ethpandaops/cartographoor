@@ -125,8 +125,34 @@ func (s *Service) Stop(ctx context.Context) error {
 	}
 }
 
-// runDiscovery runs the discovery process.
+// RunOnce executes a single discovery run and returns the result directly
+func (s *Service) RunOnce(ctx context.Context) (Result, error) {
+	result, err := s.executeDiscovery(ctx)
+	if err != nil {
+		return Result{}, err
+	}
+	return result, nil
+}
+
+// runDiscovery runs the discovery process and sends the result to the result channel
 func (s *Service) runDiscovery(ctx context.Context) error {
+	result, err := s.executeDiscovery(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Send result to channel
+	select {
+	case s.resultChan <- result:
+	default:
+		s.log.Warn("Result channel full, discarding result")
+	}
+
+	return nil
+}
+
+// executeDiscovery performs the actual discovery process and returns the result
+func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 	start := time.Now()
 	s.log.Info("Running discovery")
 
@@ -136,7 +162,7 @@ func (s *Service) runDiscovery(ctx context.Context) error {
 
 	if len(providers) == 0 {
 		s.log.Warn("No discovery providers registered")
-		return nil
+		return Result{}, nil
 	}
 
 	var (
@@ -186,12 +212,5 @@ func (s *Service) runDiscovery(ctx context.Context) error {
 		"duration": duration,
 	}).Info("Discovery complete")
 
-	// Send result to channel
-	select {
-	case s.resultChan <- result:
-	default:
-		s.log.Warn("Result channel full, discarding result")
-	}
-
-	return nil
+	return result, nil
 }

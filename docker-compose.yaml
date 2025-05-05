@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  network-status:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: network-status
+    restart: unless-stopped
+    volumes:
+      - ./config.example.yaml:/app/config/config.yaml
+    environment:
+      - NETWORK_STATUS_LOGGING_LEVEL=debug
+    # Uncomment this to run once and exit
+    # command: run --once --config=/app/config/config.yaml

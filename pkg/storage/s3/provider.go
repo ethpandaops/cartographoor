@@ -144,12 +144,6 @@ func (p *Provider) Upload(ctx context.Context, result discovery.Result) error {
 		ContentType: aws.String(p.config.ContentType),
 	}
 
-	// Add ACL if provided
-	// Note: We would use s3.ObjectCannedACL but let's just skip it for testing
-	// if p.config.ACL != "" {
-	// 	input.ACL = s3.ObjectCannedACL(p.config.ACL)
-	// }
-
 	// Upload to S3
 	p.log.WithFields(logrus.Fields{
 		"bucket": p.config.BucketName,

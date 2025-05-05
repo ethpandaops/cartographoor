@@ -21,6 +21,7 @@ type runConfig struct {
 	ConfigFile   string
 	Discovery    discovery.Config `mapstructure:"discovery"`
 	Storage      s3.Config        `mapstructure:"storage"`
+	RunOnce      bool             `mapstructure:"runOnce"`
 }
 
 func newRunCmd(log *logrus.Logger) *cobra.Command {
@@ -60,6 +61,7 @@ func newRunCmd(log *logrus.Logger) *cobra.Command {
 	// Define flags
 	cmd.Flags().StringVar(&cfg.ConfigFile, "config", "", "Path to config file")
 	cmd.Flags().StringVar(&cfg.LoggingLevel, "logging.level", "info", "Logging level (trace, debug, info, warn, error, fatal, panic)")
+	cmd.Flags().BoolVar(&cfg.RunOnce, "once", false, "Run discovery once and exit")
 
 	return cmd
 }
@@ -87,6 +89,15 @@ func runService(ctx context.Context, log *logrus.Logger, cfg *runConfig) error {
 		return err
 	}
 	discoveryService.RegisterProvider(githubProvider)
+
+	// For run-once mode, we'll use a different approach
+	if cfg.RunOnce {
+		log.Info("Running in one-time discovery mode")
+		return runOnce(ctx, log, discoveryService, storageProvider)
+	}
+
+	// Start the service in normal mode (continuous discovery)
+	log.WithField("interval", cfg.Discovery.Interval).Info("Starting service in continuous mode")
 
 	// Start discovery service
 	if err := discoveryService.Start(ctx); err != nil {
@@ -122,5 +133,28 @@ func runService(ctx context.Context, log *logrus.Logger, cfg *runConfig) error {
 		log.WithError(err).Error("Error during discovery service shutdown")
 	}
 
+	return nil
+}
+
+// runOnce executes a single discovery run and uploads the results
+func runOnce(ctx context.Context, log *logrus.Logger, discoveryService *discovery.Service, storageProvider *s3.Provider) error {
+	// Create a context with timeout to ensure we don't hang indefinitely
+	runCtx, runCancel := context.WithTimeout(ctx, 5*time.Minute)
+	defer runCancel()
+
+	log.Info("Running one-time discovery")
+	result, err := discoveryService.RunOnce(runCtx)
+	if err != nil {
+		return fmt.Errorf("failed to run discovery: %w", err)
+	}
+
+	log.WithField("networks", len(result.Networks)).Info("One-time discovery complete")
+
+	// Upload to S3
+	if err := storageProvider.Upload(runCtx, result); err != nil {
+		return fmt.Errorf("failed to upload networks to S3: %w", err)
+	}
+
+	log.Info("Upload complete, exiting")
 	return nil
 }

@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+.github
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Build artifacts
+build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Local dev files
+*.env
+*.local
+.idea/
+.vscode/
+
+# Go test and coverage files
+*.test
+*.out
