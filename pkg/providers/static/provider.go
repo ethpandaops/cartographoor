@@ -40,12 +40,11 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 		Status:      "active",
 		LastUpdated: time.Now(),
 		ServiceURLs: &discovery.ServiceURLs{
-			Ethstats:       "https://ethstats.mainnet.ethpandaops.io",
-			Forkmon:        "https://forkmon.mainnet.ethpandaops.io",
-			CheckpointSync: "https://checkpoint-sync.mainnet.ethpandaops.io",
-			BlobArchive:    "https://blob-archive.mainnet.ethpandaops.io",
-			Forky:          "https://forky.mainnet.ethpandaops.io",
-			Tracoor:        "https://tracoor.mainnet.ethpandaops.io",
+			Ethstats:    "https://ethstats.mainnet.ethpandaops.io",
+			Forkmon:     "https://forkmon.mainnet.ethpandaops.io",
+			BlobArchive: "https://blob-archive.mainnet.ethpandaops.io",
+			Forky:       "https://forky.mainnet.ethpandaops.io",
+			Tracoor:     "https://tracoor.mainnet.ethpandaops.io",
 		},
 	}
 
