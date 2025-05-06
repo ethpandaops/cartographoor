@@ -49,12 +49,12 @@ storage:
   secretKey: ${AWS_SECRET_ACCESS_KEY}
   
   # Force path style addressing (for some S3-compatible services)
-  forcePathStyle: false
+  forcePathStyle: true
   
   # Content type for the uploaded file
   contentType: application/json
   
-  # Access control list for the uploaded file
+  # Access control list for the uploaded file (REQUIRED for public access)
   acl: public-read
   
   # Retry configuration
