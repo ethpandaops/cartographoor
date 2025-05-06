@@ -11,7 +11,7 @@ runOnce: true
 discovery:
   # Discovery interval (default: 1h)
   interval: 1h
-  
+
   # GitHub discovery configuration
   github:
     # List of repositories to check for networks
@@ -20,6 +20,7 @@ discovery:
         namePrefix: eof-
         displayName: EOF Devnets
         description: "EOF is a new, versioned container format for EVM bytecode that separates code and data, validates contracts at deploy‑time, and unlocks cheaper, safer, future‑proof smart‑contract execution."
+        image: https://ethpandaops.io/img/eof.jpg
         links:
           - title: "EIP-3540: EOF"
             url: "https://eips.ethereum.org/EIPS/eip-3540"
@@ -29,6 +30,7 @@ discovery:
         namePrefix: pectra-
         displayName: Pectra Devnets
         description: "Pectra is the combined Prague‑Electra hard fork that ships 11 EIPs to streamline validator exits, sharpen wallet UX, and boost post‑Dencun scalability across both Ethereum’s execution and consensus layers."
+        image: https://ethpandaops.io/img/pectra.jpg
         links:
           - title: "Pectra Roadmap"
             url: "https://ethereum.org/en/roadmap/pectra/"
@@ -38,6 +40,7 @@ discovery:
         namePrefix: peerdas-
         displayName: PeerDAS Devnets
         description: "PeerDAS is a peer‑to‑peer data‑availability‑sampling protocol that lets beacon nodes verify blob data by grabbing random samples instead of the whole payload, slashing bandwidth and paving the way for full danksharding scale."
+        image: https://ethpandaops.io/img/peerdas.jpg
         links:
           - title: "EIP-7594: PeerDAS"
             url: "https://eips.ethereum.org/EIPS/eip-7594"
@@ -47,6 +50,7 @@ discovery:
         namePrefix: ssz-
         displayName: SSZ Devnets
         description: "SSZ upgrade migrates execution‑layer blocks and transactions from legacy RLP to the Simple Serialize container format, unifying data structures with the consensus layer and enabling smaller, stateless proofs plus easier future extensions."
+        image: https://ethpandaops.io/img/ssz.jpg
         links:
           - title: "EIP-7807: SSZ"
             url: "https://eips.ethereum.org/EIPS/eip-7807"
@@ -56,7 +60,7 @@ discovery:
         namePrefix: nft-
         displayName: NFT Devnets
         description: "NFTs are purpose‑built Non‑Finality Testnets that deliberately drop finality to stress‑test clients and validators on detecting, diagnosing, and recovering an unstable chain."
-    
+
     # GitHub API token (via environment variable)
     token: ${GITHUB_TOKEN}
 
@@ -64,30 +68,30 @@ discovery:
 storage:
   # S3 bucket name - environment variable example: ${S3_BUCKET_NAME}
   bucketName: ${S3_BUCKET_NAME}
-  
+
   # S3 key (path) for the networks.json file
   key: networks.json
-  
+
   # AWS region - environment variable example: ${AWS_REGION}
   region: ${AWS_REGION}
-  
+
   # S3-compatible endpoint (for DigitalOcean Spaces)
   endpoint: https://ams3.digitaloceanspaces.com
-  
+
   # Access credentials using environment variables
   accessKey: ${AWS_ACCESS_KEY_ID}
   secretKey: ${AWS_SECRET_ACCESS_KEY}
-  
+
   # Force path style addressing (for some S3-compatible services)
   forcePathStyle: true
-  
+
   # Content type for the uploaded file
   contentType: application/json
-  
+
   # Access control list for the uploaded file (REQUIRED for public access)
   acl: public-read
-  
+
   # Retry configuration
   retryDuration: 5s
   maxRetries: 3
-  backoffJitterPercent: 20 
+  backoffJitterPercent: 20
