@@ -20,12 +20,10 @@ jobs:
       
       - name: Build Cartographoor
         run: |
-          cd cartographoor
           go build -o cartographoor ./cmd/cartographoor
       
       - name: Run Cartographoor
         run: |
-          cd cartographoor
           ./cartographoor run --once
         env:
           GITHUB_TOKEN: ${{ secrets.CARTOGRAPHOOR_GITHUB_TOKEN }}
