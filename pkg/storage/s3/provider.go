@@ -150,10 +150,11 @@ func (p *Provider) Upload(ctx context.Context, result discovery.Result) error {
 		"key":    p.config.Key,
 	}).Info("Uploading networks to S3")
 
-	_, err = p.client.PutObject(ctx, input)
-	if err != nil {
+	if _, err = p.client.PutObject(ctx, input); err != nil {
 		return fmt.Errorf("failed to upload to S3: %w", err)
 	}
+
+	p.log.Info("S3 upload completed successfully")
 
 	return nil
 }
