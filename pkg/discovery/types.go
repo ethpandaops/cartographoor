@@ -8,8 +8,8 @@ import (
 // Network represents an Ethereum network.
 type Network struct {
 	Name          string         `json:"name"`
-	Repository    string         `json:"repository"`
-	Path          string         `json:"path"`
+	Repository    string         `json:"repository,omitempty"`
+	Path          string         `json:"path,omitempty"`
 	URL           string         `json:"url,omitempty"`
 	Description   string         `json:"description,omitempty"`
 	Status        string         `json:"status"`
@@ -34,6 +34,9 @@ type ServiceURLs struct {
 	Blobscan       string `json:"blobscan,omitempty"`
 	Ethstats       string `json:"ethstats,omitempty"`
 	DevnetSpec     string `json:"devnetSpec,omitempty"`
+	BlobArchive    string `json:"blobArchive,omitempty"`
+	Forky          string `json:"forky,omitempty"`
+	Tracoor        string `json:"tracoor,omitempty"`
 }
 
 // GenesisConfig represents the configuration URLs for a network.
