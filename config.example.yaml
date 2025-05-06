@@ -17,8 +17,49 @@ discovery:
     # List of repositories to check for networks
     repositories:
       # Example with a network name prefix (e.g. "devnet-4" becomes "dencun-devnet-4")
-      - name: ethpandaops/dencun-devnets
-        namePrefix: dencun-
+      - name: ethpandaops/eof-devnets
+        namePrefix: eof-
+        displayName: EOF Devnets
+        description: "EOF (EVM Object Format) upgrade devnets, testing new EVM features for contract deployment and execution."
+        image: "https://ethpandaops.io/images/eof-logo.png"
+        links:
+          - title: "EIP-3540: EOF - EVM Object Format v1"
+            url: "https://eips.ethereum.org/EIPS/eip-3540"
+          - title: "EOF Specification"
+            url: "https://notes.ethereum.org/@ipsilon/evm-object-format-overview"
+      - name: ethpandaops/pectra-devnets
+        namePrefix: pectra-
+        displayName: Pectra Devnets
+        description: "Pectra upgrade devnets, focused on improving the Ethereum Protocol's transaction processing and efficiency."
+        image: "https://ethpandaops.io/images/pectra-logo.png"
+        links:
+          - title: "Pectra Upgrade Overview"
+            url: "https://ethereum.org/en/roadmap/pectra/"
+          - title: "Related EIPs Discussion"
+            url: "https://ethereum-magicians.org/t/pectra-network-upgrade-meta-thread/15010"
+      - name: ethpandaops/peerdas-devnets
+        namePrefix: peerdas-
+        displayName: PeerDAS Devnets
+        description: "PeerDAS (Peer Data Availability Sampling) devnets, testing improvements to data availability and retrieval protocols."
+        image: "https://ethpandaops.io/images/peerdas-logo.png"
+        links:
+          - title: "PeerDAS Specification"
+            url: "https://github.com/ethereum/consensus-specs/blob/dev/specs/deneb/p2p-interface.md#peerdas"
+          - title: "Data Availability Sampling Overview"
+            url: "https://ethereum.org/en/developers/docs/data-availability/"
+      - name: ethpandaops/ssz-devnets
+        namePrefix: ssz-
+        displayName: SSZ Devnets
+        description: "SSZ upgrade migrates execution‑layer blocks and transactions from legacy RLP to the Simple Serialize container format, unifying data structures with the consensus layer and enabling smaller, stateless proofs plus easier future extensions."
+        links:
+          - title: "EIP-7807: SSZ"
+            url: "https://eips.ethereum.org/EIPS/eip-7807"
+          - title: "SSZ Overview"
+            url: "https://ethereum.org/en/developers/docs/data-structures-and-encoding/ssz/"
+      - name: ethpandaops/nft-devnets
+        namePrefix: nft-
+        displayName: NFT Devnets
+        description: "NFTs are purpose‑built Non‑Finality Testnets that deliberately drop finality to stress‑test clients and validators on detecting, diagnosing, and recovering an unstable chain."
     
     # GitHub API token (REQUIRED)
     # token: ghp_your_github_token
@@ -35,12 +76,12 @@ storage:
   region: us-east-1
   
   # S3-compatible endpoint (optional, for non-AWS S3 implementations)
-  # endpoint: https://s3.example.com
+  # endpoint: ${AWS_SECRET_ACCESS_KEY}
   
   # Access credentials using environment variables
-  # accessKey: ${AWS_ACCESS_KEY_ID}
+  # accessKey: ${AWS_SECRET_ACCESS_ID}
   # secretKey: ${AWS_SECRET_ACCESS_KEY}
-  
+
   # Force path style addressing (for some S3-compatible services)
   # forcePathStyle: true
   

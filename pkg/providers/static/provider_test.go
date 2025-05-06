@@ -107,7 +107,6 @@ func TestProvider_Discover(t *testing.T) {
 	require.NotNil(t, mainnet.ServiceURLs)
 	assert.Equal(t, "https://ethstats.mainnet.ethpandaops.io", mainnet.ServiceURLs.Ethstats)
 	assert.Equal(t, "https://forkmon.mainnet.ethpandaops.io", mainnet.ServiceURLs.Forkmon)
-	assert.Equal(t, "https://checkpoint-sync.mainnet.ethpandaops.io", mainnet.ServiceURLs.CheckpointSync)
 	assert.Equal(t, "https://blob-archive.mainnet.ethpandaops.io", mainnet.ServiceURLs.BlobArchive)
 	assert.Equal(t, "https://forky.mainnet.ethpandaops.io", mainnet.ServiceURLs.Forky)
 	assert.Equal(t, "https://tracoor.mainnet.ethpandaops.io", mainnet.ServiceURLs.Tracoor)

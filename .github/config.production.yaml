@@ -16,16 +16,46 @@ discovery:
   github:
     # List of repositories to check for networks
     repositories:
-      - name: ethpandaops/pectra-devnets
-        namePrefix: pectra-
-      - name: ethpandaops/peerdas-devnets
-        namePrefix: peerdas-
       - name: ethpandaops/eof-devnets
         namePrefix: eof-
+        displayName: EOF Devnets
+        description: "EOF is a new, versioned container format for EVM bytecode that separates code and data, validates contracts at deploy‑time, and unlocks cheaper, safer, future‑proof smart‑contract execution."
+        links:
+          - title: "EIP-3540: EOF"
+            url: "https://eips.ethereum.org/EIPS/eip-3540"
+          - title: "EOF Overview"
+            url: "https://notes.ethereum.org/@ipsilon/evm-object-format-overview"
+      - name: ethpandaops/pectra-devnets
+        namePrefix: pectra-
+        displayName: Pectra Devnets
+        description: "Pectra is the combined Prague‑Electra hard fork that ships 11 EIPs to streamline validator exits, sharpen wallet UX, and boost post‑Dencun scalability across both Ethereum’s execution and consensus layers."
+        links:
+          - title: "Pectra Roadmap"
+            url: "https://ethereum.org/en/roadmap/pectra/"
+          - title: "Mainnet Checklist"
+            url: "https://ethpandaops.io/posts/pectra-mainnet-checklist/"
+      - name: ethpandaops/peerdas-devnets
+        namePrefix: peerdas-
+        displayName: PeerDAS Devnets
+        description: "PeerDAS is a peer‑to‑peer data‑availability‑sampling protocol that lets beacon nodes verify blob data by grabbing random samples instead of the whole payload, slashing bandwidth and paving the way for full danksharding scale."
+        links:
+          - title: "EIP-7594: PeerDAS"
+            url: "https://eips.ethereum.org/EIPS/eip-7594"
+          - title: "ethresear.ch"
+            url: "https://ethresear.ch/t/peerdas-a-simpler-das-approach-using-battle-tested-p2p-components/16541"
       - name: ethpandaops/ssz-devnets
         namePrefix: ssz-
+        displayName: SSZ Devnets
+        description: "SSZ upgrade migrates execution‑layer blocks and transactions from legacy RLP to the Simple Serialize container format, unifying data structures with the consensus layer and enabling smaller, stateless proofs plus easier future extensions."
+        links:
+          - title: "EIP-7807: SSZ"
+            url: "https://eips.ethereum.org/EIPS/eip-7807"
+          - title: "SSZ Overview"
+            url: "https://ethereum.org/en/developers/docs/data-structures-and-encoding/ssz/"
       - name: ethpandaops/nft-devnets
         namePrefix: nft-
+        displayName: NFT Devnets
+        description: "NFTs are purpose‑built Non‑Finality Testnets that deliberately drop finality to stress‑test clients and validators on detecting, diagnosing, and recovering an unstable chain."
     
     # GitHub API token (via environment variable)
     token: ${GITHUB_TOKEN}

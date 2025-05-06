@@ -12,12 +12,19 @@ type Network struct {
 	Path          string         `json:"path,omitempty"`
 	URL           string         `json:"url,omitempty"`
 	Description   string         `json:"description,omitempty"`
+	Links         []Link         `json:"links,omitempty"`
 	Status        string         `json:"status"`
 	LastUpdated   time.Time      `json:"lastUpdated"`
 	ChainID       uint64         `json:"chainId,omitempty"`
 	GenesisConfig *GenesisConfig `json:"genesisConfig,omitempty"`
 	ServiceURLs   *ServiceURLs   `json:"serviceUrls,omitempty"`
 	Images        *Images        `json:"images,omitempty"`
+}
+
+// Link represents a related link with title and URL.
+type Link struct {
+	Title string `json:"title" mapstructure:"title"`
+	URL   string `json:"url" mapstructure:"url"`
 }
 
 // ServiceURLs contains URLs for various network services.
@@ -54,18 +61,40 @@ type ConfigFile struct {
 	URL  string `json:"url"`
 }
 
+// RepositoryMetadata contains metadata for a repository.
+type RepositoryMetadata struct {
+	DisplayName string `json:"displayName"`
+	Description string `json:"description,omitempty"`
+	Links       []Link `json:"links"`
+	Image       string `json:"image,omitempty"`
+	Stats       Stats  `json:"stats"`
+}
+
+// Stats contains statistics and metrics about repository networks.
+type Stats struct {
+	TotalNetworks    int      `json:"totalNetworks"`
+	ActiveNetworks   int      `json:"activeNetworks"`
+	InactiveNetworks int      `json:"inactiveNetworks"`
+	NetworkNames     []string `json:"networkNames,omitempty"`
+}
+
 // Result represents the result of a discovery operation.
 type Result struct {
-	Networks   map[string]Network `json:"networks"`
-	LastUpdate time.Time          `json:"lastUpdate"`
-	Duration   float64            `json:"duration"`
-	Providers  []Provider         `json:"providers"`
+	NetworkMetadata map[string]RepositoryMetadata `json:"networkMetadata"`
+	Networks        map[string]Network            `json:"networks"`
+	LastUpdate      time.Time                     `json:"lastUpdate"`
+	Duration        float64                       `json:"duration"`
+	Providers       []Provider                    `json:"providers"`
 }
 
 // GitHubRepositoryConfig represents the configuration for a GitHub repository source.
 type GitHubRepositoryConfig struct {
-	Name       string `mapstructure:"name"`
-	NamePrefix string `mapstructure:"namePrefix"`
+	Name        string `mapstructure:"name"`
+	NamePrefix  string `mapstructure:"namePrefix"`
+	DisplayName string `mapstructure:"displayName"`
+	Description string `mapstructure:"description"`
+	Image       string `mapstructure:"image"`
+	Links       []Link `mapstructure:"links"`
 }
 
 // Config represents the configuration for the discovery service.
