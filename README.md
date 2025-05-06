@@ -2,6 +2,8 @@
 
 A service that discovers and maps active Ethereum networks in the ethpandaops ecosystem.
 
+[![Latest Networks](https://img.shields.io/badge/Latest%20Networks-JSON-blue)](https://ethpandaops-platform-production-cartographoor.ams3.digitaloceanspaces.com/networks.json)
+
 ## Overview
 
 Cartographoor is a Go application that periodically scans and discovers active Ethereum networks maintained by the ethpandaops team. It aggregates network information and uploads it to S3 as a structured JSON file, making it easier to maintain an up-to-date view of available networks.
