@@ -53,9 +53,17 @@ func (p *Provider) createNetwork(ctx context.Context, config *NetworkConfig) dis
 		LastUpdated: time.Now(),
 	}
 
-	// If network is active and has configs, build the GenesisConfig
-	if config.Status == "active" && config.Domain != "" && len(config.ConfigFiles) > 0 {
-		network.GenesisConfig = p.buildGenesisConfig(config)
+	// If network is active, add service URLs and GenesisConfig
+	if config.Status == "active" {
+		if config.Domain != "" {
+			// Add service URLs
+			network.ServiceURLs = p.getServiceURLs(ctx, config.Domain)
+
+			// Add GenesisConfig if we have config files
+			if len(config.ConfigFiles) > 0 {
+				network.GenesisConfig = p.buildGenesisConfig(config)
+			}
+		}
 	}
 
 	return network

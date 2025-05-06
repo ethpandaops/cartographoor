@@ -15,6 +15,23 @@ type Network struct {
 	Status        string         `json:"status"`
 	LastUpdated   time.Time      `json:"lastUpdated"`
 	GenesisConfig *GenesisConfig `json:"genesisConfig,omitempty"`
+	ServiceURLs   *ServiceURLs   `json:"serviceUrls,omitempty"`
+}
+
+// ServiceURLs contains URLs for various network services.
+type ServiceURLs struct {
+	Faucet         string `json:"faucet,omitempty"`
+	JSONRPC        string `json:"jsonRpc,omitempty"`
+	BeaconRPC      string `json:"beaconRpc,omitempty"`
+	Explorer       string `json:"explorer,omitempty"`
+	BeaconExplorer string `json:"beaconExplorer,omitempty"`
+	Forkmon        string `json:"forkmon,omitempty"`
+	Assertoor      string `json:"assertoor,omitempty"`
+	Dora           string `json:"dora,omitempty"`
+	CheckpointSync string `json:"checkpointSync,omitempty"`
+	Blobscan       string `json:"blobscan,omitempty"`
+	Ethstats       string `json:"ethstats,omitempty"`
+	DevnetSpec     string `json:"devnetSpec,omitempty"`
 }
 
 // GenesisConfig represents the configuration URLs for a network.
