@@ -1,0 +1,63 @@
+# Cartographoor Production Configuration
+
+# Logging configuration
+logging:
+  level: info
+
+# Run once and exit
+runOnce: true
+
+# Discovery configuration
+discovery:
+  # Discovery interval (default: 1h)
+  interval: 1h
+  
+  # GitHub discovery configuration
+  github:
+    # List of repositories to check for networks
+    repositories:
+      - name: ethpandaops/pectra-devnets
+        namePrefix: pectra-
+      - name: ethpandaops/peerdas-devnets
+        namePrefix: peerdas-
+      - name: ethpandaops/eof-devnets
+        namePrefix: eof-
+      - name: ethpandaops/ssz-devnets
+        namePrefix: ssz-
+      - name: ethpandaops/nft-devnets
+        namePrefix: nft-
+    
+    # GitHub API token (via environment variable)
+    token: ${GITHUB_TOKEN}
+
+# S3 storage configuration
+storage:
+  # S3 bucket name - environment variable example: ${S3_BUCKET_NAME}
+  bucketName: ${S3_BUCKET_NAME}
+  
+  # S3 key (path) for the networks.json file
+  key: networks.json
+  
+  # AWS region - environment variable example: ${AWS_REGION}
+  region: ${AWS_REGION}
+  
+  # S3-compatible endpoint (for DigitalOcean Spaces)
+  endpoint: https://ams3.digitaloceanspaces.com
+  
+  # Access credentials using environment variables
+  accessKey: ${AWS_ACCESS_KEY_ID}
+  secretKey: ${AWS_SECRET_ACCESS_KEY}
+  
+  # Force path style addressing (for some S3-compatible services)
+  forcePathStyle: false
+  
+  # Content type for the uploaded file
+  contentType: application/json
+  
+  # Access control list for the uploaded file
+  acl: public-read
+  
+  # Retry configuration
+  retryDuration: 5s
+  maxRetries: 3
+  backoffJitterPercent: 20 

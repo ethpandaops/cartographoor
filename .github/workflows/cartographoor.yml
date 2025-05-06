@@ -24,7 +24,7 @@ jobs:
       
       - name: Run Cartographoor
         run: |
-          ./cartographoor run --once
+          ./cartographoor run --config=.github/config.production.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.CARTOGRAPHOOR_GITHUB_TOKEN }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
