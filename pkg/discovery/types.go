@@ -22,6 +22,7 @@ type GenesisConfig struct {
 	ConsensusLayer []ConfigFile `json:"consensusLayer,omitempty"`
 	ExecutionLayer []ConfigFile `json:"executionLayer,omitempty"`
 	Metadata       []ConfigFile `json:"metadata,omitempty"`
+	API            []ConfigFile `json:"api,omitempty"`
 }
 
 // ConfigFile represents a configuration file URL.

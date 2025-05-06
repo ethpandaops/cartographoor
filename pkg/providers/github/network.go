@@ -67,9 +67,11 @@ func (p *Provider) buildGenesisConfig(config *NetworkConfig) *discovery.GenesisC
 		ConsensusLayer: []discovery.ConfigFile{},
 		ExecutionLayer: []discovery.ConfigFile{},
 		Metadata:       []discovery.ConfigFile{},
+		API:            []discovery.ConfigFile{},
 	}
 
 	for _, configPath := range config.ConfigFiles {
+		// Always use the config domain prefix for all paths
 		url := fmt.Sprintf("https://config.%s%s", config.Domain, configPath)
 
 		configFile := discovery.ConfigFile{
@@ -78,7 +80,10 @@ func (p *Provider) buildGenesisConfig(config *NetworkConfig) *discovery.GenesisC
 		}
 
 		// Categorize files based on path and filename
-		if strings.HasPrefix(configPath, "/metadata/") {
+		if strings.HasPrefix(configPath, "/api/") {
+			// API endpoints
+			genesisConfig.API = append(genesisConfig.API, configFile)
+		} else if strings.HasPrefix(configPath, "/metadata/") {
 			// Add only to metadata section
 			genesisConfig.Metadata = append(genesisConfig.Metadata, configFile)
 		} else if strings.HasPrefix(configPath, "/cl/") {

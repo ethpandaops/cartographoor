@@ -78,7 +78,6 @@ func (p *Provider) discoverRepositoryNetworks(
 	}
 
 	owner, repo := parts[0], parts[1]
-
 	p.log.WithFields(logrus.Fields{
 		"owner":      owner,
 		"repo":       repo,
