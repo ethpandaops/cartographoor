@@ -61,8 +61,10 @@ func (s *Service) Start(ctx context.Context) error {
 
 	// Start the result processor
 	s.wg.Add(1)
+
 	go func() {
 		defer s.wg.Done()
+
 		for {
 			select {
 			case <-ctx.Done():
@@ -80,6 +82,7 @@ func (s *Service) Start(ctx context.Context) error {
 	// Start the ticker
 	s.ticker = time.NewTicker(s.config.Interval)
 	s.wg.Add(1)
+
 	go func() {
 		defer s.wg.Done()
 
@@ -112,6 +115,7 @@ func (s *Service) Stop(ctx context.Context) error {
 	}
 
 	done := make(chan struct{})
+
 	go func() {
 		s.wg.Wait()
 		close(done)
@@ -125,16 +129,17 @@ func (s *Service) Stop(ctx context.Context) error {
 	}
 }
 
-// RunOnce executes a single discovery run and returns the result directly
+// RunOnce executes a single discovery run and returns the result directly.
 func (s *Service) RunOnce(ctx context.Context) (Result, error) {
 	result, err := s.executeDiscovery(ctx)
 	if err != nil {
 		return Result{}, err
 	}
+
 	return result, nil
 }
 
-// runDiscovery runs the discovery process and sends the result to the result channel
+// runDiscovery runs the discovery process and sends the result to the result channel.
 func (s *Service) runDiscovery(ctx context.Context) error {
 	result, err := s.executeDiscovery(ctx)
 	if err != nil {
@@ -151,9 +156,10 @@ func (s *Service) runDiscovery(ctx context.Context) error {
 	return nil
 }
 
-// executeDiscovery performs the actual discovery process and returns the result
+// executeDiscovery performs the actual discovery process and returns the result.
 func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 	start := time.Now()
+
 	s.log.Info("Running discovery")
 
 	s.mutex.Lock()
@@ -162,6 +168,7 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 
 	if len(providers) == 0 {
 		s.log.Warn("No discovery providers registered")
+
 		return Result{
 			Networks: make(map[string]Network),
 		}, nil
@@ -185,11 +192,13 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 			networkMap, err := p.Discover(ctx, s.config)
 			if err != nil {
 				pLog.WithError(err).Error("Failed to discover networks")
+
 				resultCh <- providerResult{
 					networks: nil,
 					provider: p,
 					err:      err,
 				}
+
 				return
 			}
 
@@ -204,8 +213,10 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 	}
 
 	// Collect results
-	allNetworks := make(map[string]Network)
-	var provNames []Provider
+	var (
+		allNetworks = make(map[string]Network)
+		provNames   = make([]Provider, 0)
+	)
 
 	// Wait for all provider goroutines to complete
 	for i := 0; i < len(providers); i++ {
@@ -218,6 +229,7 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 				for key, network := range pr.networks {
 					allNetworks[key] = network
 				}
+
 				provNames = append(provNames, pr.provider)
 			}
 		}

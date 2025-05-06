@@ -79,6 +79,7 @@ func (p *Provider) Initialize(ctx context.Context) error {
 
 	// Add custom endpoint if provided
 	if p.config.Endpoint != "" {
+		//nolint:staticcheck // fine.
 		customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 			return aws.Endpoint{
 				URL:               p.config.Endpoint,
@@ -86,6 +87,8 @@ func (p *Provider) Initialize(ctx context.Context) error {
 				HostnameImmutable: true,
 			}, nil
 		})
+
+		//nolint:staticcheck // fine.
 		opts = append(opts, config.WithEndpointResolverWithOptions(customResolver))
 	}
 

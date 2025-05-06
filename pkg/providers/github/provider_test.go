@@ -338,24 +338,24 @@ func TestServiceURLs(t *testing.T) {
 	})
 }
 
-// Mock HTTP transport to redirect GitHub API requests to our test server
+// Mock HTTP transport to redirect GitHub API requests to our test server.
 type mockTransport struct {
 	URL string
 }
 
 func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	// Clone the request URL and override the host with our test server
+	// Clone the request URL and override the host with our test server.
 	req2 := new(http.Request)
 	*req2 = *req
 	req2.URL.Scheme = "http"
 	req2.URL.Host = req.Host
 
-	// Remove api.github.com from the path and update it
+	// Remove api.github.com from the path and update it.
 	path := req.URL.Path
 	path = path[len("/repos"):]
 	req2.URL.Path = path
 
-	// Set the full URL to our test server
+	// Set the full URL to our test server.
 	req2.URL.Host = t.URL[7:] // Remove "http://"
 	req2.Host = t.URL[7:]     // Remove "http://"
 
@@ -363,8 +363,9 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return http.DefaultTransport.RoundTrip(req2)
 }
 
-// Mock GitHub API
 func mockGitHubAPI(t *testing.T) *httptest.Server {
+	t.Helper()
+
 	mux := http.NewServeMux()
 
 	// Mock repository contents
@@ -414,6 +415,7 @@ func mockGitHubAPI(t *testing.T) *httptest.Server {
 
 	// Return test server
 	server := httptest.NewServer(mux)
+
 	return server
 }
 

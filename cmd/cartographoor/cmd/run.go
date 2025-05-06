@@ -96,15 +96,17 @@ func runService(ctx context.Context, log *logrus.Logger, cfg *runConfig) error {
 	if err != nil {
 		return err
 	}
+
 	discoveryService.RegisterProvider(githubProvider)
 
 	// For run-once mode, we'll use a different approach
 	if cfg.RunOnce {
 		log.Info("Running in one-time discovery mode")
+
 		return runOnce(ctx, log, discoveryService, storageProvider)
 	}
 
-	// Start the service in normal mode (continuous discovery)
+	// Start the service in normal mode (continuous discovery).
 	log.WithField("interval", cfg.Discovery.Interval).Info("Starting service in continuous mode")
 
 	// Start discovery service
@@ -151,13 +153,14 @@ func runService(ctx context.Context, log *logrus.Logger, cfg *runConfig) error {
 	return nil
 }
 
-// runOnce executes a single discovery run and uploads the results
+// runOnce executes a single discovery run and uploads the results.
 func runOnce(ctx context.Context, log *logrus.Logger, discoveryService *discovery.Service, storageProvider *s3.Provider) error {
 	// Create a context with timeout to ensure we don't hang indefinitely
 	runCtx, runCancel := context.WithTimeout(ctx, 5*time.Minute)
 	defer runCancel()
 
 	log.Info("Running one-time discovery")
+
 	result, err := discoveryService.RunOnce(runCtx)
 	if err != nil {
 		return fmt.Errorf("failed to run discovery: %w", err)
@@ -178,10 +181,11 @@ func runOnce(ctx context.Context, log *logrus.Logger, discoveryService *discover
 	}
 
 	log.Info("Upload complete, exiting")
+
 	return nil
 }
 
-// readConfigWithEnvSubst reads a config file and performs environment variable substitution
+// readConfigWithEnvSubst reads a config file and performs environment variable substitution.
 func readConfigWithEnvSubst(v *viper.Viper) error {
 	configFile := v.ConfigFileUsed()
 	if configFile == "" {

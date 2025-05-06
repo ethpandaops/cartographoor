@@ -36,6 +36,7 @@ func (p *MockProvider) Discover(ctx context.Context, config Config) (map[string]
 	if p.err != nil {
 		return nil, p.err
 	}
+
 	return p.networks, nil
 }
 

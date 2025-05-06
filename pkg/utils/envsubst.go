@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	// envVarRegex matches ${VAR} or $VAR patterns
+	// envVarRegex matches ${VAR} or $VAR patterns.
 	envVarRegex = regexp.MustCompile(`\${([a-zA-Z0-9_]+)}|\$([a-zA-Z0-9_]+)`)
 )
 
@@ -15,7 +15,7 @@ var (
 // It supports both ${VAR} and $VAR syntax.
 func EnvSubst(s string) string {
 	return envVarRegex.ReplaceAllStringFunc(s, func(match string) string {
-		// Extract variable name from ${VAR} or $VAR format
+		// Extract variable name from ${VAR} or $VAR format.
 		var envVar string
 		if strings.HasPrefix(match, "${") {
 			envVar = match[2 : len(match)-1]
@@ -23,10 +23,11 @@ func EnvSubst(s string) string {
 			envVar = match[1:]
 		}
 
-		// Return the environment variable value or the original string if not found
+		// Return the environment variable value or the original string if not found.
 		if val, exists := os.LookupEnv(envVar); exists {
 			return val
 		}
+
 		return match
 	})
 }

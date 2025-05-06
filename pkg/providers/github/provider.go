@@ -55,6 +55,7 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 		discoveredNetworks, err := p.discoverRepositoryNetworks(ctx, client, repoConfig)
 		if err != nil {
 			p.log.WithError(err).WithField("repository", repoConfig.Name).Error("Failed to discover networks in repository")
+
 			continue
 		}
 

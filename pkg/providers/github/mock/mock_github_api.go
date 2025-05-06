@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os/exec"
 	"strings"
@@ -79,7 +80,7 @@ func NewMockGitHubAPIContainer(ctx context.Context, log *logrus.Logger) (*MockGi
 
 	mockAPI := &MockGitHubAPIContainer{
 		Container: container,
-		URL:       fmt.Sprintf("http://%s:%s", host, mappedPort.Port()),
+		URL:       fmt.Sprintf("http://%s", net.JoinHostPort(host, mappedPort.Port())),
 		Port:      mappedPort.Int(),
 	}
 
@@ -186,8 +187,11 @@ http {
 		return err
 	}
 
-	if err := writeFile("/tmp/mock-github/api/repos/ethpandaops/dencun-devnets/contents", string(rootContentsJSON)); err != nil {
-		return err
+	if writeErr := writeFile(
+		"/tmp/mock-github/api/repos/ethpandaops/dencun-devnets/contents",
+		string(rootContentsJSON),
+	); writeErr != nil {
+		return writeErr
 	}
 
 	// Create network-configs contents
@@ -220,53 +224,74 @@ type RepoContent struct {
 	Name    string `json:"name"`
 	Path    string `json:"path,omitempty"`
 	Type    string `json:"type"`
-	HTMLURL string `json:"html_url"`
+	HTMLURL string `json:"html_url"` //nolint:tagliatelle // fine, test.
 }
 
-// Helper function to create directory
+// Helper function to create directory.
 func createDirectory(path string) error {
 	return execCommand("mkdir", "-p", path)
 }
 
-// Helper function to write file
+// Helper function to write file.
 func writeFile(path, content string) error {
 	return execCommand("bash", "-c", fmt.Sprintf("echo '%s' > %s", strings.ReplaceAll(content, "'", "'\\''"), path))
 }
 
-// Helper function to execute command
+// Helper function to execute command.
 func execCommand(command string, args ...string) error {
 	allArgs := append([]string{command}, args...)
 	cmd := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 		defer cancel()
-		
+
+		//nolint:gosec // fine, test.
 		output, err := exec.CommandContext(ctx, allArgs[0], allArgs[1:]...).CombinedOutput()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "Error executing command: %v\nOutput: %s", err, output)
+
 			return
 		}
-		
+
 		w.WriteHeader(http.StatusOK)
-		w.Write(output)
+
+		if _, err := w.Write(output); err != nil {
+			fmt.Fprintf(w, "Error writing output: %v", err)
+		}
 	})
-	
-	// Start a temporary server to handle the command execution
-	server := &http.Server{Addr: ":0", Handler: cmd}
-	go server.ListenAndServe()
-	defer server.Shutdown(context.Background())
-	
-	// Execute the command via HTTP request
+
+	// Start a temporary server to handle the command execution.
+	server := &http.Server{Addr: ":0", Handler: cmd, ReadTimeout: 10 * time.Second}
+
+	// Use a goroutine to run the server and handle errors
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			fmt.Printf("HTTP server error: %v\n", err)
+		}
+	}()
+
+	// Ensure shutdown happens and handle any errors
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			fmt.Printf("HTTP server shutdown error: %v\n", err)
+		}
+	}()
+
+	// Execute the command via HTTP request.
 	resp, err := http.Get("http://localhost" + server.Addr)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-	
+
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
+
 		return fmt.Errorf("command failed: %s", body)
 	}
-	
+
 	return nil
 }
