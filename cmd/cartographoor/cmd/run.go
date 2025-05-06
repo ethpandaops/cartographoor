@@ -116,6 +116,13 @@ func runService(ctx context.Context, log *logrus.Logger, cfg *runConfig) error {
 	discoveryService.OnResult(func(result discovery.Result) {
 		log.WithField("networks", len(result.Networks)).Info("Discovered networks")
 
+		// Skip upload if there are no networks or discovery had errors
+		if len(result.Networks) == 0 {
+			log.Info("No networks discovered, skipping S3 upload")
+
+			return
+		}
+
 		// Upload to S3
 		if err := storageProvider.Upload(ctx, result); err != nil {
 			log.WithError(err).Error("Failed to upload networks to S3")
@@ -157,6 +164,13 @@ func runOnce(ctx context.Context, log *logrus.Logger, discoveryService *discover
 	}
 
 	log.WithField("networks", len(result.Networks)).Info("One-time discovery complete")
+
+	// Skip upload if there are no networks
+	if len(result.Networks) == 0 {
+		log.Info("No networks discovered, skipping S3 upload")
+
+		return nil
+	}
 
 	// Upload to S3
 	if err := storageProvider.Upload(runCtx, result); err != nil {

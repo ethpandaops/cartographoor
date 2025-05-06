@@ -39,6 +39,12 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 		return nil, fmt.Errorf("no repositories configured")
 	}
 
+	// We require a token to be set in production, otherwise we'll just get rate-limited.
+	// Skip this check if the client is already set (for testing purposes)
+	if config.GitHub.Token == "" && p.client == nil {
+		return nil, fmt.Errorf("no GitHub token configured")
+	}
+
 	// Create GitHub client
 	client := p.getClient(ctx, config.GitHub.Token)
 

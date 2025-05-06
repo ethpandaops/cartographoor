@@ -20,7 +20,7 @@ discovery:
       - name: ethpandaops/dencun-devnets
         namePrefix: dencun-
     
-    # GitHub API token (optional)
+    # GitHub API token (REQUIRED)
     # token: ghp_your_github_token
 
 # S3 storage configuration

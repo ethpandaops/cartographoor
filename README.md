@@ -35,6 +35,10 @@ Cartographoor uses a configuration file to determine:
 
 The service identifies networks by checking for directories within the `network-configs/` path of specified repositories.
 
+### Requirements
+
+- **GitHub Token**: A GitHub personal access token is required to prevent rate limiting when accessing GitHub repositories. This can be provided in the configuration file or as an environment variable.
+
 ## Example
 
 The service scans repositories like `ethpandaops/dencun-devnets`, which contains networks such as:
@@ -74,6 +78,8 @@ Key configuration sections:
 discovery:
   interval: 1h
   github:
+    # GitHub token is required to prevent rate limiting
+    token: ${GITHUB_TOKEN}
     repositories:
       # Simple configuration
       - name: ethpandaops/dencun-devnets
@@ -96,6 +102,10 @@ The configuration file supports environment variable substitution using the `${V
 For example:
 
 ```yaml
+discovery:
+  github:
+    token: ${GITHUB_TOKEN}
+
 storage:
   bucketName: ${S3_BUCKET_NAME}
   region: ${AWS_REGION}
@@ -149,6 +159,7 @@ services:
       - ./config.yaml:/app/config/config.yaml
     environment:
       - CARTOGRAPHOOR_LOGGING_LEVEL=info
+      - GITHUB_TOKEN=your_github_token_here
 ```
 
 ### Running with Local Minio (S3 Alternative)

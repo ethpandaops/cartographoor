@@ -182,6 +182,9 @@ func TestProvider_Discover_InvalidRepository(t *testing.T) {
 	provider, err := NewProvider(log)
 	require.NoError(t, err)
 
+	// Create a mock client to bypass the token check
+	provider.client = gh.NewClient(nil)
+
 	config := discovery.Config{
 		GitHub: struct {
 			Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
@@ -256,6 +259,33 @@ func TestProvider_DiscoverNetworkStatus(t *testing.T) {
 			assert.Equal(t, expectedStatus, network.Status, "Network %s should have status %s", networkName, expectedStatus)
 		}
 	}
+}
+
+func TestProvider_Discover_NoToken(t *testing.T) {
+	log := logrus.New()
+	provider, err := NewProvider(log)
+	require.NoError(t, err)
+
+	// Don't set the mock client - this should cause the token check to fail
+
+	config := discovery.Config{
+		GitHub: struct {
+			Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
+			Token        string                             `mapstructure:"token"`
+		}{
+			Repositories: []discovery.GitHubRepositoryConfig{
+				{
+					Name:       "ethpandaops/dencun-devnets",
+					NamePrefix: "",
+				},
+			},
+			Token: "", // Empty token
+		},
+	}
+
+	_, err = provider.Discover(context.Background(), config)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no GitHub token configured")
 }
 
 // Mock HTTP transport to redirect GitHub API requests to our test server
