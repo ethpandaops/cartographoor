@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ethpandaops/cartographoor/pkg/discovery"
@@ -147,10 +148,16 @@ func (p *Provider) Upload(ctx context.Context, result discovery.Result) error {
 		ContentType: aws.String(p.config.ContentType),
 	}
 
+	// Add ACL if configured
+	if p.config.ACL != "" {
+		input.ACL = types.ObjectCannedACL(p.config.ACL)
+	}
+
 	// Upload to S3
 	p.log.WithFields(logrus.Fields{
 		"bucket": p.config.BucketName,
 		"key":    p.config.Key,
+		"acl":    p.config.ACL,
 	}).Info("Uploading networks to S3")
 
 	if _, err = p.client.PutObject(ctx, input); err != nil {
