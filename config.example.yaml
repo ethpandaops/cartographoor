@@ -76,7 +76,7 @@ storage:
   region: us-east-1
   
   # S3-compatible endpoint (optional, for non-AWS S3 implementations)
-  # endpoint: ${AWS_SECRET_ACCESS_KEY}
+  # endpoint: https://s3.example.com
   
   # Access credentials using environment variables
   # accessKey: ${AWS_SECRET_ACCESS_ID}
