@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"strings"
 	"sync"
 	"time"
 
@@ -170,7 +171,8 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 		s.log.Warn("No discovery providers registered")
 
 		return Result{
-			Networks: make(map[string]Network),
+			Networks:        make(map[string]Network),
+			NetworkMetadata: make(map[string]RepositoryMetadata),
 		}, nil
 	}
 
@@ -222,7 +224,10 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 	for i := 0; i < len(providers); i++ {
 		select {
 		case <-ctx.Done():
-			return Result{Networks: allNetworks}, ctx.Err()
+			return Result{
+				Networks:        allNetworks,
+				NetworkMetadata: make(map[string]RepositoryMetadata),
+			}, ctx.Err()
 		case pr := <-resultCh:
 			if pr.err == nil && pr.networks != nil {
 				// Merge networks, newer ones will overwrite older ones with the same key
@@ -235,19 +240,133 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 		}
 	}
 
+	// Build repository metadata from config
+	networkMetadata := buildNetworkMetadata(s.config, allNetworks)
+
 	// Create result
 	duration := time.Since(start).Seconds()
 	result := Result{
-		Networks:   allNetworks,
-		LastUpdate: time.Now(),
-		Duration:   duration,
-		Providers:  provNames,
+		Networks:        allNetworks,
+		NetworkMetadata: networkMetadata,
+		LastUpdate:      time.Now(),
+		Duration:        duration,
+		Providers:       provNames,
 	}
 
 	s.log.WithFields(logrus.Fields{
-		"networks": len(allNetworks),
-		"duration": duration,
+		"networks":         len(allNetworks),
+		"network_metadata": len(networkMetadata),
+		"duration":         duration,
 	}).Info("Discovery complete")
 
 	return result, nil
+}
+
+// buildNetworkMetadata builds the network metadata from GitHub repository configurations.
+func buildNetworkMetadata(config Config, networks map[string]Network) map[string]RepositoryMetadata {
+	metadata := make(map[string]RepositoryMetadata)
+
+	// First pass: create metadata entries for each repository
+	for _, repo := range config.GitHub.Repositories {
+		// Use the repository name prefix (e.g., "eof-") as the key in network_metadata
+		// If there's no prefix, use the repo name
+		metadataKey := repo.NamePrefix
+		if metadataKey == "" {
+			// Extract the repo name from the full path
+			parts := strings.Split(repo.Name, "/")
+			if len(parts) == 2 {
+				metadataKey = parts[1]
+			} else {
+				metadataKey = repo.Name
+			}
+		} else {
+			// Remove trailing dash if present to get a clean key
+			metadataKey = strings.TrimSuffix(metadataKey, "-")
+		}
+
+		metadata[metadataKey] = RepositoryMetadata{
+			DisplayName: repo.DisplayName,
+			Description: repo.Description,
+			Links:       repo.Links,
+			Image:       repo.Image,
+			Stats: Stats{
+				TotalNetworks:    0,
+				ActiveNetworks:   0,
+				InactiveNetworks: 0,
+				NetworkNames:     []string{},
+			},
+		}
+	}
+
+	// Second pass: gather network statistics
+	repoNetworks := make(map[string][]Network)
+
+	// Group networks by repository
+	for netName, network := range networks {
+		if network.Repository == "" {
+			continue
+		}
+
+		// Extract repository name prefix from network name
+		var metadataKey string
+
+		for _, repo := range config.GitHub.Repositories {
+			prefix := repo.NamePrefix
+			if prefix != "" && strings.HasPrefix(netName, prefix) {
+				metadataKey = strings.TrimSuffix(prefix, "-")
+
+				break
+			}
+
+			// If no matching prefix found, try to extract from repository path
+			if repo.Name == network.Repository {
+				parts := strings.Split(repo.Name, "/")
+				if len(parts) == 2 {
+					metadataKey = parts[1]
+				} else {
+					metadataKey = repo.Name
+				}
+
+				break
+			}
+		}
+
+		if metadataKey != "" {
+			if _, exists := repoNetworks[metadataKey]; !exists {
+				repoNetworks[metadataKey] = []Network{}
+			}
+
+			repoNetworks[metadataKey] = append(repoNetworks[metadataKey], network)
+		}
+	}
+
+	// Calculate statistics for each repository
+	for repoKey, nets := range repoNetworks {
+		meta, exists := metadata[repoKey]
+		if !exists {
+			continue
+		}
+
+		// Count networks
+		meta.Stats.TotalNetworks = len(nets)
+		meta.Stats.ActiveNetworks = 0
+		meta.Stats.InactiveNetworks = 0
+
+		for _, net := range nets {
+			// Collect network name
+			meta.Stats.NetworkNames = append(meta.Stats.NetworkNames, net.Name)
+
+			// Count by status
+			if net.Status == "active" {
+				meta.Stats.ActiveNetworks++
+			} else {
+				meta.Stats.InactiveNetworks++
+			}
+		}
+
+		// Update the metadata
+		metadata[repoKey] = meta
+	}
+
+	return metadata
 }
