@@ -7,13 +7,27 @@ import (
 
 // Network represents an Ethereum network.
 type Network struct {
-	Name        string    `json:"name"`
-	Repository  string    `json:"repository"`
-	Path        string    `json:"path"`
-	URL         string    `json:"url,omitempty"`
-	Description string    `json:"description,omitempty"`
-	Status      string    `json:"status"`
-	LastUpdated time.Time `json:"lastUpdated"`
+	Name          string         `json:"name"`
+	Repository    string         `json:"repository"`
+	Path          string         `json:"path"`
+	URL           string         `json:"url,omitempty"`
+	Description   string         `json:"description,omitempty"`
+	Status        string         `json:"status"`
+	LastUpdated   time.Time      `json:"lastUpdated"`
+	GenesisConfig *GenesisConfig `json:"genesisConfig,omitempty"`
+}
+
+// GenesisConfig represents the configuration URLs for a network.
+type GenesisConfig struct {
+	ConsensusLayer []ConfigFile `json:"consensusLayer,omitempty"`
+	ExecutionLayer []ConfigFile `json:"executionLayer,omitempty"`
+	Metadata       []ConfigFile `json:"metadata,omitempty"`
+}
+
+// ConfigFile represents a configuration file URL.
+type ConfigFile struct {
+	Path string `json:"path"`
+	URL  string `json:"url"`
 }
 
 // Result represents the result of a discovery operation.
@@ -26,7 +40,7 @@ type Result struct {
 
 // GitHubRepositoryConfig represents the configuration for a GitHub repository source.
 type GitHubRepositoryConfig struct {
-	Name      string `mapstructure:"name"`
+	Name       string `mapstructure:"name"`
 	NamePrefix string `mapstructure:"namePrefix"`
 }
 

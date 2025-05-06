@@ -10,6 +10,9 @@ import (
 func main() {
 	log := logrus.New()
 	log.SetOutput(os.Stdout)
+
+	// Log level will be properly set by the configuration in cmd.NewRootCommand
+	// Default to info level
 	log.SetLevel(logrus.InfoLevel)
 
 	if err := cmd.NewRootCommand(log).Execute(); err != nil {

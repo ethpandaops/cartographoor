@@ -5,19 +5,12 @@ import (
 	"fmt"
 	"path"
 	"strings"
-	"time"
 
 	gh "github.com/google/go-github/v53/github"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 
 	"github.com/ethpandaops/cartographoor/pkg/discovery"
-)
-
-const (
-	networkConfigDir     = "network-configs"
-	kubernetesDir        = "kubernetes"
-	kubernetesArchiveDir = "kubernetes-archive"
 )
 
 // Provider implements the discovery.Provider interface for GitHub.
@@ -53,90 +46,83 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 
 	// Discover networks for each repository
 	for _, repoConfig := range config.GitHub.Repositories {
-		repoPath := repoConfig.Name
-		namePrefix := repoConfig.NamePrefix
-
-		parts := strings.Split(repoPath, "/")
-		if len(parts) != 2 {
-			p.log.WithField("repository", repoPath).Warn("Invalid repository path")
-			continue
-		}
-
-		owner, repo := parts[0], parts[1]
-		p.log.WithFields(logrus.Fields{
-			"owner":      owner,
-			"repo":       repo,
-			"namePrefix": namePrefix,
-		}).Info("Discovering networks in repository")
-
-		// Check if network-configs directory exists
-		netConfigPath := networkConfigDir
-		_, dirContent, _, err := client.Repositories.GetContents(ctx, owner, repo, netConfigPath, nil)
+		discoveredNetworks, err := p.discoverRepositoryNetworks(ctx, client, repoConfig)
 		if err != nil {
-			p.log.WithError(err).WithFields(logrus.Fields{
-				"owner": owner,
-				"repo":  repo,
-				"path":  netConfigPath,
-			}).Error("Failed to get contents of network-configs directory")
+			p.log.WithError(err).WithField("repository", repoConfig.Name).Error("Failed to discover networks in repository")
 			continue
 		}
 
-		// Process directories in network-configs
-		for _, content := range dirContent {
-			if *content.Type != "dir" {
-				continue
-			}
-
-			originalNetworkName := *content.Name
-			// Apply prefix if configured
-			networkName := originalNetworkName
-			if namePrefix != "" {
-				networkName = namePrefix + originalNetworkName
-			}
-
-			p.log.WithFields(logrus.Fields{
-				"owner":           owner,
-				"repo":            repo,
-				"originalNetwork": originalNetworkName,
-				"prefixedNetwork": networkName,
-			}).Debug("Found network")
-
-			// Determine network status by checking if it's in kubernetes/ or kubernetes-archive/
-			status := "unknown"
-
-			// Check if network exists in kubernetes directory (active).
-			kubePath := path.Join(kubernetesDir, originalNetworkName)
-
-			_, _, resp, err := client.Repositories.GetContents(ctx, owner, repo, kubePath, nil)
-			if err == nil || (resp != nil && resp.StatusCode != 404) {
-				status = "active"
-			} else {
-				// Check if network exists in kubernetes-archive directory (inactive).
-				archivePath := path.Join(kubernetesArchiveDir, originalNetworkName)
-
-				_, _, resp, err := client.Repositories.GetContents(ctx, owner, repo, archivePath, nil)
-				if err == nil || (resp != nil && resp.StatusCode != 404) {
-					status = "inactive"
-				}
-			}
-
-			p.log.WithFields(logrus.Fields{
-				"network": networkName,
-				"status":  status,
-			}).Debug("Network status determined")
-
-			// Create network
-			network := discovery.Network{
-				Name:        originalNetworkName, // Keep original name in the network object
-				Repository:  repoPath,
-				Path:        path.Join(netConfigPath, originalNetworkName),
-				URL:         *content.HTMLURL,
-				Status:      status,
-				LastUpdated: time.Now(), // ideally would use last commit time
-			}
-
-			networks[networkName] = network
+		// Add discovered networks to the result
+		for name, network := range discoveredNetworks {
+			networks[name] = network
 		}
+	}
+
+	return networks, nil
+}
+
+// discoverRepositoryNetworks discovers networks in a specific repository.
+func (p *Provider) discoverRepositoryNetworks(
+	ctx context.Context,
+	client *gh.Client,
+	repoConfig discovery.GitHubRepositoryConfig,
+) (map[string]discovery.Network, error) {
+	var (
+		repoPath   = repoConfig.Name
+		namePrefix = repoConfig.NamePrefix
+		parts      = strings.Split(repoPath, "/")
+	)
+
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid repository path: %s", repoPath)
+	}
+
+	owner, repo := parts[0], parts[1]
+
+	p.log.WithFields(logrus.Fields{
+		"owner":      owner,
+		"repo":       repo,
+		"namePrefix": namePrefix,
+	}).Info("Discovering networks in repository")
+
+	// Check if network-configs directory exists
+	netConfigPath := networkConfigDir
+
+	_, dirContent, _, err := client.Repositories.GetContents(ctx, owner, repo, netConfigPath, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get contents of network-configs directory: %w", err)
+	}
+
+	networks := make(map[string]discovery.Network)
+
+	// Process directories in network-configs
+	for _, content := range dirContent {
+		if *content.Type != "dir" {
+			continue
+		}
+
+		networkConfig := &NetworkConfig{
+			Name:         *content.Name,
+			PrefixedName: *content.Name,
+			Repository:   repoPath,
+			Owner:        owner,
+			Repo:         repo,
+			Path:         path.Join(netConfigPath, *content.Name),
+			URL:          *content.HTMLURL,
+		}
+
+		// Apply prefix if configured
+		if namePrefix != "" {
+			networkConfig.PrefixedName = namePrefix + networkConfig.Name
+		}
+
+		// Determine network status and configs
+		networkConfig.Status, networkConfig.ConfigFiles, networkConfig.Domain = p.determineNetworkStatus(
+			ctx, client, owner, repo, networkConfig.Name,
+		)
+
+		// Create network and add to result
+		networks[networkConfig.PrefixedName] = p.createNetwork(ctx, networkConfig)
 	}
 
 	return networks, nil

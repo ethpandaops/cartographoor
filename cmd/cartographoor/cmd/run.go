@@ -12,7 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	
+
 	"github.com/ethpandaops/cartographoor/pkg/utils"
 
 	"github.com/ethpandaops/cartographoor/pkg/discovery"
@@ -21,11 +21,13 @@ import (
 )
 
 type runConfig struct {
-	LoggingLevel string `mapstructure:"logging.level"`
-	ConfigFile   string
-	Discovery    discovery.Config `mapstructure:"discovery"`
-	Storage      s3.Config        `mapstructure:"storage"`
-	RunOnce      bool             `mapstructure:"runOnce"`
+	Logging struct {
+		Level string `mapstructure:"level"`
+	} `mapstructure:"logging"`
+	ConfigFile string
+	Discovery  discovery.Config `mapstructure:"discovery"`
+	Storage    s3.Config        `mapstructure:"storage"`
+	RunOnce    bool             `mapstructure:"runOnce"`
 }
 
 func newRunCmd(log *logrus.Logger) *cobra.Command {
@@ -40,7 +42,7 @@ func newRunCmd(log *logrus.Logger) *cobra.Command {
 
 			if cfg.ConfigFile != "" {
 				v.SetConfigFile(cfg.ConfigFile)
-				
+
 				// Read and process the config file with environment variable substitution
 				if err := readConfigWithEnvSubst(v); err != nil {
 					return err
@@ -55,7 +57,7 @@ func newRunCmd(log *logrus.Logger) *cobra.Command {
 			}
 
 			// Set log level
-			level, err := logrus.ParseLevel(cfg.LoggingLevel)
+			level, err := logrus.ParseLevel(cfg.Logging.Level)
 			if err == nil {
 				log.SetLevel(level)
 			}
@@ -66,7 +68,7 @@ func newRunCmd(log *logrus.Logger) *cobra.Command {
 
 	// Define flags
 	cmd.Flags().StringVar(&cfg.ConfigFile, "config", "", "Path to config file")
-	cmd.Flags().StringVar(&cfg.LoggingLevel, "logging.level", "info", "Logging level (trace, debug, info, warn, error, fatal, panic)")
+	cmd.Flags().StringVar(&cfg.Logging.Level, "logging.level", "info", "Logging level (trace, debug, info, warn, error, fatal, panic)")
 	cmd.Flags().BoolVar(&cfg.RunOnce, "once", false, "Run discovery once and exit")
 
 	return cmd
