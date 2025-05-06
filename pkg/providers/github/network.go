@@ -78,6 +78,20 @@ func (p *Provider) createNetwork(ctx context.Context, config *NetworkConfig) dis
 				Tools:   config.Images.Tools,
 			}
 		}
+
+		// Try to extract chainId and genesisTime from genesis.json
+		chainID, genesisTime, err := p.parseGenesisJSON(ctx, config.Owner, config.Repo, config.Name)
+		if err == nil {
+			// Set the ChainID in the Network struct
+			network.ChainID = chainID
+
+			// Set the GenesisTime in the GenesisConfig struct if it exists
+			if network.GenesisConfig != nil {
+				network.GenesisConfig.GenesisTime = genesisTime
+			}
+		} else {
+			p.log.WithError(err).WithField("network", config.Name).Debug("Failed to parse genesis.json")
+		}
 	}
 
 	return network

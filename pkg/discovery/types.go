@@ -14,6 +14,7 @@ type Network struct {
 	Description   string         `json:"description,omitempty"`
 	Status        string         `json:"status"`
 	LastUpdated   time.Time      `json:"lastUpdated"`
+	ChainID       uint64         `json:"chainId,omitempty"`
 	GenesisConfig *GenesisConfig `json:"genesisConfig,omitempty"`
 	ServiceURLs   *ServiceURLs   `json:"serviceUrls,omitempty"`
 	Images        *Images        `json:"images,omitempty"`
@@ -41,6 +42,7 @@ type GenesisConfig struct {
 	ExecutionLayer []ConfigFile `json:"executionLayer,omitempty"`
 	Metadata       []ConfigFile `json:"metadata,omitempty"`
 	API            []ConfigFile `json:"api,omitempty"`
+	GenesisTime    uint64       `json:"genesisTime,omitempty"`
 }
 
 // ConfigFile represents a configuration file URL.
