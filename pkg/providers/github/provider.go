@@ -121,10 +121,18 @@ func (p *Provider) discoverRepositoryNetworks(
 			networkConfig.PrefixedName = namePrefix + networkConfig.Name
 		}
 
-		// Determine network status and configs
-		networkConfig.Status, networkConfig.ConfigFiles, networkConfig.Domain = p.determineNetworkStatus(
+		// Determine network status, configs, domain, and images
+		var images *discovery.Images
+		networkConfig.Status, networkConfig.ConfigFiles, networkConfig.Domain, images = p.getNetworkDetails(
 			ctx, client, owner, repo, networkConfig.Name,
 		)
+
+		// Copy images data to network config if available
+		if images != nil {
+			networkConfig.Images.URL = images.URL
+			networkConfig.Images.Clients = images.Clients
+			networkConfig.Images.Tools = images.Tools
+		}
 
 		// Create network and add to result
 		networks[networkConfig.PrefixedName] = p.createNetwork(ctx, networkConfig)

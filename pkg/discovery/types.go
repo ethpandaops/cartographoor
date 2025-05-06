@@ -16,6 +16,7 @@ type Network struct {
 	LastUpdated   time.Time      `json:"lastUpdated"`
 	GenesisConfig *GenesisConfig `json:"genesisConfig,omitempty"`
 	ServiceURLs   *ServiceURLs   `json:"serviceUrls,omitempty"`
+	Images        *Images        `json:"images,omitempty"`
 }
 
 // ServiceURLs contains URLs for various network services.
@@ -82,3 +83,22 @@ type Provider interface {
 
 // ResultHandler is a function that handles discovery results.
 type ResultHandler func(Result)
+
+// Images contains information about client and tool images used in the network.
+type Images struct {
+	URL     string        `json:"url,omitempty"`
+	Clients []ClientImage `json:"clients,omitempty"`
+	Tools   []ToolImage   `json:"tools,omitempty"`
+}
+
+// ClientImage represents a client image with name and version.
+type ClientImage struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}
+
+// ToolImage represents a tool image with name and version.
+type ToolImage struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}

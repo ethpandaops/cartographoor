@@ -4,6 +4,7 @@ import (
 	"context"
 	"path"
 
+	"github.com/ethpandaops/cartographoor/pkg/discovery"
 	gh "github.com/google/go-github/v53/github"
 )
 
@@ -39,4 +40,21 @@ func (p *Provider) determineNetworkStatus(
 	}
 
 	return status, configFiles, domain
+}
+
+// getNetworkDetails fetches configuration details and images for a network.
+func (p *Provider) getNetworkDetails(
+	ctx context.Context,
+	client *gh.Client,
+	owner, repo, networkName string,
+) (status string, configFiles []string, domain string, images *discovery.Images) {
+	// Get basic network status, configs, and domain
+	status, configFiles, domain = p.determineNetworkStatus(ctx, client, owner, repo, networkName)
+
+	// For active networks, try to get images information
+	if status == active {
+		images, _ = p.getImages(ctx, client, owner, repo, networkName)
+	}
+
+	return status, configFiles, domain, images
 }

@@ -23,6 +23,11 @@ type NetworkConfig struct {
 	Status       string
 	ConfigFiles  []string
 	Domain       string
+	Images       struct {
+		URL     string
+		Clients []discovery.ClientImage
+		Tools   []discovery.ToolImage
+	}
 }
 
 // getNetworkConfigs gets the config files and domain for an active network.
@@ -62,6 +67,15 @@ func (p *Provider) createNetwork(ctx context.Context, config *NetworkConfig) dis
 			// Add GenesisConfig if we have config files
 			if len(config.ConfigFiles) > 0 {
 				network.GenesisConfig = p.buildGenesisConfig(config)
+			}
+		}
+
+		// Add images information if any exists
+		if len(config.Images.Clients) > 0 || len(config.Images.Tools) > 0 {
+			network.Images = &discovery.Images{
+				URL:     config.Images.URL,
+				Clients: config.Images.Clients,
+				Tools:   config.Images.Tools,
 			}
 		}
 	}

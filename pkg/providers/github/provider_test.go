@@ -17,8 +17,6 @@ import (
 
 func TestProvider_Name(t *testing.T) {
 	log := logrus.New()
-	log.SetLevel(logrus.DebugLevel)
-
 	provider, err := NewProvider(log)
 	require.NoError(t, err)
 
@@ -26,266 +24,318 @@ func TestProvider_Name(t *testing.T) {
 }
 
 func TestProvider_Discover(t *testing.T) {
-	log := logrus.New()
-	log.SetLevel(logrus.DebugLevel)
-
-	// Mock GitHub API server
-	ts := mockGitHubAPI(t)
-	defer ts.Close()
-
-	provider, err := NewProvider(log)
-	require.NoError(t, err)
-
-	// Create a custom GitHub client that uses our test server
-	httpClient := &http.Client{
-		Transport: &mockTransport{URL: ts.URL},
-	}
-	provider.client = gh.NewClient(httpClient)
-
-	// Configure discovery
-	config := discovery.Config{
-		GitHub: struct {
-			Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
-			Token        string                             `mapstructure:"token"`
-		}{
-			Repositories: []discovery.GitHubRepositoryConfig{
-				{
-					Name:       "ethpandaops/dencun-devnets",
-					NamePrefix: "",
+	// Create test cases table to cover different scenarios
+	testCases := []struct {
+		name           string
+		config         discovery.Config
+		mockSetup      func(t *testing.T) *httptest.Server
+		expectedError  string
+		expectedCount  int
+		expectedStatus map[string]string
+		clientSetup    bool
+	}{
+		{
+			name: "successful discovery with standard networks",
+			config: discovery.Config{
+				GitHub: struct {
+					Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
+					Token        string                             `mapstructure:"token"`
+				}{
+					Repositories: []discovery.GitHubRepositoryConfig{
+						{
+							Name:       "ethpandaops/dencun-devnets",
+							NamePrefix: "",
+						},
+					},
+					Token: "dummy-token",
 				},
 			},
-			Token: "",
+			mockSetup:     mockGitHubAPI,
+			expectedCount: 9,
+			expectedStatus: map[string]string{
+				"devnet-10":   "active",
+				"devnet-11":   "active",
+				"devnet-12":   "active",
+				"devnet-4":    "active",
+				"devnet-5":    "active",
+				"gsf-1":       "active",
+				"gsf-2":       "active",
+				"msf-1":       "active",
+				"sepolia-sf1": "active",
+			},
+			clientSetup: true,
+		},
+		{
+			name: "successful discovery with name prefix",
+			config: discovery.Config{
+				GitHub: struct {
+					Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
+					Token        string                             `mapstructure:"token"`
+				}{
+					Repositories: []discovery.GitHubRepositoryConfig{
+						{
+							Name:       "ethpandaops/dencun-devnets",
+							NamePrefix: "dencun-",
+						},
+					},
+					Token: "dummy-token",
+				},
+			},
+			mockSetup:     mockGitHubAPI,
+			expectedCount: 9,
+			expectedStatus: map[string]string{
+				"dencun-devnet-10":   "active",
+				"dencun-devnet-11":   "active",
+				"dencun-devnet-12":   "active",
+				"dencun-devnet-4":    "active",
+				"dencun-devnet-5":    "active",
+				"dencun-gsf-1":       "active",
+				"dencun-gsf-2":       "active",
+				"dencun-msf-1":       "active",
+				"dencun-sepolia-sf1": "active",
+			},
+			clientSetup: true,
+		},
+		{
+			name: "different network statuses",
+			config: discovery.Config{
+				GitHub: struct {
+					Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
+					Token        string                             `mapstructure:"token"`
+				}{
+					Repositories: []discovery.GitHubRepositoryConfig{
+						{
+							Name:       "ethpandaops/pectra-devnets",
+							NamePrefix: "",
+						},
+					},
+					Token: "dummy-token",
+				},
+			},
+			mockSetup:     mockGitHubAPIWithStatus,
+			expectedCount: 3,
+			expectedStatus: map[string]string{
+				"devnet-active":   "active",
+				"devnet-inactive": "inactive",
+				"devnet-unknown":  "unknown",
+			},
+			clientSetup: true,
+		},
+		{
+			name: "invalid repository format",
+			config: discovery.Config{
+				GitHub: struct {
+					Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
+					Token        string                             `mapstructure:"token"`
+				}{
+					Repositories: []discovery.GitHubRepositoryConfig{
+						{
+							Name:       "invalid-repo-format",
+							NamePrefix: "",
+						},
+					},
+					Token: "dummy-token",
+				},
+			},
+			expectedCount: 0,
+			clientSetup:   true,
+		},
+		{
+			name: "no repositories",
+			config: discovery.Config{
+				GitHub: struct {
+					Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
+					Token        string                             `mapstructure:"token"`
+				}{
+					Repositories: []discovery.GitHubRepositoryConfig{},
+					Token:        "dummy-token",
+				},
+			},
+			expectedError: "no repositories configured",
+			clientSetup:   true,
+		},
+		{
+			name: "no token",
+			config: discovery.Config{
+				GitHub: struct {
+					Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
+					Token        string                             `mapstructure:"token"`
+				}{
+					Repositories: []discovery.GitHubRepositoryConfig{
+						{
+							Name:       "ethpandaops/dencun-devnets",
+							NamePrefix: "",
+						},
+					},
+					Token: "",
+				},
+			},
+			expectedError: "no GitHub token configured",
+			clientSetup:   false,
 		},
 	}
 
-	// Test discovery
-	networks, err := provider.Discover(context.Background(), config)
-	require.NoError(t, err)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			log := logrus.New()
+			log.SetLevel(logrus.DebugLevel)
 
-	// Validate the discovered networks
-	require.Len(t, networks, 9)
+			provider, err := NewProvider(log)
+			require.NoError(t, err)
 
-	// Check specific networks
-	expectedNetworks := map[string]bool{
-		"devnet-10":   true,
-		"devnet-11":   true,
-		"devnet-12":   true,
-		"devnet-4":    true,
-		"devnet-5":    true,
-		"gsf-1":       true,
-		"gsf-2":       true,
-		"msf-1":       true,
-		"sepolia-sf1": true,
-	}
+			// Set up mock API if needed
+			var ts *httptest.Server
+			if tc.mockSetup != nil {
+				ts = tc.mockSetup(t)
+				defer ts.Close()
+			}
 
-	for key, network := range networks {
-		// Key should be the same as the original network name since we didn't use a prefix
-		assert.Equal(t, key, network.Name)
-		assert.True(t, expectedNetworks[key], "Unexpected network: %s", key)
-		assert.Equal(t, "ethpandaops/dencun-devnets", network.Repository)
-		assert.Equal(t, "network-configs/"+network.Name, network.Path)
-		assert.Contains(t, network.URL, "github.com/ethpandaops/dencun-devnets/tree/main/network-configs/")
-		assert.Equal(t, "active", network.Status)
-		assert.WithinDuration(t, time.Now(), network.LastUpdated, 10*time.Second)
+			// Configure client if needed
+			if tc.clientSetup {
+				if ts != nil {
+					httpClient := &http.Client{
+						Transport: &mockTransport{URL: ts.URL},
+					}
+					provider.client = gh.NewClient(httpClient)
+				} else {
+					provider.client = gh.NewClient(nil)
+				}
+			}
+
+			// Test discovery
+			networks, err := provider.Discover(context.Background(), tc.config)
+
+			// Verify error cases
+			if tc.expectedError != "" {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tc.expectedError)
+
+				return
+			}
+
+			// For invalid repo format, we shouldn't error but return empty networks
+			if tc.name == "invalid repository format" {
+				require.NoError(t, err)
+				assert.Empty(t, networks)
+
+				return
+			}
+
+			// Verify successful cases
+			require.NoError(t, err)
+			assert.Len(t, networks, tc.expectedCount)
+
+			// Verify network properties
+			for key, network := range networks {
+				// Check if the status matches expected
+				if expected, ok := tc.expectedStatus[key]; ok {
+					assert.Equal(t, expected, network.Status, "Network %s status should be %s", key, expected)
+				}
+
+				// Additional checks for standard networks
+				if tc.name == "successful discovery with standard networks" {
+					assert.Equal(t, key, network.Name)
+					assert.Equal(t, "ethpandaops/dencun-devnets", network.Repository)
+					assert.Equal(t, "network-configs/"+network.Name, network.Path)
+					assert.Contains(t, network.URL, "github.com/ethpandaops/dencun-devnets/tree/main/network-configs/")
+					assert.WithinDuration(t, time.Now(), network.LastUpdated, 10*time.Second)
+				}
+
+				// Additional checks for prefixed networks
+				if tc.name == "successful discovery with name prefix" {
+					// The names in the returned map have the prefix
+					// but the original name in the network object does not
+					originalName := network.Name
+					prefixedName := key
+					assert.Equal(t, "dencun-"+originalName, prefixedName)
+					assert.Equal(t, "ethpandaops/dencun-devnets", network.Repository)
+					assert.Equal(t, "network-configs/"+originalName, network.Path)
+					assert.Contains(t, network.URL, "github.com/ethpandaops/dencun-devnets/tree/main/network-configs/")
+					assert.WithinDuration(t, time.Now(), network.LastUpdated, 10*time.Second)
+				}
+			}
+		})
 	}
 }
 
-func TestProvider_DiscoverWithPrefix(t *testing.T) {
-	log := logrus.New()
-	log.SetLevel(logrus.DebugLevel)
-
-	// Mock GitHub API server
-	ts := mockGitHubAPI(t)
-	defer ts.Close()
-
-	provider, err := NewProvider(log)
-	require.NoError(t, err)
-
-	// Create a custom GitHub client that uses our test server
-	httpClient := &http.Client{
-		Transport: &mockTransport{URL: ts.URL},
-	}
-	provider.client = gh.NewClient(httpClient)
-
-	// Configure discovery with a prefix
-	config := discovery.Config{
-		GitHub: struct {
-			Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
-			Token        string                             `mapstructure:"token"`
-		}{
-			Repositories: []discovery.GitHubRepositoryConfig{
-				{
-					Name:       "ethpandaops/dencun-devnets",
-					NamePrefix: "dencun-",
-				},
-			},
-			Token: "",
-		},
-	}
-
-	// Test discovery
-	networks, err := provider.Discover(context.Background(), config)
-	require.NoError(t, err)
-
-	// Validate the discovered networks
-	require.Len(t, networks, 9)
-
-	// Check specific networks with prefixes
-	expectedNetworks := map[string]string{
-		"dencun-devnet-10":   "devnet-10",
-		"dencun-devnet-11":   "devnet-11",
-		"dencun-devnet-12":   "devnet-12",
-		"dencun-devnet-4":    "devnet-4",
-		"dencun-devnet-5":    "devnet-5",
-		"dencun-gsf-1":       "gsf-1",
-		"dencun-gsf-2":       "gsf-2",
-		"dencun-msf-1":       "msf-1",
-		"dencun-sepolia-sf1": "sepolia-sf1",
-	}
-
-	for key, network := range networks {
-		originalName, exists := expectedNetworks[key]
-		assert.True(t, exists, "Unexpected network key: %s", key)
-		assert.Equal(t, originalName, network.Name, "Network name should be the original name without prefix")
-		assert.Equal(t, "ethpandaops/dencun-devnets", network.Repository)
-		assert.Equal(t, "network-configs/"+originalName, network.Path)
-		assert.Contains(t, network.URL, "github.com/ethpandaops/dencun-devnets/tree/main/network-configs/")
-		assert.Equal(t, "active", network.Status)
-		assert.WithinDuration(t, time.Now(), network.LastUpdated, 10*time.Second)
-	}
-}
-
-func TestProvider_Discover_NoRepositories(t *testing.T) {
-	log := logrus.New()
-	provider, err := NewProvider(log)
-	require.NoError(t, err)
-
-	config := discovery.Config{
-		GitHub: struct {
-			Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
-			Token        string                             `mapstructure:"token"`
-		}{
-			Repositories: []discovery.GitHubRepositoryConfig{},
-			Token:        "",
-		},
-	}
-
-	_, err = provider.Discover(context.Background(), config)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "no repositories configured")
-}
-
-func TestProvider_Discover_InvalidRepository(t *testing.T) {
+func TestServiceURLs(t *testing.T) {
 	log := logrus.New()
 	log.SetLevel(logrus.DebugLevel)
 
 	provider, err := NewProvider(log)
 	require.NoError(t, err)
 
-	// Create a mock client to bypass the token check
-	provider.client = gh.NewClient(nil)
-
-	config := discovery.Config{
-		GitHub: struct {
-			Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
-			Token        string                             `mapstructure:"token"`
-		}{
-			Repositories: []discovery.GitHubRepositoryConfig{
-				{
-					Name:       "invalid-repo-format",
-					NamePrefix: "",
-				},
-			},
-			Token: "",
-		},
-	}
-
-	_, err = provider.Discover(context.Background(), config)
-	require.NoError(t, err)
-	// Should not error, just log a warning and return empty networks
-}
-
-func TestProvider_DiscoverNetworkStatus(t *testing.T) {
-	log := logrus.New()
-	log.SetLevel(logrus.DebugLevel)
-
-	// Mock GitHub API server
-	ts := mockGitHubAPIWithStatus(t)
-	defer ts.Close()
-
-	provider, err := NewProvider(log)
-	require.NoError(t, err)
-
-	// Create a custom GitHub client that uses our test server
-	httpClient := &http.Client{
-		Transport: &mockTransport{URL: ts.URL},
-	}
-	provider.client = gh.NewClient(httpClient)
-
-	// Configure discovery
-	config := discovery.Config{
-		GitHub: struct {
-			Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
-			Token        string                             `mapstructure:"token"`
-		}{
-			Repositories: []discovery.GitHubRepositoryConfig{
-				{
-					Name:       "ethpandaops/pectra-devnets",
-					NamePrefix: "",
-				},
-			},
-			Token: "",
-		},
-	}
-
-	// Test discovery
-	networks, err := provider.Discover(context.Background(), config)
-	require.NoError(t, err)
-
-	// Validate the discovered networks
-	require.Len(t, networks, 3)
-
-	// Check status for each network
-	expected := map[string]string{
-		"devnet-active":   "active",   // exists in kubernetes/
-		"devnet-inactive": "inactive", // exists in kubernetes-archive/
-		"devnet-unknown":  "unknown",  // doesn't exist in either
-	}
-
-	for networkName, expectedStatus := range expected {
-		network, exists := networks[networkName]
-		assert.True(t, exists, "Network %s should exist", networkName)
-		if exists {
-			assert.Equal(t, expectedStatus, network.Status, "Network %s should have status %s", networkName, expectedStatus)
+	// Create a test server that simulates valid/invalid service endpoints
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Successful endpoints
+		validEndpoints := map[string]bool{
+			"/faucet.test-domain.com":          true,
+			"/rpc.test-domain.com":             true,
+			"/beacon.test-domain.com":          true,
+			"/test-domain.beaconcha.in":        true,
+			"/checkpoint-sync.test-domain.com": true,
 		}
-	}
-}
 
-func TestProvider_Discover_NoToken(t *testing.T) {
-	log := logrus.New()
-	provider, err := NewProvider(log)
-	require.NoError(t, err)
+		if validEndpoints[r.URL.Path] {
+			w.WriteHeader(http.StatusOK)
 
-	// Don't set the mock client - this should cause the token check to fail
+			return
+		}
 
-	config := discovery.Config{
-		GitHub: struct {
-			Repositories []discovery.GitHubRepositoryConfig `mapstructure:"repositories"`
-			Token        string                             `mapstructure:"token"`
-		}{
-			Repositories: []discovery.GitHubRepositoryConfig{
-				{
-					Name:       "ethpandaops/dencun-devnets",
-					NamePrefix: "",
-				},
-			},
-			Token: "", // Empty token
-		},
-	}
+		// Server error responses for invalid services
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
 
-	_, err = provider.Discover(context.Background(), config)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "no GitHub token configured")
+	// Test directly the isURLValid function with our test server
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	client := &http.Client{Timeout: 2 * time.Second}
+
+	// Test valid and invalid URLs
+	t.Run("URL validation", func(t *testing.T) {
+		// Valid URL
+		assert.True(t, provider.isURLValid(ctx, client, server.URL+"/rpc.test-domain.com"))
+		// Invalid URL
+		assert.False(t, provider.isURLValid(ctx, client, server.URL+"/explorer.test-domain.com"))
+	})
+
+	// Verify service patterns and URL generation
+	t.Run("Service patterns", func(t *testing.T) {
+		// Standard patterns
+		assert.Equal(t, "https://faucet.%s", servicePatterns["faucet"])
+		assert.Equal(t, "https://rpc.%s", servicePatterns["json_rpc"])
+		assert.Equal(t, "https://beacon.%s", servicePatterns["beacon_rpc"])
+
+		// Special patterns
+		t.Run("Beaconcha.in explorer", func(t *testing.T) {
+			beaconchainURL := specialServicePatterns["beacon_explorer"]("test-domain.com")
+			assert.Equal(t, "https://test-domain.beaconcha.in", beaconchainURL)
+		})
+
+		t.Run("Blobscan", func(t *testing.T) {
+			blobscanURL := specialServicePatterns["blobscan"]("test-domain.com")
+			assert.Equal(t, "https://blobscan.com", blobscanURL)
+		})
+
+		t.Run("Devnet spec with prefix", func(t *testing.T) {
+			devnetDomain := "pectra-devnet-1.test-domain.com"
+			devnetSpecURL := specialServicePatterns["devnet_spec"](devnetDomain)
+			assert.Equal(t, "https://github.com/ethpandaops/pectra-devnets/tree/master/network-configs/devnet-1/metadata", devnetSpecURL)
+		})
+
+		t.Run("Devnet spec with invalid domain", func(t *testing.T) {
+			emptySpecURL := specialServicePatterns["devnet_spec"]("")
+			assert.Equal(t, "", emptySpecURL)
+		})
+
+		t.Run("Devnet spec with non-prefixed domain", func(t *testing.T) {
+			nonPrefixDomain := "invalid-domain"
+			nonPrefixedSpecURL := specialServicePatterns["devnet_spec"](nonPrefixDomain)
+			expectedURL := "https://github.com/ethpandaops/invalid-devnets/tree/master/network-configs/domain/metadata"
+			assert.Equal(t, expectedURL, nonPrefixedSpecURL)
+		})
+	})
 }
 
 // Mock HTTP transport to redirect GitHub API requests to our test server
