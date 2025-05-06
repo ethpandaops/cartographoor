@@ -17,6 +17,7 @@ import (
 
 	"github.com/ethpandaops/cartographoor/pkg/discovery"
 	"github.com/ethpandaops/cartographoor/pkg/providers/github"
+	"github.com/ethpandaops/cartographoor/pkg/providers/static"
 	"github.com/ethpandaops/cartographoor/pkg/storage/s3"
 )
 
@@ -98,6 +99,14 @@ func runService(ctx context.Context, log *logrus.Logger, cfg *runConfig) error {
 	}
 
 	discoveryService.RegisterProvider(githubProvider)
+
+	// Register Static provider for hardcoded networks
+	staticProvider, err := static.NewProvider(log)
+	if err != nil {
+		return err
+	}
+
+	discoveryService.RegisterProvider(staticProvider)
 
 	// For run-once mode, we'll use a different approach
 	if cfg.RunOnce {
