@@ -60,6 +60,7 @@ discovery:
         namePrefix: nft-
         displayName: NFT Devnets
         description: "NFTs are purpose‑built Non‑Finality Testnets that deliberately drop finality to stress‑test clients and validators on detecting, diagnosing, and recovering an unstable chain."
+        image: https://ethpandaops.io/img/nft.jpg
 
     # GitHub API token (via environment variable)
     token: ${GITHUB_TOKEN}
