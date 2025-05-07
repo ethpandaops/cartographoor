@@ -102,7 +102,7 @@ func TestProvider_Discover(t *testing.T) {
 	// Verify mainnet network properties
 	mainnet := networks["mainnet"]
 	assert.Equal(t, "mainnet", mainnet.Name)
-	assert.Equal(t, "Ethereum Mainnet", mainnet.Description)
+	assert.Equal(t, "Production Ethereum network", mainnet.Description)
 	assert.Equal(t, "active", mainnet.Status)
 	assert.WithinDuration(t, time.Now(), mainnet.LastUpdated, 10*time.Second)
 	require.NotNil(t, mainnet.ServiceURLs)
@@ -115,7 +115,7 @@ func TestProvider_Discover(t *testing.T) {
 	// Verify sepolia network properties
 	sepolia := networks["sepolia"]
 	assert.Equal(t, "sepolia", sepolia.Name)
-	assert.Equal(t, "Sepolia Testnet", sepolia.Description)
+	assert.Equal(t, "Smaller testnet for application development with controlled validator set.", sepolia.Description)
 	assert.Equal(t, "active", sepolia.Status)
 	assert.WithinDuration(t, time.Now(), sepolia.LastUpdated, 10*time.Second)
 	require.NotNil(t, sepolia.ServiceURLs)
@@ -127,7 +127,7 @@ func TestProvider_Discover(t *testing.T) {
 	// Verify hoodi network properties
 	hoodi := networks["hoodi"]
 	assert.Equal(t, "hoodi", hoodi.Name)
-	assert.Equal(t, "Hoodi Testnet", hoodi.Description)
+	assert.Equal(t, "New public testnet (launched March 2025) designed for validator testing and protocol upgrades, replacing Holesky.", hoodi.Description)
 	assert.Equal(t, "active", hoodi.Status)
 	assert.WithinDuration(t, time.Now(), hoodi.LastUpdated, 10*time.Second)
 	require.NotNil(t, hoodi.ServiceURLs)

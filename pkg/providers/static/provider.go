@@ -36,8 +36,9 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 	// Add Ethereum Mainnet
 	networks["mainnet"] = discovery.Network{
 		Name:        "mainnet",
-		Description: "Ethereum Mainnet",
+		Description: "Production Ethereum network",
 		Status:      "active",
+		ChainID:     1,
 		LastUpdated: time.Now(),
 		ServiceURLs: &discovery.ServiceURLs{
 			Ethstats:    "https://ethstats.mainnet.ethpandaops.io",
@@ -53,8 +54,9 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 	// Add Sepolia Testnet
 	networks["sepolia"] = discovery.Network{
 		Name:        "sepolia",
-		Description: "Sepolia Testnet",
+		Description: "Smaller testnet for application development with controlled validator set.",
 		Status:      "active",
+		ChainID:     11155111,
 		LastUpdated: time.Now(),
 		ServiceURLs: &discovery.ServiceURLs{
 			Dora:           "https://dora.sepolia.ethpandaops.io",
@@ -73,8 +75,9 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 	// Add Holesky Network
 	networks["holesky"] = discovery.Network{
 		Name:        "holesky",
-		Description: "Holesky Testnet",
+		Description: "Long-term public testnet designed for staking/validator testing with high validator counts.",
 		Status:      "active",
+		ChainID:     17000,
 		LastUpdated: time.Now(),
 		ServiceURLs: &discovery.ServiceURLs{
 			Dora:           "https://dora.holesky.ethpandaops.io",
@@ -93,8 +96,9 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 	// Add Hoodi Network
 	networks["hoodi"] = discovery.Network{
 		Name:        "hoodi",
-		Description: "Hoodi Testnet",
+		Description: "New public testnet (launched March 2025) designed for validator testing and protocol upgrades, replacing Holesky.",
 		Status:      "active",
+		ChainID:     560048,
 		LastUpdated: time.Now(),
 		ServiceURLs: &discovery.ServiceURLs{
 			Dora:           "https://dora.hoodi.ethpandaops.io",
