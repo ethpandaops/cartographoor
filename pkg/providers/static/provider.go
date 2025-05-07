@@ -73,7 +73,7 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 	// Add Holesky Network
 	networks["holesky"] = discovery.Network{
 		Name:        "holesky",
-		Description: "Holesky Network",
+		Description: "Holesky Testnet",
 		Status:      "active",
 		LastUpdated: time.Now(),
 		ServiceURLs: &discovery.ServiceURLs{
@@ -93,7 +93,7 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 	// Add Hoodi Network
 	networks["hoodi"] = discovery.Network{
 		Name:        "hoodi",
-		Description: "Hoodi Network",
+		Description: "Hoodi Testnet",
 		Status:      "active",
 		LastUpdated: time.Now(),
 		ServiceURLs: &discovery.ServiceURLs{
