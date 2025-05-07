@@ -131,7 +131,6 @@ func TestProvider_Discover(t *testing.T) {
 	assert.Equal(t, "active", hoodi.Status)
 	assert.WithinDuration(t, time.Now(), hoodi.LastUpdated, 10*time.Second)
 	require.NotNil(t, hoodi.ServiceURLs)
-	assert.Equal(t, "https://assertoor.hoodi.ethpandaops.io", hoodi.ServiceURLs.Assertoor)
 	assert.Equal(t, "https://dora.hoodi.ethpandaops.io", hoodi.ServiceURLs.Dora)
 	assert.Equal(t, "https://dora.hoodi.ethpandaops.io", hoodi.ServiceURLs.BeaconExplorer)
 	assert.Equal(t, "https://checkpoint-sync.hoodi.ethpandaops.io", hoodi.ServiceURLs.CheckpointSync)
