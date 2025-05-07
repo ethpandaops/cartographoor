@@ -70,6 +70,27 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 
 	p.log.Info("Discovered Sepolia")
 
+	// Add Holesky Network
+	networks["holesky"] = discovery.Network{
+		Name:        "holesky",
+		Description: "Holesky Network",
+		Status:      "active",
+		LastUpdated: time.Now(),
+		ServiceURLs: &discovery.ServiceURLs{
+			Dora:           "https://dora.holesky.ethpandaops.io",
+			BeaconExplorer: "https://dora.holesky.ethpandaops.io",
+			CheckpointSync: "https://checkpoint-sync.holesky.ethpandaops.io",
+			Ethstats:       "https://ethstats.holesky.ethpandaops.io",
+			Forkmon:        "https://forkmon.holesky.ethpandaops.io",
+			Assertoor:      "https://assertoor.holesky.ethpandaops.io",
+			BlobArchive:    "https://blob-archive.holesky.ethpandaops.io",
+			Forky:          "https://forky.holesky.ethpandaops.io",
+			Tracoor:        "https://tracoor.holesky.ethpandaops.io",
+		},
+	}
+
+	p.log.Info("Discovered Holesky")
+
 	// Add Hoodi Network
 	networks["hoodi"] = discovery.Network{
 		Name:        "hoodi",

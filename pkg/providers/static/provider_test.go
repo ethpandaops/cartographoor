@@ -60,10 +60,11 @@ func TestCombinedProviders(t *testing.T) {
 	require.NoError(t, err)
 
 	// Verify we have networks from both providers
-	assert.Len(t, result.Networks, 4, "Should have 4 networks (3 from static, 1 from GitHub mock)")
+	assert.Len(t, result.Networks, 5, "Should have 5 networks (5 from static, 1 from GitHub mock)")
 	assert.Contains(t, result.Networks, "mainnet")
 	assert.Contains(t, result.Networks, "sepolia")
 	assert.Contains(t, result.Networks, "hoodi")
+	assert.Contains(t, result.Networks, "holesky")
 	assert.Contains(t, result.Networks, "devnet-1")
 
 	// Verify the providers in the result
@@ -93,7 +94,7 @@ func TestProvider_Discover(t *testing.T) {
 	require.NoError(t, err)
 
 	// Verify we got the expected networks
-	assert.Len(t, networks, 3)
+	assert.Len(t, networks, 4)
 	assert.Contains(t, networks, "mainnet")
 	assert.Contains(t, networks, "sepolia")
 	assert.Contains(t, networks, "hoodi")
