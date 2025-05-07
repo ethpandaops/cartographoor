@@ -127,7 +127,7 @@ func TestProvider_Discover(t *testing.T) {
 	// Verify hoodi network properties
 	hoodi := networks["hoodi"]
 	assert.Equal(t, "hoodi", hoodi.Name)
-	assert.Equal(t, "Hoodi Network", hoodi.Description)
+	assert.Equal(t, "Hoodi Testnet", hoodi.Description)
 	assert.Equal(t, "active", hoodi.Status)
 	assert.WithinDuration(t, time.Now(), hoodi.LastUpdated, 10*time.Second)
 	require.NotNil(t, hoodi.ServiceURLs)
