@@ -34,8 +34,6 @@ discovery:
         links:
           - title: "Pectra Roadmap"
             url: "https://ethereum.org/en/roadmap/pectra/"
-          - title: "Mainnet Checklist"
-            url: "https://ethpandaops.io/posts/pectra-mainnet-checklist/"
       - name: ethpandaops/peerdas-devnets
         namePrefix: peerdas-
         displayName: PeerDAS Devnets
