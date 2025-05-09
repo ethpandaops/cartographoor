@@ -3,6 +3,7 @@ package discovery
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	gh "github.com/google/go-github/v53/github"
@@ -27,10 +28,32 @@ const (
 	ELEthereumJS = "ethereumjs"
 )
 
+const (
+	CLClientType = "consensus"
+	ELClientType = "execution"
+)
+
 var (
 	// Buckets of known clients.
 	CLClients = []string{CLLighthouse, CLPrysm, CLLodestar, CLNimbus, CLTeku, CLGrandine}
 	ELClients = []string{ELNethermind, ELNimbusel, ELBesu, ELGeth, ELReth, ELErigon, ELEthereumJS}
+
+	// DefaultDisplayNames maps clients to their default display names.
+	DefaultDisplayNames = map[string]string{
+		CLLighthouse: "Lighthouse",
+		CLPrysm:      "Prysm",
+		CLLodestar:   "Lodestar",
+		CLNimbus:     "Nimbus",
+		CLTeku:       "Teku",
+		CLGrandine:   "Grandine",
+		ELNethermind: "Nethermind",
+		ELNimbusel:   "NimbusEL",
+		ELBesu:       "Besu",
+		ELGeth:       "Geth",
+		ELReth:       "Reth",
+		ELErigon:     "Erigon",
+		ELEthereumJS: "EthereumJS",
+	}
 
 	// DefaultRepositories maps clients to their default source repositories.
 	DefaultRepositories = map[string]string{
@@ -160,14 +183,29 @@ func (d *ClientDiscoverer) DiscoverClients(ctx context.Context) (map[string]Clie
 			docsURL = ""
 		}
 
+		displayName, ok := DefaultDisplayNames[clientName]
+		if !ok {
+			displayName = clientName
+		}
+
+		var clientType string
+
+		if slices.Contains(ELClients, clientName) {
+			clientType = ELClientType
+		} else {
+			clientType = CLClientType
+		}
+
 		// Create client info
 		clientInfo := ClientInfo{
-			Name:       clientName,
-			Repository: repo,
-			Branch:     branch,
-			Logo:       fmt.Sprintf("https://ethpandaops.io/img/clients/%s.jpg", clientName),
-			WebsiteURL: websiteURL,
-			DocsURL:    docsURL,
+			Name:        clientName,
+			DisplayName: displayName,
+			Repository:  repo,
+			Type:        clientType,
+			Branch:      branch,
+			Logo:        fmt.Sprintf("https://ethpandaops.io/img/clients/%s.jpg", clientName),
+			WebsiteURL:  websiteURL,
+			DocsURL:     docsURL,
 		}
 
 		// Try to fetch the latest version

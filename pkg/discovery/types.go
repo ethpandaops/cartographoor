@@ -81,7 +81,9 @@ type Stats struct {
 // ClientInfo represents details about an Ethereum client.
 type ClientInfo struct {
 	Name          string `json:"name"`
+	DisplayName   string `json:"displayName"`
 	Repository    string `json:"repository"`
+	Type          string `json:"type"`
 	Branch        string `json:"branch"`
 	Logo          string `json:"logo"`
 	LatestVersion string `json:"latestVersion,omitempty"`
