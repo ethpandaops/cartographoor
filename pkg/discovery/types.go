@@ -78,10 +78,22 @@ type Stats struct {
 	NetworkNames     []string `json:"networkNames,omitempty"`
 }
 
+// ClientInfo represents details about an Ethereum client.
+type ClientInfo struct {
+	Name          string `json:"name"`
+	Repository    string `json:"repository"`
+	Branch        string `json:"branch"`
+	Logo          string `json:"logo"`
+	LatestVersion string `json:"latestVersion,omitempty"`
+	WebsiteURL    string `json:"websiteUrl,omitempty"`
+	DocsURL       string `json:"docsUrl,omitempty"`
+}
+
 // Result represents the result of a discovery operation.
 type Result struct {
 	NetworkMetadata map[string]RepositoryMetadata `json:"networkMetadata"`
 	Networks        map[string]Network            `json:"networks"`
+	Clients         map[string]ClientInfo         `json:"clients"`
 	LastUpdate      time.Time                     `json:"lastUpdate"`
 	Duration        float64                       `json:"duration"`
 	Providers       []Provider                    `json:"providers"`

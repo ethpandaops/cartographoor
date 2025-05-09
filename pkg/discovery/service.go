@@ -9,16 +9,22 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// ClientDiscovererInterface defines the interface for client discovery.
+type ClientDiscovererInterface interface {
+	DiscoverClients(ctx context.Context) (map[string]ClientInfo, error)
+}
+
 // Service handles the discovery of networks.
 type Service struct {
-	log         *logrus.Logger
-	config      Config
-	providers   []Provider
-	resultChan  chan Result
-	resultFuncs []ResultHandler
-	ticker      *time.Ticker
-	wg          sync.WaitGroup
-	mutex       sync.Mutex
+	log              *logrus.Logger
+	config           Config
+	providers        []Provider
+	resultChan       chan Result
+	resultFuncs      []ResultHandler
+	ticker           *time.Ticker
+	wg               sync.WaitGroup
+	mutex            sync.Mutex
+	clientDiscoverer ClientDiscovererInterface
 }
 
 // NewService creates a new discovery service.
@@ -31,11 +37,12 @@ func NewService(log *logrus.Logger, cfg Config) (*Service, error) {
 	}
 
 	return &Service{
-		log:         log,
-		config:      cfg,
-		providers:   []Provider{},
-		resultChan:  make(chan Result, 10),
-		resultFuncs: []ResultHandler{},
+		log:              log,
+		config:           cfg,
+		providers:        []Provider{},
+		resultChan:       make(chan Result, 10),
+		resultFuncs:      []ResultHandler{},
+		clientDiscoverer: NewClientDiscoverer(log, cfg.GitHub.Token),
 	}, nil
 }
 
@@ -134,7 +141,11 @@ func (s *Service) Stop(ctx context.Context) error {
 func (s *Service) RunOnce(ctx context.Context) (Result, error) {
 	result, err := s.executeDiscovery(ctx)
 	if err != nil {
-		return Result{}, err
+		return Result{
+			Networks:        make(map[string]Network),
+			NetworkMetadata: make(map[string]RepositoryMetadata),
+			Clients:         make(map[string]ClientInfo),
+		}, err
 	}
 
 	return result, nil
@@ -173,6 +184,7 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 		return Result{
 			Networks:        make(map[string]Network),
 			NetworkMetadata: make(map[string]RepositoryMetadata),
+			Clients:         make(map[string]ClientInfo),
 		}, nil
 	}
 
@@ -227,6 +239,7 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 			return Result{
 				Networks:        allNetworks,
 				NetworkMetadata: make(map[string]RepositoryMetadata),
+				Clients:         make(map[string]ClientInfo),
 			}, ctx.Err()
 		case pr := <-resultCh:
 			if pr.err == nil && pr.networks != nil {
@@ -243,11 +256,20 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 	// Build repository metadata from config
 	networkMetadata := buildNetworkMetadata(s.config, allNetworks)
 
+	// Discover client information
+	clientInfo, err := s.clientDiscoverer.DiscoverClients(ctx)
+	if err != nil {
+		s.log.WithError(err).Warn("Failed to discover client information")
+
+		clientInfo = make(map[string]ClientInfo)
+	}
+
 	// Create result
 	duration := time.Since(start).Seconds()
 	result := Result{
 		Networks:        allNetworks,
 		NetworkMetadata: networkMetadata,
+		Clients:         clientInfo,
 		LastUpdate:      time.Now(),
 		Duration:        duration,
 		Providers:       provNames,
@@ -256,6 +278,7 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 	s.log.WithFields(logrus.Fields{
 		"networks":         len(allNetworks),
 		"network_metadata": len(networkMetadata),
+		"clients":          len(clientInfo),
 		"duration":         duration,
 	}).Info("Discovery complete")
 
