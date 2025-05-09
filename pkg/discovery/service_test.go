@@ -10,6 +10,30 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Ensure MockClientDiscoverer implements ClientDiscovererInterface.
+var _ ClientDiscovererInterface = (*MockClientDiscoverer)(nil)
+
+// MockClientDiscoverer is a mock implementation of ClientDiscoverer for testing.
+type MockClientDiscoverer struct {
+	log                 *logrus.Logger
+	discoverClientsFunc func(ctx context.Context) (map[string]ClientInfo, error)
+}
+
+// NewMockClientDiscoverer creates a new MockClientDiscoverer.
+func NewMockClientDiscoverer(log *logrus.Logger) *MockClientDiscoverer {
+	return &MockClientDiscoverer{
+		log: log,
+		discoverClientsFunc: func(ctx context.Context) (map[string]ClientInfo, error) {
+			return make(map[string]ClientInfo), nil
+		},
+	}
+}
+
+// DiscoverClients returns mock client information.
+func (d *MockClientDiscoverer) DiscoverClients(ctx context.Context) (map[string]ClientInfo, error) {
+	return d.discoverClientsFunc(ctx)
+}
+
 // MockProvider is a mock discovery provider for testing.
 type MockProvider struct {
 	name     string
@@ -51,6 +75,21 @@ func TestDiscoveryService(t *testing.T) {
 
 	service, err := NewService(log, cfg)
 	require.NoError(t, err)
+
+	// Create and set mock client discoverer
+	mockClientDiscoverer := NewMockClientDiscoverer(log)
+	mockClientDiscoverer.discoverClientsFunc = func(ctx context.Context) (map[string]ClientInfo, error) {
+		return map[string]ClientInfo{
+			"test": {
+				Name:          "test",
+				Repository:    "test/repo",
+				Branch:        "main",
+				Logo:          "test.jpg",
+				LatestVersion: "v1.0.0",
+			},
+		}, nil
+	}
+	service.clientDiscoverer = mockClientDiscoverer
 
 	// Create mock networks as a map with network names as keys
 	networks := map[string]Network{
@@ -103,6 +142,8 @@ func TestDiscoveryService(t *testing.T) {
 	assert.Contains(t, result.Networks, "devnet-11")
 	assert.Equal(t, "devnet-10", result.Networks["devnet-10"].Name)
 	assert.Equal(t, "devnet-11", result.Networks["devnet-11"].Name)
+	assert.Equal(t, 1, len(result.Clients))
+	assert.Contains(t, result.Clients, "test")
 
 	// Stop service - we'll skip this part to avoid the context deadline errors
 	// Just cancel the main context instead
@@ -119,6 +160,10 @@ func TestDiscoveryService_NoProviders(t *testing.T) {
 
 	service, err := NewService(log, cfg)
 	require.NoError(t, err)
+
+	// Create and set mock client discoverer
+	mockClientDiscoverer := NewMockClientDiscoverer(log)
+	service.clientDiscoverer = mockClientDiscoverer
 
 	// Should not fail with no providers
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
