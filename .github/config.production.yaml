@@ -59,6 +59,21 @@ discovery:
         displayName: NFT Devnets
         description: "NFTs are purpose‑built Non‑Finality Testnets that deliberately drop finality to stress‑test clients and validators on detecting, diagnosing, and recovering an unstable chain."
         image: https://ethpandaops.io/img/nft.jpg
+      - name: ethpandaops/perf-devnets
+        namePrefix: perf-
+        displayName: Perf Devnets
+        description: "A specialized set of Ethereum testnets focused on stress-testing gas limits and evaluating EVM performance under extreme execution loads"
+        image: https://ethpandaops.io/img/perf.jpg
+      - name: ethpandaops/mekong-devnets
+        namePrefix: mekong-
+        displayName: Mekong Devnets
+        description: "Mekong is a testing ground where anyone can confidently prepare for the Pectra upgrade, ensuring a smooth, non-stressed transition for the whole Ethereum ecosystem."
+        image: https://ethpandaops.io/img/mekong.jpg
+      - name: ethpandaops/dencun-devnets
+        namePrefix: dencun-
+        displayName: Dencun Devnets
+        description: "The Dencun upgrade is a significant update to the Ethereum blockchain, aimed at enhancing scalability and efficiency, especially for Layer 2 (L2) rollups."
+        image: https://ethpandaops.io/img/dencun.jpg
 
     # GitHub API token (via environment variable)
     token: ${GITHUB_TOKEN}
