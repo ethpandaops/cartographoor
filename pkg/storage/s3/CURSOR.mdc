@@ -1,0 +1,20 @@
+---
+description: S3 Storage - AWS S3 storage provider for uploading discovery results
+globs: 
+  - "*.go"
+  - "**/*_test.go"
+alwaysApply: false
+---
+
+# S3 Storage Provider
+
+AWS S3 storage backend for persisting Ethereum network discovery results as JSON.
+
+## Key Integration Pattern
+- Implements flexible S3 configuration supporting both AWS and S3-compatible endpoints
+- Uses AWS SDK v2 with custom endpoint resolution for compatibility
+
+## Important Constraints
+- Always initialize client lazily on first upload to support dynamic configuration
+- Handle AWS SDK errors with proper context wrapping
+- Support both standard AWS S3 and alternative S3-compatible services (MinIO, etc.)

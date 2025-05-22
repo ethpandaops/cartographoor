@@ -1,0 +1,21 @@
+---
+description: Utils - Environment variable substitution utilities
+globs: 
+  - "*.go"
+  - "**/*_test.go"
+alwaysApply: false
+---
+
+Environment variable substitution utilities for configuration parsing.
+
+## Primary Purpose
+Provides safe environment variable substitution in strings and byte arrays supporting both ${VAR} and $VAR syntax.
+
+## Key Integration Pattern
+- Stateless utility functions for use throughout the codebase
+- Returns original text when environment variables are not found (safe defaults)
+- Supports configuration file parsing with env var interpolation
+
+## Important Constraints
+- Must preserve original text when environment variables don't exist
+- Regular expression based parsing for performance

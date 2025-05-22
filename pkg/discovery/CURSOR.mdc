@@ -1,0 +1,21 @@
+---
+description: Discovery - Network and client discovery orchestration service
+globs: 
+  - "*.go"
+  - "**/*_test.go"
+alwaysApply: false
+---
+
+# Discovery Component
+
+Network and client discovery orchestration service that coordinates multiple providers to scan GitHub repositories and aggregate Ethereum network information.
+
+## Key Architecture Pattern
+- Uses provider pattern for extensible discovery sources via `discovery.Provider` interface
+- Concurrent provider execution with result aggregation
+- Thread-safe provider and handler registration with mutex protection
+
+## Critical Design Decisions
+- Providers must be stateless and return complete network maps
+- GitHub token required in config to prevent API rate limiting
+- Result handlers called synchronously - keep processing lightweight

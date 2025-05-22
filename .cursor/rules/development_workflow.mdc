@@ -1,0 +1,164 @@
+---
+description: Development workflow and processes for Cartographoor
+alwaysApply: true
+---
+
+# Development Workflow
+
+This document outlines the development workflow, processes, and best practices for contributing to Cartographoor.
+
+## Git Workflow
+
+### Branching Strategy
+- **master**: Main branch, always deployable
+- **feature/***: New features and enhancements
+- **fix/***: Bug fixes
+- **chore/***: Maintenance tasks, dependency updates
+
+### Commit Guidelines
+- Follow conventional commit format: `type(scope): description`
+- Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+- Keep commits atomic and focused
+- Write clear, descriptive commit messages
+
+Examples:
+```
+feat(discovery): add support for multiple GitHub organizations
+fix(storage): handle S3 upload timeout errors
+docs(readme): update configuration examples
+chore(deps): update aws-sdk-go to v2.36.3
+```
+
+## Development Process
+
+### Local Development Setup
+1. Clone the repository
+2. Install Go 1.24.1 or higher
+3. Copy `config.example.yaml` to `config.yaml`
+4. Set required environment variables (e.g., `GITHUB_TOKEN`)
+5. Run `make build` to compile
+6. Run `make test` to verify setup
+
+### Making Changes
+1. Create a feature branch from `master`
+2. Make your changes following code standards
+3. Write or update tests as needed
+4. Run `make test` to ensure tests pass
+5. Run `make lint` to check code quality
+6. Commit changes with descriptive messages
+
+### Testing Requirements
+- All new features must include unit tests
+- Maintain or improve test coverage (target >80%)
+- Use table-driven tests for multiple scenarios
+- Mock external dependencies (GitHub API, S3, etc.)
+- Run integration tests before submitting PR
+
+### Pre-commit Checklist
+- [ ] Code follows project style guidelines
+- [ ] Tests pass (`make test`)
+- [ ] Linting passes (`make lint`)
+- [ ] Documentation updated if needed
+- [ ] No hardcoded credentials or secrets
+- [ ] Changes are backwards compatible
+
+## Build and Deployment
+
+### Build Commands
+```bash
+make build          # Build binary
+make test           # Run tests
+make lint           # Run linter
+make clean          # Clean build artifacts
+make run            # Build and run with example config
+```
+
+### Docker Development
+```bash
+# Build Docker image
+docker build -t cartographoor:dev .
+
+# Run with local config
+docker run -v $(pwd)/config.yaml:/app/config/config.yaml cartographoor:dev
+
+# Use docker-compose for full stack
+docker-compose up -d
+```
+
+### Environment Variables
+- `GITHUB_TOKEN`: Required for GitHub API access
+- `AWS_ACCESS_KEY_ID`: For S3 uploads (if not using IAM roles)
+- `AWS_SECRET_ACCESS_KEY`: For S3 uploads (if not using IAM roles)
+- `CARTOGRAPHOOR_LOGGING_LEVEL`: Set log level (debug, info, warn, error)
+
+## CI/CD Pipeline
+
+### GitHub Actions
+- Runs on all pull requests
+- Executes tests and linting
+- Builds Docker images on merge to master
+- Publishes to GitHub Container Registry
+
+### Quality Gates
+- All tests must pass
+- Linting must pass (golangci-lint)
+- No decrease in test coverage
+- Docker image must build successfully
+
+## Release Process
+
+### Version Tagging
+- Use semantic versioning (v1.2.3)
+- Tag releases on master branch
+- Include changelog in release notes
+
+### Release Checklist
+1. Update version in relevant files
+2. Update CHANGELOG.md
+3. Create and push version tag
+4. GitHub Actions builds and publishes Docker image
+5. Create GitHub release with notes
+
+## Debugging and Troubleshooting
+
+### Local Debugging
+- Use `--logging.level=debug` for verbose output
+- Check logs for detailed error messages
+- Use debugger with VS Code or Delve
+- Test with local Minio for S3 operations
+
+### Common Issues
+- **Rate Limiting**: Ensure GitHub token is set
+- **S3 Errors**: Check AWS credentials and permissions
+- **Discovery Failures**: Verify network connectivity
+- **Config Issues**: Validate YAML syntax and env vars
+
+## Code Review Guidelines
+
+### For Authors
+- Keep PRs focused and reasonably sized
+- Provide clear description of changes
+- Link to related issues
+- Respond to feedback constructively
+- Update PR based on review comments
+
+### For Reviewers
+- Check code adheres to standards
+- Verify tests are adequate
+- Look for potential bugs or edge cases
+- Suggest improvements constructively
+- Approve when satisfied with changes
+
+## Dependency Management
+
+### Adding Dependencies
+- Use `go mod` for dependency management
+- Justify new dependencies in PR
+- Prefer well-maintained libraries
+- Check for security vulnerabilities
+
+### Updating Dependencies
+- Regular updates for security patches
+- Test thoroughly after updates
+- Document breaking changes
+- Update go.mod and go.sum together

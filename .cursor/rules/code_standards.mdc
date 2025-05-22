@@ -1,0 +1,110 @@
+---
+description: Code standards and conventions for the Cartographoor project
+alwaysApply: true
+---
+
+# Code Standards
+
+Follow these coding standards when contributing to Cartographoor.
+
+## Go Language Conventions
+
+### General Guidelines
+- Target Go 1.24.1 or higher
+- Follow standard Go idioms and the [Effective Go](https://golang.org/doc/effective_go.html) guidelines
+- Use `gofmt` for code formatting (automatically handled by most Go tools)
+- Keep functions focused and small - if a function exceeds 50 lines, consider refactoring
+
+### Naming Conventions
+- **Packages**: Use lowercase, short, and concise names (e.g., `discovery`, `providers`, `storage`)
+- **Interfaces**: Use descriptive names, often ending with `-er` suffix (e.g., `Provider`, `Discoverer`)
+- **Exported Functions/Types**: Use PascalCase (e.g., `DiscoverNetworks`, `NetworkInfo`)
+- **Unexported Functions/Types**: Use camelCase (e.g., `parseConfig`, `internalState`)
+- **Constants**: Use PascalCase for exported, camelCase for unexported
+- **Acronyms**: Keep consistent case (e.g., `URL`, `ID`, not `Url`, `Id`)
+
+### Error Handling
+- Always check and handle errors explicitly
+- Wrap errors with context using `fmt.Errorf` with `%w` verb
+- Return early on errors
+- Log errors at appropriate levels using logrus
+
+Example:
+```go
+if err != nil {
+    return fmt.Errorf("failed to discover networks: %w", err)
+}
+```
+
+### Context Usage
+- Always accept `context.Context` as the first parameter in functions that perform I/O
+- Propagate context throughout the call chain
+- Respect context cancellation and timeouts
+
+### Logging
+- Use structured logging with logrus
+- Include relevant context in log fields
+- Use appropriate log levels:
+  - `Debug`: Verbose information for debugging
+  - `Info`: General informational messages
+  - `Warn`: Warning conditions that don't prevent operation
+  - `Error`: Error conditions that affect operation
+
+Example:
+```go
+log.WithFields(logrus.Fields{
+    "provider": provider.Name(),
+    "network":  network.Name,
+}).Info("discovered network")
+```
+
+### Testing
+- Write unit tests for all exported functions
+- Use table-driven tests for multiple test cases
+- Mock external dependencies using interfaces
+- Aim for >80% test coverage for core packages
+- Test files should be named `*_test.go`
+
+### Configuration
+- Use Viper for configuration management
+- Support environment variable substitution with `${VAR}` syntax
+- Provide sensible defaults
+- Document all configuration options in example files
+
+## Project-Specific Standards
+
+### Provider Implementation
+- All providers must implement the `discovery.Provider` interface
+- Providers should be stateless and thread-safe
+- Handle rate limiting and retries appropriately
+- Return meaningful errors with context
+
+### Network Discovery
+- Validate all discovered network data
+- Use consistent network naming patterns
+- Include all required metadata fields
+- Handle missing or malformed data gracefully
+
+### Storage Operations
+- Always use context for timeout control
+- Implement retry logic with exponential backoff
+- Set appropriate content types and metadata
+- Handle upload failures gracefully
+
+## File Organization
+- Keep related functionality in the same package
+- Separate concerns into distinct packages
+- Place interfaces in the package that uses them, not the package that implements them
+- Keep test files alongside implementation files
+
+## Documentation
+- Add package-level documentation in `doc.go` files
+- Document all exported types, functions, and methods
+- Include examples in documentation where helpful
+- Keep comments concise and meaningful
+
+## Commit Standards
+- Use conventional commit format
+- Keep commits focused and atomic
+- Write clear, descriptive commit messages
+- Reference issues when applicable

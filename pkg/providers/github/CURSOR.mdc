@@ -1,0 +1,21 @@
+---
+description: GitHub Provider - Discovers Ethereum networks from GitHub repositories via API
+globs: 
+  - "*.go"
+  - "**/*_test.go"
+alwaysApply: false
+---
+
+# GitHub Provider
+
+Discovers Ethereum network configurations from GitHub repositories by scanning network-configs directories.
+
+## Key Integration Pattern
+- Uses GitHub API v53 client with OAuth2 authentication
+- Parses YAML configurations to extract network metadata and service URLs
+- Maps repository directory structure to network discovery results
+
+## Important Constraints
+- Requires GitHub token to avoid rate limiting
+- Only processes networks with kubernetes deployment configurations
+- Network status determined by presence in kubernetes or kubernetes-archive directories

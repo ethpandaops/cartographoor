@@ -1,0 +1,20 @@
+---
+description: Cartographoor CMD - Cobra command definitions for the CLI application
+globs: 
+  - "*.go"
+alwaysApply: false
+---
+
+# Cartographoor CMD Component
+
+Cobra command definitions that implement the cartographoor CLI functionality.
+
+## Key Integration Pattern
+
+- **Provider Registration**: Commands must register all discovery providers (GitHub, Static) before starting the service
+- **Service Lifecycle**: Commands orchestrate discovery service creation, provider registration, and result handling
+
+## Important Constraints
+
+- **Error Context**: All errors must be wrapped with descriptive context using `fmt.Errorf` with `%w`
+- **Config Processing**: Environment variable substitution must occur before viper unmarshalling

@@ -1,0 +1,22 @@
+---
+description: Cartographoor CLI - Command-line interface for the network discovery service
+globs: 
+  - "*.go"
+  - "cmd/*.go"
+alwaysApply: false
+---
+
+# Cartographoor CLI Component
+
+Command-line interface that bootstraps and runs the cartographoor network discovery service.
+
+## Key Patterns
+
+- **Cobra Command Structure**: All commands use cobra with structured subcommands pattern
+- **Viper Configuration**: Config loading with environment variable substitution using `utils.EnvSubstBytes`
+- **Context Propagation**: Commands must respect context cancellation for graceful shutdown
+
+## Important Constraints
+
+- **Run-Once Mode**: Support both continuous and one-time discovery modes via `--once` flag
+- **Signal Handling**: Graceful shutdown on SIGINT/SIGTERM with 5-second timeout

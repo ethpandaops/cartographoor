@@ -1,0 +1,102 @@
+---
+description: Cartographoor project architecture and structure guidelines
+alwaysApply: true
+---
+
+# Project Architecture
+
+Cartographoor is a Go service that discovers and maps active Ethereum networks in the ethpandaops ecosystem. It follows a modular, provider-based architecture.
+
+## Core Architecture Principles
+
+- **Modular Design**: Three main components - Discovery Service, Discovery Providers, and Storage Providers
+- **Provider Pattern**: Extensible through interfaces for adding new discovery sources and storage backends
+- **Context-Aware**: All operations support proper context propagation for cancellation and timeouts
+- **Configuration-Driven**: Uses Viper for flexible YAML-based configuration with environment variable substitution
+
+## Project Structure
+
+```
+├── cmd/                    # Application entry points
+│   └── cartographoor/      # Main CLI application
+│       ├── cmd/            # Cobra command definitions
+│       │   ├── root.go     # Root command setup
+│       │   └── run.go      # Run command implementation
+│       └── main.go         # Entry point
+├── pkg/                    # Reusable packages
+│   ├── discovery/          # Network discovery service
+│   │   ├── service.go      # Core discovery orchestration
+│   │   ├── types.go        # Common types (Network, Result, etc.)
+│   │   └── clients.go      # Client discovery and identification
+│   ├── providers/          # Discovery provider implementations
+│   │   ├── github/         # GitHub repository provider
+│   │   └── static/         # Static configuration provider
+│   └── storage/            # Storage provider implementations
+│       └── s3/             # AWS S3 storage provider
+└── utils/                  # Utility functions
+```
+
+## Key Components
+
+### Discovery Service (`pkg/discovery/service.go`)
+- Orchestrates discovery across multiple providers
+- Manages discovery intervals and scheduling
+- Aggregates results from all providers
+- Handles error collection and reporting
+
+### Discovery Providers
+Must implement the `discovery.Provider` interface:
+```go
+type Provider interface {
+    Name() string
+    Discover(ctx context.Context, config Config) (map[string]Network, error)
+}
+```
+
+### Storage Providers
+Must implement upload functionality for discovery results:
+```go
+Upload(ctx context.Context, result discovery.Result) error
+```
+
+## Data Flow
+
+1. **Configuration Loading**: Viper loads YAML config with env var substitution
+2. **Service Initialization**: Discovery service created with configured providers
+3. **Discovery Loop**: Service periodically calls all providers
+4. **Result Aggregation**: Networks from all providers merged into single result
+5. **Storage Upload**: Result uploaded to configured storage backend (S3)
+
+## Network Data Model
+
+```go
+type Network struct {
+    Name         string
+    DisplayName  string
+    Repository   string
+    Path         string
+    URL          string
+    Status       string
+    LastUpdated  time.Time
+    Description  string
+    Image        string
+    Links        []Link
+    Services     map[string]Service
+    GenesisTime  *time.Time
+    Clients      []ClientInfo
+}
+```
+
+## Extension Points
+
+- **New Discovery Sources**: Implement `discovery.Provider` interface
+- **New Storage Backends**: Create package in `pkg/storage/` with upload functionality
+- **Network Metadata**: Extend `Network` struct for additional fields
+
+## Dependencies
+
+- **cobra/viper**: CLI framework and configuration management
+- **logrus**: Structured logging
+- **go-github**: GitHub API client for repository discovery
+- **aws-sdk-go-v2**: AWS SDK for S3 uploads
+- **oauth2**: GitHub authentication

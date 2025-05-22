@@ -1,0 +1,19 @@
+---
+description: GitHub Mock - Test container providing mock GitHub API responses
+globs: 
+  - "*.go"
+  - "**/*_test.go"
+alwaysApply: false
+---
+
+# GitHub Mock
+
+Test utility that simulates GitHub API responses using containerized nginx server.
+
+## Key Integration Pattern
+- Uses testcontainers-go to spin up nginx container serving static JSON responses
+- Simulates GitHub repository structure with mock network configurations
+
+## Important Constraints
+- Only for testing - never use in production code
+- Container lifecycle must be properly managed with Close() to avoid resource leaks
