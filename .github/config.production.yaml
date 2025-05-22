@@ -16,6 +16,16 @@ discovery:
   github:
     # List of repositories to check for networks
     repositories:
+      - name: ethpandaops/fusaka-devnets
+        namePrefix: fusaka-
+        displayName: Fusaka Devnets
+        description: "Ethereum's Fusaka upgrade supercharges scalability with PeerDAS, boosts blob capacity, and slashes node overhead—paving the way for faster, cheaper L2s and smoother network ops."
+        image: https://ethpandaops.io/img/fusaka.jpg
+        links:
+          - title: "EIP-7594: PeerDAS"
+            url: "https://eips.ethereum.org/EIPS/eip-7594"
+          - title: "ethresear.ch"
+            url: "https://ethresear.ch/t/peerdas-a-simpler-das-approach-using-battle-tested-p2p-components/16541"
       - name: ethpandaops/eof-devnets
         namePrefix: eof-
         displayName: EOF Devnets
