@@ -17,7 +17,7 @@ import (
 
 func TestProvider_Name(t *testing.T) {
 	log := logrus.New()
-	provider, err := NewProvider(log)
+	provider, err := NewProvider(log, nil)
 	require.NoError(t, err)
 
 	assert.Equal(t, "github", provider.Name())
@@ -180,7 +180,7 @@ func TestProvider_Discover(t *testing.T) {
 			log := logrus.New()
 			log.SetLevel(logrus.DebugLevel)
 
-			provider, err := NewProvider(log)
+			provider, err := NewProvider(log, nil)
 			require.NoError(t, err)
 
 			// Set up mock API if needed
@@ -196,9 +196,9 @@ func TestProvider_Discover(t *testing.T) {
 					httpClient := &http.Client{
 						Transport: &mockTransport{URL: ts.URL},
 					}
-					provider.client = gh.NewClient(httpClient)
+					provider.githubClient = gh.NewClient(httpClient)
 				} else {
-					provider.client = gh.NewClient(nil)
+					provider.githubClient = gh.NewClient(nil)
 				}
 			}
 
@@ -262,7 +262,7 @@ func TestServiceURLs(t *testing.T) {
 	log := logrus.New()
 	log.SetLevel(logrus.DebugLevel)
 
-	provider, err := NewProvider(log)
+	provider, err := NewProvider(log, nil)
 	require.NoError(t, err)
 
 	// Create a test server that simulates valid/invalid service endpoints

@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -80,6 +81,10 @@ func runService(ctx context.Context, log *logrus.Logger, cfg *runConfig) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
+	httpClient := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
 	// Create discovery service
 	discoveryService, err := discovery.NewService(log, cfg.Discovery)
 	if err != nil {
@@ -93,7 +98,7 @@ func runService(ctx context.Context, log *logrus.Logger, cfg *runConfig) error {
 	}
 
 	// Register GitHub provider
-	githubProvider, err := github.NewProvider(log)
+	githubProvider, err := github.NewProvider(log, httpClient)
 	if err != nil {
 		return err
 	}

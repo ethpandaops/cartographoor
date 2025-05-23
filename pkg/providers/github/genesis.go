@@ -17,7 +17,7 @@ func (p *Provider) parseGenesisJSON(
 	genesisPath := path.Join(networkConfigDir, networkName, "metadata", "genesis.json")
 
 	// Try to get file content
-	fileContent, _, _, err := p.client.Repositories.GetContents(ctx, owner, repo, genesisPath, nil)
+	fileContent, _, _, err := p.githubClient.Repositories.GetContents(ctx, owner, repo, genesisPath, nil)
 	if err != nil {
 		return 0, 0, fmt.Errorf("failed to get genesis.json: %w", err)
 	}
