@@ -3,8 +3,10 @@ package github
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"path"
 	"strings"
+	"time"
 
 	gh "github.com/google/go-github/v53/github"
 	"github.com/sirupsen/logrus"
@@ -15,16 +17,24 @@ import (
 
 // Provider implements the discovery.Provider interface for GitHub.
 type Provider struct {
-	log    *logrus.Logger
-	client *gh.Client
+	log          *logrus.Logger
+	githubClient *gh.Client
+	httpClient   *http.Client
 }
 
 // NewProvider creates a new GitHub provider.
-func NewProvider(log *logrus.Logger) (*Provider, error) {
+func NewProvider(log *logrus.Logger, httpClient *http.Client) (*Provider, error) {
 	log = log.WithField("provider", "github").Logger
 
+	if httpClient == nil {
+		httpClient = &http.Client{
+			Timeout: 10 * time.Second,
+		}
+	}
+
 	return &Provider{
-		log: log,
+		log:        log,
+		httpClient: httpClient,
 	}, nil
 }
 
@@ -41,18 +51,18 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 
 	// We require a token to be set in production, otherwise we'll just get rate-limited.
 	// Skip this check if the client is already set (for testing purposes)
-	if config.GitHub.Token == "" && p.client == nil {
+	if config.GitHub.Token == "" && p.githubClient == nil {
 		return nil, fmt.Errorf("no GitHub token configured")
 	}
 
 	// Create GitHub client
-	client := p.getClient(ctx, config.GitHub.Token)
+	githubClient := p.getClient(ctx, config.GitHub.Token)
 
 	networks := make(map[string]discovery.Network)
 
 	// Discover networks for each repository
 	for _, repoConfig := range config.GitHub.Repositories {
-		discoveredNetworks, err := p.discoverRepositoryNetworks(ctx, client, repoConfig)
+		discoveredNetworks, err := p.discoverRepositoryNetworks(ctx, githubClient, repoConfig)
 		if err != nil {
 			p.log.WithError(err).WithField("repository", repoConfig.Name).Error("Failed to discover networks in repository")
 
@@ -71,7 +81,7 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 // discoverRepositoryNetworks discovers networks in a specific repository.
 func (p *Provider) discoverRepositoryNetworks(
 	ctx context.Context,
-	client *gh.Client,
+	githubClient *gh.Client,
 	repoConfig discovery.GitHubRepositoryConfig,
 ) (map[string]discovery.Network, error) {
 	var (
@@ -94,7 +104,7 @@ func (p *Provider) discoverRepositoryNetworks(
 	// Check if network-configs directory exists
 	netConfigPath := networkConfigDir
 
-	_, dirContent, _, err := client.Repositories.GetContents(ctx, owner, repo, netConfigPath, nil)
+	_, dirContent, _, err := githubClient.Repositories.GetContents(ctx, owner, repo, netConfigPath, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get contents of network-configs directory: %w", err)
 	}
@@ -124,8 +134,8 @@ func (p *Provider) discoverRepositoryNetworks(
 
 		// Determine network status, configs, domain, and images
 		var images *discovery.Images
-		networkConfig.Status, networkConfig.ConfigFiles, networkConfig.Domain, images = p.getNetworkDetails(
-			ctx, client, owner, repo, networkConfig.Name,
+		networkConfig.Status, networkConfig.ConfigFiles, networkConfig.Domain, images, networkConfig.HiveURL = p.getNetworkDetails(
+			ctx, githubClient, owner, repo, networkConfig.Name,
 		)
 
 		// Copy images data to network config if available
@@ -144,8 +154,8 @@ func (p *Provider) discoverRepositoryNetworks(
 
 // getClient returns a GitHub client.
 func (p *Provider) getClient(ctx context.Context, token string) *gh.Client {
-	if p.client != nil {
-		return p.client
+	if p.githubClient != nil {
+		return p.githubClient
 	}
 
 	if token != "" {
@@ -153,10 +163,10 @@ func (p *Provider) getClient(ctx context.Context, token string) *gh.Client {
 			&oauth2.Token{AccessToken: token},
 		)
 		tc := oauth2.NewClient(ctx, ts)
-		p.client = gh.NewClient(tc)
+		p.githubClient = gh.NewClient(tc)
 	} else {
-		p.client = gh.NewClient(nil)
+		p.githubClient = gh.NewClient(nil)
 	}
 
-	return p.client
+	return p.githubClient
 }

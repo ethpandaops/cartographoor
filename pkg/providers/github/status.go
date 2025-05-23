@@ -6,6 +6,7 @@ import (
 
 	"github.com/ethpandaops/cartographoor/pkg/discovery"
 	gh "github.com/google/go-github/v53/github"
+	"github.com/sirupsen/logrus"
 )
 
 // determineNetworkStatus determines if a network is active, inactive, or unknown.
@@ -47,14 +48,24 @@ func (p *Provider) getNetworkDetails(
 	ctx context.Context,
 	client *gh.Client,
 	owner, repo, networkName string,
-) (status string, configFiles []string, domain string, images *discovery.Images) {
+) (status string, configFiles []string, domain string, images *discovery.Images, hiveURL string) {
 	// Get basic network status, configs, and domain
 	status, configFiles, domain = p.determineNetworkStatus(ctx, client, owner, repo, networkName)
 
-	// For active networks, try to get images information
+	// For active networks, try to get images + hive information.
 	if status == active {
 		images, _ = p.getImages(ctx, client, owner, repo, networkName)
 	}
 
-	return status, configFiles, domain, images
+	var err error
+
+	hiveURL, err = p.checkHiveAvailability(ctx, owner, repo, networkName)
+	if err != nil {
+		p.log.WithFields(logrus.Fields{
+			"repo":    repo,
+			"network": networkName,
+		}).Debug("hive is not available for network")
+	}
+
+	return status, configFiles, domain, images, hiveURL
 }

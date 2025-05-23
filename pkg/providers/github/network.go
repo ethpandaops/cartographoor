@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"path"
 	"strings"
 	"time"
@@ -23,11 +24,41 @@ type NetworkConfig struct {
 	Status       string
 	ConfigFiles  []string
 	Domain       string
+	HiveURL      string
 	Images       struct {
 		URL     string
 		Clients []discovery.ClientImage
 		Tools   []discovery.ToolImage
 	}
+}
+
+// checkHiveAvailability checks if the hive is available for a network.
+func (p *Provider) checkHiveAvailability(
+	ctx context.Context,
+	owner, repo, networkName string,
+) (string, error) {
+	hiveURL := fmt.Sprintf(
+		"https://hive.ethpandaops.io/%s-%s/index.html",
+		strings.ReplaceAll(repo, "-devnets", ""),
+		networkName,
+	)
+
+	resp, err := p.httpClient.Get(hiveURL)
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("hive is not available for network: %s", networkName)
+	}
+
+	return hiveURL, nil
 }
 
 // getNetworkConfigs gets the config files and domain for an active network.
@@ -55,6 +86,7 @@ func (p *Provider) createNetwork(ctx context.Context, config *NetworkConfig) dis
 		Path:        config.Path,
 		URL:         config.URL,
 		Status:      config.Status,
+		HiveURL:     config.HiveURL,
 		LastUpdated: time.Now(),
 	}
 
@@ -77,6 +109,11 @@ func (p *Provider) createNetwork(ctx context.Context, config *NetworkConfig) dis
 				Clients: config.Images.Clients,
 				Tools:   config.Images.Tools,
 			}
+		}
+
+		// Add hive information if any exists.
+		if config.HiveURL != "" {
+			network.HiveURL = config.HiveURL
 		}
 
 		// Try to extract chainId and genesisTime from genesis.json

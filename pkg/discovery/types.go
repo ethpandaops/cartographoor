@@ -19,6 +19,7 @@ type Network struct {
 	GenesisConfig *GenesisConfig `json:"genesisConfig,omitempty"`
 	ServiceURLs   *ServiceURLs   `json:"serviceUrls,omitempty"`
 	Images        *Images        `json:"images,omitempty"`
+	HiveURL       string         `json:"hiveUrl,omitempty"`
 }
 
 // Link represents a related link with title and URL.
