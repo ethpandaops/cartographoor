@@ -51,10 +51,6 @@ func (p *Provider) checkHiveAvailability(
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", err
-	}
-
-	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("hive is not available for network: %s", networkName)
 	}
 
