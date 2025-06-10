@@ -16,6 +16,11 @@ discovery:
   github:
     # List of repositories to check for networks
     repositories:
+      - name: ethpandaops/berlinterop-devnets
+        namePrefix: berlinterop-
+        displayName: Berlin Interop Devnets
+        description: "Ephemeral devnets spun up exclusively for Berlin’s week of research and client interop—purpose-built to avoid disrupting ongoing Fusaka devnets."
+        image: https://ethpandaops.io/img/berlinterop.jpg
       - name: ethpandaops/fusaka-devnets
         namePrefix: fusaka-
         displayName: Fusaka Devnets
