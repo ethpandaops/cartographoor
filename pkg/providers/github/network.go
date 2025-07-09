@@ -37,13 +37,24 @@ func (p *Provider) checkHiveAvailability(
 	ctx context.Context,
 	owner, repo, networkName string,
 ) (string, error) {
+
+	// Example: fusaka-devnets -> fusaka
+	devnetid := strings.ReplaceAll(repo, "-devnets", "")
+
 	hiveURL := fmt.Sprintf(
-		"https://hive.ethpandaops.io/%s-%s/index.html",
-		strings.ReplaceAll(repo, "-devnets", ""),
+		"https://hive.ethpandaops.io/#/group/%s-%s",
+		devnetid,
 		networkName,
 	)
 
-	resp, err := p.httpClient.Get(hiveURL)
+	// Check if the hive test listing file is available.
+	hiveListingURL := fmt.Sprintf(
+		"https://hive.ethpandaops.io/%s-%s/listing.jsonl",
+		devnetid,
+		networkName,
+	)
+
+	resp, err := p.httpClient.Get(hiveListingURL)
 	if err != nil {
 		return "", err
 	}
