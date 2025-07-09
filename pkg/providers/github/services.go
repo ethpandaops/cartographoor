@@ -21,6 +21,7 @@ var servicePatterns = map[string]string{
 	"dora":            "https://dora.%s",
 	"checkpoint_sync": "https://checkpoint-sync.%s",
 	"ethstats":        "https://ethstats.%s",
+	"tracoor":         "https://tracoor.%s",
 }
 
 // Special case services with custom patterns.
@@ -153,6 +154,8 @@ func (p *Provider) getServiceURLs(ctx context.Context, domain string) *discovery
 				services.Ethstats = result.url
 			case "beacon_explorer":
 				services.BeaconExplorer = result.url
+			case "tracoor":
+				services.Tracoor = result.url
 			}
 		}
 	}
