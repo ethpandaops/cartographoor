@@ -37,7 +37,6 @@ func (p *Provider) checkHiveAvailability(
 	ctx context.Context,
 	owner, repo, networkName string,
 ) (string, error) {
-
 	// Example: fusaka-devnets -> fusaka
 	devnetid := strings.ReplaceAll(repo, "-devnets", "")
 
