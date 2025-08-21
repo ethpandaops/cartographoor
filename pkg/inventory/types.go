@@ -2,6 +2,8 @@ package inventory
 
 import (
 	"time"
+
+	"github.com/ethpandaops/cartographoor/pkg/discovery"
 )
 
 // InventoryData represents the complete inventory data for a network.
@@ -75,4 +77,15 @@ type DoraExecutionClient struct {
 	PeersInbound  int    `json:"peers_inbound"`
 	PeersOutbound int    `json:"peers_outbound"`
 	// Blockchain fields are intentionally omitted (block_number, block_hash)
+}
+
+// NetworksResult represents a simplified version of discovery.Result for inventory.
+// It only includes the fields needed for inventory generation, avoiding the Provider interface.
+type NetworksResult struct {
+	NetworkMetadata map[string]discovery.RepositoryMetadata `json:"networkMetadata"`
+	Networks        map[string]discovery.Network            `json:"networks"`
+	Clients         map[string]discovery.ClientInfo         `json:"clients"`
+	LastUpdate      time.Time                               `json:"lastUpdate"`
+	Duration        float64                                 `json:"duration"`
+	// Providers field is intentionally omitted to avoid unmarshal issues
 }
