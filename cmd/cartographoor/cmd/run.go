@@ -92,6 +92,13 @@ func runService(ctx context.Context, log *logrus.Logger, cfg *runConfig) error {
 	}
 
 	// Create S3 storage provider
+	log.WithFields(logrus.Fields{
+		"endpoint":       cfg.Storage.Endpoint,
+		"bucket":         cfg.Storage.BucketName,
+		"region":         cfg.Storage.Region,
+		"forcePathStyle": cfg.Storage.ForcePathStyle,
+	}).Info("Creating S3 storage provider with config")
+
 	storageProvider, err := s3.NewProvider(log, cfg.Storage)
 	if err != nil {
 		return err
