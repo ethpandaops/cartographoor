@@ -95,7 +95,7 @@ func (s *Service) Run(ctx context.Context) error {
 }
 
 // downloadNetworksJSON downloads and parses the networks.json file from S3.
-func (s *Service) downloadNetworksJSON(ctx context.Context) (*discovery.Result, error) {
+func (s *Service) downloadNetworksJSON(ctx context.Context) (*NetworksResult, error) {
 	s.log.Debug("Downloading networks.json from S3")
 
 	// Download the file
@@ -104,8 +104,8 @@ func (s *Service) downloadNetworksJSON(ctx context.Context) (*discovery.Result, 
 		return nil, fmt.Errorf("failed to download networks.json: %w", err)
 	}
 
-	// Parse the JSON
-	var result discovery.Result
+	// Parse the JSON using our simplified struct
+	var result NetworksResult
 	if err := json.Unmarshal(data, &result); err != nil {
 		return nil, fmt.Errorf("failed to parse networks.json: %w", err)
 	}
