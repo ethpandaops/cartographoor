@@ -252,3 +252,111 @@ func (d *ClientDiscoverer) getLatestVersion(ctx context.Context, repo string) (s
 	// If all else fails, return an empty string
 	return "", fmt.Errorf("no version information found")
 }
+
+// ExtractClientTypeFromVersion extracts and normalizes the client type from a version string.
+// It handles version strings like "Geth/v1.16.2-unstable..." and returns "geth".
+// Returns the normalized client type and whether it's a known valid client.
+func ExtractClientTypeFromVersion(version string) (clientType string, isKnown bool) {
+	if version == "" {
+		return "", false
+	}
+
+	// Extract the client name from version string
+	// Most clients use format: "ClientName/version-info"
+	var rawClientName string
+
+	if idx := strings.Index(version, "/"); idx > 0 {
+		rawClientName = version[:idx]
+	} else {
+		// Some clients might not have a slash
+		rawClientName = version
+	}
+
+	// Normalize the client name
+	normalizedName := strings.ToLower(strings.TrimSpace(rawClientName))
+
+	// Check if it's a known consensus client
+	for _, known := range CLClients {
+		if normalizedName == known {
+			return known, true
+		}
+	}
+
+	// Check if it's a known execution client
+	for _, known := range ELClients {
+		if normalizedName == known {
+			return known, true
+		}
+	}
+
+	// Handle special cases and aliases
+	aliases := map[string]string{
+		"go-ethereum":     ELGeth,
+		"nimbus-eth1":     ELNimbusel,
+		"nimbus-eth2":     CLNimbus,
+		"prysm-beacon":    CLPrysm,
+		"lighthouse-bn":   CLLighthouse,
+		"teku-beacon":     CLTeku,
+		"grandine-beacon": CLGrandine,
+	}
+
+	if mapped, ok := aliases[normalizedName]; ok {
+		return mapped, true
+	}
+
+	// Return the normalized name even if not in our known list
+	// This allows for new clients that might not be in our constants yet
+	return normalizedName, false
+}
+
+// GetClientType returns the type (consensus/execution) for a given client name.
+func GetClientType(clientName string) string {
+	normalizedName := strings.ToLower(strings.TrimSpace(clientName))
+
+	// Check consensus clients
+	for _, cl := range CLClients {
+		if normalizedName == cl {
+			return CLClientType
+		}
+	}
+
+	// Check execution clients
+	for _, el := range ELClients {
+		if normalizedName == el {
+			return ELClientType
+		}
+	}
+
+	return ""
+}
+
+// IsKnownClient checks if a client name is in our list of known clients.
+func IsKnownClient(clientName string) bool {
+	normalizedName := strings.ToLower(strings.TrimSpace(clientName))
+
+	// Check all known clients
+	allClients := append(CLClients, ELClients...)
+	for _, known := range allClients {
+		if normalizedName == known {
+			return true
+		}
+	}
+
+	return false
+}
+
+// GetClientDisplayName returns the display name for a client.
+func GetClientDisplayName(clientName string) string {
+	normalizedName := strings.ToLower(strings.TrimSpace(clientName))
+
+	if displayName, ok := DefaultDisplayNames[normalizedName]; ok {
+		return displayName
+	}
+
+	// Fallback to capitalizing the first letter
+	if len(clientName) > 0 {
+		return strings.ToUpper(string(clientName[0])) + clientName[1:]
+	}
+
+	return clientName
+}

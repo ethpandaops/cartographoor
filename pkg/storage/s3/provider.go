@@ -73,6 +73,13 @@ func NewProvider(log *logrus.Logger, cfg Config) (*Provider, error) {
 
 // Initialize sets up the S3 client.
 func (p *Provider) Initialize(ctx context.Context) error {
+	p.log.WithFields(logrus.Fields{
+		"endpoint":       p.config.Endpoint,
+		"bucket":         p.config.BucketName,
+		"region":         p.config.Region,
+		"forcePathStyle": p.config.ForcePathStyle,
+	}).Debug("Initializing S3 client")
+
 	// Create AWS config
 	opts := []func(*config.LoadOptions) error{
 		config.WithRegion(p.config.Region),
@@ -80,6 +87,7 @@ func (p *Provider) Initialize(ctx context.Context) error {
 
 	// Add custom endpoint if provided
 	if p.config.Endpoint != "" {
+		p.log.WithField("endpoint", p.config.Endpoint).Debug("Using custom S3 endpoint")
 		//nolint:staticcheck // fine.
 		customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 			return aws.Endpoint{
@@ -165,6 +173,105 @@ func (p *Provider) Upload(ctx context.Context, result discovery.Result) error {
 	}
 
 	p.log.Info("S3 upload completed successfully")
+
+	return nil
+}
+
+// Download downloads a file from S3.
+func (p *Provider) Download(ctx context.Context, key string) ([]byte, error) {
+	if p.client == nil {
+		if err := p.Initialize(ctx); err != nil {
+			return nil, err
+		}
+	}
+
+	p.log.WithFields(logrus.Fields{
+		"bucket": p.config.BucketName,
+		"key":    key,
+	}).Debug("Downloading from S3")
+
+	// Create S3 get object input
+	input := &s3.GetObjectInput{
+		Bucket: aws.String(p.config.BucketName),
+		Key:    aws.String(key),
+	}
+
+	// Download from S3 with retry logic
+	var (
+		result *s3.GetObjectOutput
+		err    error
+	)
+
+	for attempt := 0; attempt <= p.config.MaxRetries; attempt++ {
+		result, err = p.client.GetObject(ctx, input)
+		if err == nil {
+			break
+		}
+
+		if attempt < p.config.MaxRetries {
+			p.log.WithFields(logrus.Fields{
+				"attempt": attempt + 1,
+				"error":   err,
+			}).Warn("S3 download failed, retrying")
+			time.Sleep(p.config.RetryDuration)
+		}
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to download from S3: %w", err)
+	}
+
+	defer result.Body.Close()
+
+	// Read response body
+	buf := new(bytes.Buffer)
+	if _, err := buf.ReadFrom(result.Body); err != nil {
+		return nil, fmt.Errorf("failed to read S3 response body: %w", err)
+	}
+
+	p.log.WithFields(logrus.Fields{
+		"bucket": p.config.BucketName,
+		"key":    key,
+		"size":   buf.Len(),
+	}).Debug("S3 download completed successfully")
+
+	return buf.Bytes(), nil
+}
+
+// UploadRaw uploads raw data to S3 with a specific key.
+func (p *Provider) UploadRaw(ctx context.Context, key string, data []byte, contentType string) error {
+	if p.client == nil {
+		if err := p.Initialize(ctx); err != nil {
+			return err
+		}
+	}
+
+	// Create S3 put object input
+	input := &s3.PutObjectInput{
+		Bucket:      aws.String(p.config.BucketName),
+		Key:         aws.String(key),
+		Body:        bytes.NewReader(data),
+		ContentType: aws.String(contentType),
+	}
+
+	// Add ACL if configured
+	if p.config.ACL != "" {
+		input.ACL = types.ObjectCannedACL(p.config.ACL)
+	}
+
+	// Upload to S3
+	p.log.WithFields(logrus.Fields{
+		"bucket": p.config.BucketName,
+		"key":    key,
+		"size":   len(data),
+		"acl":    p.config.ACL,
+	}).Debug("Uploading raw data to S3")
+
+	if _, err := p.client.PutObject(ctx, input); err != nil {
+		return fmt.Errorf("failed to upload to S3: %w", err)
+	}
+
+	p.log.WithField("key", key).Debug("S3 raw upload completed successfully")
 
 	return nil
 }
