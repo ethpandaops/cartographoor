@@ -16,6 +16,26 @@ discovery:
   github:
     # List of repositories to check for networks
     repositories:
+#      - name: ethpandaops/bal-devnets
+#        namePrefix: bal-
+#        displayName: BAL Devnets
+#        description: "Block‑Level Access Lists (BAL) embed every account and storage slot touched during a block—with their post‑execution values—to unlock parallel disk reads, parallel validation, and stateless state updates."
+#        image: https://ethpandaops.io/img/bal.jpg
+#        links:
+#          - title: "EIP-7928: Block-Level Access Lists"
+#            url: "https://eips.ethereum.org/EIPS/eip-7928"
+#          - title: "Eth Magicians"
+#            url: "https://ethereum-magicians.org/t/eip-7928-block-level-access-lists/23337"
+#      - name: ethpandaops/epbs-devnets
+#        namePrefix: epbs-
+#        displayName: ePBS Devnets
+#        description: "Enshrined Proposer‑Builder Separation (ePBS) splits Ethereum blocks into consensus and execution layers and lets the consensus proposer pick the execution proposer directly."
+#        image: https://ethpandaops.io/img/epbs.jpg
+#        links:
+#          - title: "EIP-7732: Enshrined Proposer-Builder Separation"
+#            url: "https://eips.ethereum.org/EIPS/eip-7732"
+#          - title: "Eth Magicians"
+#            url: "https://ethereum-magicians.org/t/eip-7732-enshrined-proposer-builder-separation-epbs/19634"
       - name: ethpandaops/berlinterop-devnets
         namePrefix: berlinterop-
         displayName: Berlin Interop Devnets
