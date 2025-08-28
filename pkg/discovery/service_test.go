@@ -137,7 +137,7 @@ func TestDiscoveryService(t *testing.T) {
 
 	// Validate result
 	require.Len(t, result.Networks, 2)
-	assert.Contains(t, []string{"mock"}, result.Providers[0].Name())
+	assert.Contains(t, []string{"mock"}, result.Providers[0].Name)
 	assert.Contains(t, result.Networks, "devnet-10")
 	assert.Contains(t, result.Networks, "devnet-11")
 	assert.Equal(t, "devnet-10", result.Networks["devnet-10"].Name)
