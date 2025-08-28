@@ -70,7 +70,7 @@ func TestCombinedProviders(t *testing.T) {
 	// Verify the providers in the result
 	providerNames := make([]string, 0, len(result.Providers))
 	for _, p := range result.Providers {
-		providerNames = append(providerNames, p.Name())
+		providerNames = append(providerNames, p.Name)
 	}
 
 	assert.Contains(t, providerNames, "static")

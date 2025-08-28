@@ -229,7 +229,7 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 	// Collect results
 	var (
 		allNetworks = make(map[string]Network)
-		provNames   = make([]Provider, 0)
+		provInfos   = make([]ProviderInfo, 0)
 	)
 
 	// Wait for all provider goroutines to complete
@@ -248,7 +248,7 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 					allNetworks[key] = network
 				}
 
-				provNames = append(provNames, pr.provider)
+				provInfos = append(provInfos, ProviderInfo{Name: pr.provider.Name()})
 			}
 		}
 	}
@@ -272,7 +272,7 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 		Clients:         clientInfo,
 		LastUpdate:      time.Now(),
 		Duration:        duration,
-		Providers:       provNames,
+		Providers:       provInfos,
 	}
 
 	s.log.WithFields(logrus.Fields{

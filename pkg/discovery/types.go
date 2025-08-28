@@ -92,6 +92,11 @@ type ClientInfo struct {
 	DocsURL       string `json:"docsUrl,omitempty"`
 }
 
+// ProviderInfo represents serializable information about a provider.
+type ProviderInfo struct {
+	Name string `json:"name"`
+}
+
 // Result represents the result of a discovery operation.
 type Result struct {
 	NetworkMetadata map[string]RepositoryMetadata `json:"networkMetadata"`
@@ -99,7 +104,7 @@ type Result struct {
 	Clients         map[string]ClientInfo         `json:"clients"`
 	LastUpdate      time.Time                     `json:"lastUpdate"`
 	Duration        float64                       `json:"duration"`
-	Providers       []Provider                    `json:"providers"`
+	Providers       []ProviderInfo                `json:"providers"`
 }
 
 // GitHubRepositoryConfig represents the configuration for a GitHub repository source.
