@@ -167,7 +167,9 @@ func (s *Service) generateInventories(ctx context.Context, networks map[string]d
 
 			// Store the inventory
 			mu.Lock()
+
 			inventories[name] = inventory
+
 			mu.Unlock()
 
 			successCount.Add(1)
@@ -206,9 +208,11 @@ func (s *Service) uploadInventories(ctx context.Context, inventories map[string]
 				s.log.WithError(err).WithField("network", name).Error("Failed to marshal inventory")
 
 				mu.Lock()
+
 				if uploadError == nil {
 					uploadError = fmt.Errorf("failed to marshal inventory for %s: %w", name, err)
 				}
+
 				mu.Unlock()
 
 				return
@@ -229,9 +233,11 @@ func (s *Service) uploadInventories(ctx context.Context, inventories map[string]
 				s.log.WithError(err).WithField("network", name).Error("Failed to upload inventory")
 
 				mu.Lock()
+
 				if uploadError == nil {
 					uploadError = fmt.Errorf("failed to upload inventory for %s: %w", name, err)
 				}
+
 				mu.Unlock()
 
 				return
