@@ -79,9 +79,11 @@ func (s *Service) Start(ctx context.Context) error {
 				return
 			case result := <-s.resultChan:
 				s.mutex.Lock()
+
 				for _, fn := range s.resultFuncs {
 					fn(result)
 				}
+
 				s.mutex.Unlock()
 			}
 		}

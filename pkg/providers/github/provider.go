@@ -134,6 +134,7 @@ func (p *Provider) discoverRepositoryNetworks(
 
 		// Determine network status, configs, domain, and images
 		var images *discovery.Images
+
 		networkConfig.Status, networkConfig.ConfigFiles, networkConfig.Domain, images, networkConfig.HiveURL = p.getNetworkDetails(
 			ctx, githubClient, owner, repo, networkConfig.Name,
 		)
