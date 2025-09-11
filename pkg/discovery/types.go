@@ -20,6 +20,7 @@ type Network struct {
 	ServiceURLs   *ServiceURLs   `json:"serviceUrls,omitempty"`
 	Images        *Images        `json:"images,omitempty"`
 	HiveURL       string         `json:"hiveUrl,omitempty"`
+	SelfHostedDNS bool           `json:"selfHostedDns"`
 }
 
 // Link represents a related link with title and URL.

@@ -48,7 +48,7 @@ func (p *Provider) getNetworkDetails(
 	ctx context.Context,
 	client *gh.Client,
 	owner, repo, networkName string,
-) (status string, configFiles []string, domain string, images *discovery.Images, hiveURL string) {
+) (status string, configFiles []string, domain string, images *discovery.Images, hiveURL string, selfHostedDNS bool) {
 	// Get basic network status, configs, and domain
 	status, configFiles, domain = p.determineNetworkStatus(ctx, client, owner, repo, networkName)
 
@@ -67,5 +67,8 @@ func (p *Provider) getNetworkDetails(
 		}).Debug("hive is not available for network")
 	}
 
-	return status, configFiles, domain, images, hiveURL
+	// Check if network uses a self-hosted DNS server
+	selfHostedDNS = p.checkSelfHostedDNS(ctx, client, owner, repo, networkName)
+
+	return status, configFiles, domain, images, hiveURL, selfHostedDNS
 }
