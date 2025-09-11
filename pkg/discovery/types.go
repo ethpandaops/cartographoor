@@ -45,6 +45,7 @@ type ServiceURLs struct {
 	BlobArchive    string `json:"blobArchive,omitempty"`
 	Forky          string `json:"forky,omitempty"`
 	Tracoor        string `json:"tracoor,omitempty"`
+	Syncoor        string `json:"syncoor,omitempty"`
 }
 
 // GenesisConfig represents the configuration URLs for a network.
