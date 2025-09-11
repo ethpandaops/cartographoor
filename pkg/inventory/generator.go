@@ -105,13 +105,13 @@ func (g *Generator) GenerateForNetwork(ctx context.Context, network discovery.Ne
 
 	// Process consensus clients
 	for _, client := range consensusClients {
-		clientInfo := g.processConsensusClient(client, network.Images)
+		clientInfo := g.processConsensusClient(client, network)
 		inventory.ConsensusClients = append(inventory.ConsensusClients, clientInfo)
 	}
 
 	// Process execution clients
 	for _, client := range executionClients {
-		clientInfo := g.processExecutionClient(client, network.Images)
+		clientInfo := g.processExecutionClient(client, network)
 		inventory.ExecutionClients = append(inventory.ExecutionClients, clientInfo)
 	}
 
@@ -125,7 +125,7 @@ func (g *Generator) GenerateForNetwork(ctx context.Context, network discovery.Ne
 }
 
 // processConsensusClient processes a consensus client from Dora API.
-func (g *Generator) processConsensusClient(client DoraConsensusClient, images *discovery.Images) ClientInfo {
+func (g *Generator) processConsensusClient(client DoraConsensusClient, network discovery.Network) ClientInfo {
 	// Validate and normalize the client type
 	clientType := client.ClientType
 	if clientType != "" {
@@ -142,11 +142,23 @@ func (g *Generator) processConsensusClient(client DoraConsensusClient, images *d
 		clientType = normalizedType
 	}
 
+	// Construct SSH and BeaconAPI URLs based on DNS type
+	var ssh, beaconAPI string
+	if network.SelfHostedDNS {
+		// Self-hosted DNS pattern
+		ssh = fmt.Sprintf("devops@%s.srv.%s.ethpandaops.io", client.ClientName, network.Name)
+		beaconAPI = fmt.Sprintf("bn-%s.srv.%s.ethpandaops.io", client.ClientName, network.Name)
+	} else {
+		// Cloudflare DNS pattern
+		ssh = fmt.Sprintf("devops@%s.%s.ethpandaops.io", client.ClientName, network.Name)
+		beaconAPI = fmt.Sprintf("bn.%s.%s.ethpandaops.io", client.ClientName, network.Name)
+	}
+
 	return ClientInfo{
 		ClientName:  client.ClientName,
 		ClientType:  clientType,
 		Version:     client.Version,
-		DockerImage: g.matchDockerImage(clientType, images),
+		DockerImage: g.matchDockerImage(clientType, network.Images),
 		PeerID:      client.PeerID,
 		// NodeID omitted for consensus clients as it duplicates PeerID
 		ENR:           client.ENR,
@@ -154,12 +166,14 @@ func (g *Generator) processConsensusClient(client DoraConsensusClient, images *d
 		PeerCount:     client.PeerCount,
 		PeersInbound:  client.PeersInbound,
 		PeersOutbound: client.PeersOutbound,
+		SSH:           ssh,
+		BeaconAPI:     beaconAPI,
 		Metadata:      g.convertMetadata(client.Metadata),
 	}
 }
 
 // processExecutionClient processes an execution client from Dora API.
-func (g *Generator) processExecutionClient(client DoraExecutionClient, images *discovery.Images) ClientInfo {
+func (g *Generator) processExecutionClient(client DoraExecutionClient, network discovery.Network) ClientInfo {
 	// Extract client type from version string if not provided
 	clientType := client.ClientType
 	if clientType == "" && client.Version != "" {
@@ -181,13 +195,25 @@ func (g *Generator) processExecutionClient(client DoraExecutionClient, images *d
 	}
 
 	// Debug log for docker image matching
-	dockerImage := g.matchDockerImage(clientType, images)
+	dockerImage := g.matchDockerImage(clientType, network.Images)
 	if dockerImage == "" && clientType != "" {
 		g.log.WithFields(logrus.Fields{
 			"clientName": client.ClientName,
 			"clientType": clientType,
 			"version":    client.Version,
 		}).Debug("No docker image found for execution client")
+	}
+
+	// Construct SSH and RPC URLs based on DNS type
+	var ssh, rpc string
+	if network.SelfHostedDNS {
+		// Self-hosted DNS pattern
+		ssh = fmt.Sprintf("devops@%s.srv.%s.ethpandaops.io", client.ClientName, network.Name)
+		rpc = fmt.Sprintf("rpc-%s.srv.%s.ethpandaops.io", client.ClientName, network.Name)
+	} else {
+		// Cloudflare DNS pattern
+		ssh = fmt.Sprintf("devops@%s.%s.ethpandaops.io", client.ClientName, network.Name)
+		rpc = fmt.Sprintf("rpc.%s.%s.ethpandaops.io", client.ClientName, network.Name)
 	}
 
 	info := ClientInfo{
@@ -199,6 +225,8 @@ func (g *Generator) processExecutionClient(client DoraExecutionClient, images *d
 		NodeID:      client.NodeID,
 		Enode:       client.Enode,
 		Status:      client.Status,
+		SSH:         ssh,
+		RPC:         rpc,
 		Metadata:    make(map[string]string),
 	}
 

@@ -29,6 +29,9 @@ type ClientInfo struct {
 	PeerCount     int               `json:"peerCount,omitempty"`
 	PeersInbound  int               `json:"peersInbound,omitempty"`
 	PeersOutbound int               `json:"peersOutbound,omitempty"`
+	SSH           string            `json:"ssh,omitempty"`
+	BeaconAPI     string            `json:"bn,omitempty"`  // For consensus clients
+	RPC           string            `json:"rpc,omitempty"` // For execution clients
 	Metadata      map[string]string `json:"metadata,omitempty"`
 }
 

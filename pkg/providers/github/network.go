@@ -14,22 +14,42 @@ import (
 
 // NetworkConfig contains configuration for a network.
 type NetworkConfig struct {
-	Name         string
-	PrefixedName string
-	Repository   string
-	Owner        string
-	Repo         string
-	Path         string
-	URL          string
-	Status       string
-	ConfigFiles  []string
-	Domain       string
-	HiveURL      string
-	Images       struct {
+	Name          string
+	PrefixedName  string
+	Repository    string
+	Owner         string
+	Repo          string
+	Path          string
+	URL           string
+	Status        string
+	ConfigFiles   []string
+	Domain        string
+	HiveURL       string
+	SelfHostedDNS bool
+	Images        struct {
 		URL     string
 		Clients []discovery.ClientImage
 		Tools   []discovery.ToolImage
 	}
+}
+
+// checkSelfHostedDNS checks if the network uses a self-hosted DNS server.
+func (p *Provider) checkSelfHostedDNS(
+	ctx context.Context,
+	client *gh.Client,
+	owner, repo, networkName string,
+) bool {
+	// Check for ansible/inventories/devnet-X/group_vars/dns_server.yaml
+	dnsConfigPath := fmt.Sprintf("ansible/inventories/%s/group_vars/dns_server.yaml", networkName)
+
+	_, _, resp, err := client.Repositories.GetContents(ctx, owner, repo, dnsConfigPath, nil)
+	if err == nil || (resp != nil && resp.StatusCode == http.StatusOK) {
+		// File exists, network uses its own DNS
+		return true
+	}
+
+	// File doesn't exist, network uses Cloudflare
+	return false
 }
 
 // checkHiveAvailability checks if the hive is available for a network.
@@ -87,13 +107,14 @@ func (p *Provider) getNetworkConfigs(
 // createNetwork creates a discovery.Network from a NetworkConfig.
 func (p *Provider) createNetwork(ctx context.Context, config *NetworkConfig) discovery.Network {
 	network := discovery.Network{
-		Name:        config.Name,
-		Repository:  config.Repository,
-		Path:        config.Path,
-		URL:         config.URL,
-		Status:      config.Status,
-		HiveURL:     config.HiveURL,
-		LastUpdated: time.Now(),
+		Name:          config.Name,
+		Repository:    config.Repository,
+		Path:          config.Path,
+		URL:           config.URL,
+		Status:        config.Status,
+		HiveURL:       config.HiveURL,
+		SelfHostedDNS: config.SelfHostedDNS,
+		LastUpdated:   time.Now(),
 	}
 
 	// If network is active, add service URLs and GenesisConfig
