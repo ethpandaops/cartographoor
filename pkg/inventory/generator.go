@@ -26,7 +26,7 @@ func NewGenerator(log *logrus.Entry) *Generator {
 }
 
 // GenerateForNetwork generates inventory data for a specific network.
-func (g *Generator) GenerateForNetwork(ctx context.Context, network discovery.Network) (*InventoryData, error) {
+func (g *Generator) GenerateForNetwork(ctx context.Context, fullNetworkName string, network discovery.Network) (*InventoryData, error) {
 	// Check if the network has a Dora URL
 	if network.ServiceURLs == nil || network.ServiceURLs.Dora == "" {
 		g.log.WithField("network", network.Name).Debug("No Dora URL found for network, skipping inventory generation")
@@ -96,7 +96,7 @@ func (g *Generator) GenerateForNetwork(ctx context.Context, network discovery.Ne
 
 	// Process clients and match with docker images
 	inventory := &InventoryData{
-		Network:          network.Name,
+		Network:          fullNetworkName,
 		Repository:       network.Repository,
 		LastUpdated:      time.Now().UTC(),
 		ConsensusClients: make([]ClientInfo, 0, len(consensusClients)),
@@ -105,13 +105,13 @@ func (g *Generator) GenerateForNetwork(ctx context.Context, network discovery.Ne
 
 	// Process consensus clients
 	for _, client := range consensusClients {
-		clientInfo := g.processConsensusClient(client, network)
+		clientInfo := g.processConsensusClient(client, fullNetworkName, network)
 		inventory.ConsensusClients = append(inventory.ConsensusClients, clientInfo)
 	}
 
 	// Process execution clients
 	for _, client := range executionClients {
-		clientInfo := g.processExecutionClient(client, network)
+		clientInfo := g.processExecutionClient(client, fullNetworkName, network)
 		inventory.ExecutionClients = append(inventory.ExecutionClients, clientInfo)
 	}
 
@@ -125,7 +125,7 @@ func (g *Generator) GenerateForNetwork(ctx context.Context, network discovery.Ne
 }
 
 // processConsensusClient processes a consensus client from Dora API.
-func (g *Generator) processConsensusClient(client DoraConsensusClient, network discovery.Network) ClientInfo {
+func (g *Generator) processConsensusClient(client DoraConsensusClient, fullNetworkName string, network discovery.Network) ClientInfo {
 	// Validate and normalize the client type
 	clientType := client.ClientType
 	if clientType != "" {
@@ -146,12 +146,12 @@ func (g *Generator) processConsensusClient(client DoraConsensusClient, network d
 	var ssh, beaconAPI string
 	if network.SelfHostedDNS {
 		// Self-hosted DNS pattern
-		ssh = fmt.Sprintf("devops@%s.srv.%s.ethpandaops.io", client.ClientName, network.Name)
-		beaconAPI = fmt.Sprintf("bn-%s.srv.%s.ethpandaops.io", client.ClientName, network.Name)
+		ssh = fmt.Sprintf("devops@%s.srv.%s.ethpandaops.io", client.ClientName, fullNetworkName)
+		beaconAPI = fmt.Sprintf("bn-%s.srv.%s.ethpandaops.io", client.ClientName, fullNetworkName)
 	} else {
 		// Cloudflare DNS pattern
-		ssh = fmt.Sprintf("devops@%s.%s.ethpandaops.io", client.ClientName, network.Name)
-		beaconAPI = fmt.Sprintf("bn.%s.%s.ethpandaops.io", client.ClientName, network.Name)
+		ssh = fmt.Sprintf("devops@%s.%s.ethpandaops.io", client.ClientName, fullNetworkName)
+		beaconAPI = fmt.Sprintf("bn.%s.%s.ethpandaops.io", client.ClientName, fullNetworkName)
 	}
 
 	return ClientInfo{
@@ -173,7 +173,7 @@ func (g *Generator) processConsensusClient(client DoraConsensusClient, network d
 }
 
 // processExecutionClient processes an execution client from Dora API.
-func (g *Generator) processExecutionClient(client DoraExecutionClient, network discovery.Network) ClientInfo {
+func (g *Generator) processExecutionClient(client DoraExecutionClient, fullNetworkName string, network discovery.Network) ClientInfo {
 	// Extract client type from version string if not provided
 	clientType := client.ClientType
 	if clientType == "" && client.Version != "" {
@@ -208,12 +208,12 @@ func (g *Generator) processExecutionClient(client DoraExecutionClient, network d
 	var ssh, rpc string
 	if network.SelfHostedDNS {
 		// Self-hosted DNS pattern
-		ssh = fmt.Sprintf("devops@%s.srv.%s.ethpandaops.io", client.ClientName, network.Name)
-		rpc = fmt.Sprintf("rpc-%s.srv.%s.ethpandaops.io", client.ClientName, network.Name)
+		ssh = fmt.Sprintf("devops@%s.srv.%s.ethpandaops.io", client.ClientName, fullNetworkName)
+		rpc = fmt.Sprintf("rpc-%s.srv.%s.ethpandaops.io", client.ClientName, fullNetworkName)
 	} else {
 		// Cloudflare DNS pattern
-		ssh = fmt.Sprintf("devops@%s.%s.ethpandaops.io", client.ClientName, network.Name)
-		rpc = fmt.Sprintf("rpc.%s.%s.ethpandaops.io", client.ClientName, network.Name)
+		ssh = fmt.Sprintf("devops@%s.%s.ethpandaops.io", client.ClientName, fullNetworkName)
+		rpc = fmt.Sprintf("rpc.%s.%s.ethpandaops.io", client.ClientName, fullNetworkName)
 	}
 
 	info := ClientInfo{

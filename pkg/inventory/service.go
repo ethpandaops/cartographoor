@@ -150,7 +150,7 @@ func (s *Service) generateInventories(ctx context.Context, networks map[string]d
 			defer sem.Release(1)
 
 			// Generate inventory for this network
-			inventory, err := s.generator.GenerateForNetwork(ctx, network)
+			inventory, err := s.generator.GenerateForNetwork(ctx, name, network)
 			if err != nil {
 				s.log.WithError(err).WithField("network", name).Error("Failed to generate inventory")
 				failureCount.Add(1)
