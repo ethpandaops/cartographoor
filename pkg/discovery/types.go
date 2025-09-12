@@ -132,13 +132,13 @@ type StaticNetworkConfig struct {
 
 // ForksConfig represents fork configuration for both consensus and execution layers.
 type ForksConfig struct {
-	Consensus map[string]ForkConfig `mapstructure:"consensus"`
+	Consensus map[string]ForkConfig `json:"consensus" mapstructure:"consensus"`
 }
 
 // ForkConfig represents configuration for a specific fork.
 type ForkConfig struct {
-	Epoch             uint64            `mapstructure:"epoch"`
-	MinClientVersions map[string]string `mapstructure:"minClientVersions"`
+	Epoch             uint64            `json:"epoch" mapstructure:"epoch"`
+	MinClientVersions map[string]string `json:"minClientVersions,omitempty" mapstructure:"minClientVersions"`
 }
 
 // Config represents the configuration for the discovery service.
