@@ -21,6 +21,7 @@ type Network struct {
 	Images        *Images        `json:"images,omitempty"`
 	HiveURL       string         `json:"hiveUrl,omitempty"`
 	SelfHostedDNS bool           `json:"selfHostedDns"`
+	Forks         *ForksConfig   `json:"forks,omitempty"`
 }
 
 // Link represents a related link with title and URL.
@@ -119,10 +120,34 @@ type GitHubRepositoryConfig struct {
 	Links       []Link `mapstructure:"links"`
 }
 
+// StaticNetworkConfig represents the configuration for a static network.
+type StaticNetworkConfig struct {
+	Name        string            `mapstructure:"name"`
+	Description string            `mapstructure:"description"`
+	ChainID     uint64            `mapstructure:"chainId"`
+	GenesisTime uint64            `mapstructure:"genesisTime"`
+	ServiceURLs map[string]string `mapstructure:"serviceUrls"`
+	Forks       *ForksConfig      `mapstructure:"forks"`
+}
+
+// ForksConfig represents fork configuration for both consensus and execution layers.
+type ForksConfig struct {
+	Consensus map[string]ForkConfig `mapstructure:"consensus"`
+}
+
+// ForkConfig represents configuration for a specific fork.
+type ForkConfig struct {
+	Epoch             uint64            `mapstructure:"epoch"`
+	MinClientVersions map[string]string `mapstructure:"minClientVersions"`
+}
+
 // Config represents the configuration for the discovery service.
 type Config struct {
 	Interval time.Duration `mapstructure:"interval"`
-	GitHub   struct {
+	Static   struct {
+		Networks []StaticNetworkConfig `mapstructure:"networks"`
+	} `mapstructure:"static"`
+	GitHub struct {
 		Repositories []GitHubRepositoryConfig `mapstructure:"repositories"`
 		Token        string                   `mapstructure:"token"`
 	} `mapstructure:"github"`

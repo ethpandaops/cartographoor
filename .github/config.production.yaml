@@ -12,6 +12,92 @@ discovery:
   # Discovery interval (default: 1h)
   interval: 1h
 
+  # Static network configuration
+  static:
+    networks:
+      - name: mainnet
+        description: Production Ethereum network
+        chainId: 1
+        genesisTime: 1606824023
+        serviceUrls:
+          ethstats: https://ethstats.mainnet.ethpandaops.io
+          forkmon: https://forkmon.mainnet.ethpandaops.io
+          blobArchive: https://blob-archive.mainnet.ethpandaops.io
+          forky: https://forky.mainnet.ethpandaops.io
+          tracoor: https://tracoor.mainnet.ethpandaops.io
+        forks:
+          consensus:
+            electra:
+              epoch: 364032
+              minClientVersions:
+                grandine: "1.1.0"
+                lighthouse: "7.0.0"
+                lodestar: "1.29.0"
+                nimbus: "25.4.1"
+                prysm: "6.0.0"
+                teku: "25.4.1"
+
+      - name: sepolia
+        description: Smaller testnet for application development with controlled validator set.
+        chainId: 11155111
+        genesisTime: 1655726400
+        serviceUrls:
+          dora: https://dora.sepolia.ethpandaops.io
+          beaconExplorer: https://dora.sepolia.ethpandaops.io
+          checkpointSync: https://checkpoint-sync.sepolia.ethpandaops.io
+          ethstats: https://ethstats.sepolia.ethpandaops.io
+          forkmon: https://forkmon.sepolia.ethpandaops.io
+          blobArchive: https://blob-archive.sepolia.ethpandaops.io
+          forky: https://forky.sepolia.ethpandaops.io
+          tracoor: https://tracoor.sepolia.ethpandaops.io
+        forks:
+          consensus:
+            electra:
+              epoch: 222464
+              minClientVersions:
+                grandine: "1.0.0"
+                lighthouse: "7.0.0-beta.0"
+                lodestar: "1.27.0"
+                nimbus: "25.2.0"
+                prysm: "5.3.0"
+                teku: "25.2.0"
+
+      - name: holesky
+        description: Long-term public testnet designed for staking/validator testing with high validator counts.
+        chainId: 17000
+        genesisTime: 1695902400
+        serviceUrls:
+          dora: https://dora.holesky.ethpandaops.io
+          beaconExplorer: https://dora.holesky.ethpandaops.io
+          checkpointSync: https://checkpoint-sync.holesky.ethpandaops.io
+          ethstats: https://ethstats.holesky.ethpandaops.io
+          forkmon: https://forkmon.holesky.ethpandaops.io
+          blobArchive: https://blob-archive.holesky.ethpandaops.io
+          forky: https://forky.holesky.ethpandaops.io
+          tracoor: https://tracoor.holesky.ethpandaops.io
+        forks:
+          consensus:
+            electra:
+              epoch: 0  # Or appropriate epoch when known
+              # minClientVersions can be omitted if not yet determined
+
+      - name: hoodi
+        description: New public testnet (launched March 2025) designed for validator testing and protocol upgrades, replacing Holesky.
+        chainId: 560048
+        genesisTime: 1742213400
+        serviceUrls:
+          dora: https://dora.hoodi.ethpandaops.io
+          beaconExplorer: https://dora.hoodi.ethpandaops.io
+          checkpointSync: https://checkpoint-sync.hoodi.ethpandaops.io
+          forkmon: https://forkmon.hoodi.ethpandaops.io
+          forky: https://forky.hoodi.ethpandaops.io
+          tracoor: https://tracoor.hoodi.ethpandaops.io
+        forks:
+          consensus:
+            electra:
+              epoch: 2048
+              # minClientVersions will be added when specifications are finalized
+
   # GitHub discovery configuration
   github:
     # List of repositories to check for networks
