@@ -27,90 +27,76 @@ func (p *Provider) Name() string {
 	return "static"
 }
 
-// Discover returns hardcoded networks.
+// Discover returns networks from configuration.
 func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[string]discovery.Network, error) {
 	p.log.Info("Discovering static networks")
 
 	networks := make(map[string]discovery.Network)
 
-	// Add Ethereum Mainnet
-	networks["mainnet"] = discovery.Network{
-		Name:        "mainnet",
-		Description: "Production Ethereum network",
-		Status:      "active",
-		ChainID:     1,
-		LastUpdated: time.Now(),
-		ServiceURLs: &discovery.ServiceURLs{
-			Ethstats:    "https://ethstats.mainnet.ethpandaops.io",
-			Forkmon:     "https://forkmon.mainnet.ethpandaops.io",
-			BlobArchive: "https://blob-archive.mainnet.ethpandaops.io",
-			Forky:       "https://forky.mainnet.ethpandaops.io",
-			Tracoor:     "https://tracoor.mainnet.ethpandaops.io",
-		},
+	// Process each configured static network
+	for _, staticNet := range config.Static.Networks {
+		// Map service URLs from config to ServiceURLs struct
+		serviceURLs := &discovery.ServiceURLs{}
+		for key, value := range staticNet.ServiceURLs {
+			switch key {
+			case "faucet":
+				serviceURLs.Faucet = value
+			case "jsonRpc":
+				serviceURLs.JSONRPC = value
+			case "beaconRpc":
+				serviceURLs.BeaconRPC = value
+			case "explorer":
+				serviceURLs.Explorer = value
+			case "beaconExplorer":
+				serviceURLs.BeaconExplorer = value
+			case "forkmon":
+				serviceURLs.Forkmon = value
+			case "assertoor":
+				serviceURLs.Assertoor = value
+			case "dora":
+				serviceURLs.Dora = value
+			case "checkpointSync":
+				serviceURLs.CheckpointSync = value
+			case "blobscan":
+				serviceURLs.Blobscan = value
+			case "ethstats":
+				serviceURLs.Ethstats = value
+			case "devnetSpec":
+				serviceURLs.DevnetSpec = value
+			case "blobArchive":
+				serviceURLs.BlobArchive = value
+			case "forky":
+				serviceURLs.Forky = value
+			case "tracoor":
+				serviceURLs.Tracoor = value
+			case "syncoor":
+				serviceURLs.Syncoor = value
+			}
+		}
+
+		// Create network from configuration
+		network := discovery.Network{
+			Name:        staticNet.Name,
+			Description: staticNet.Description,
+			Status:      "active", // All configured networks are active by definition
+			ChainID:     staticNet.ChainID,
+			LastUpdated: time.Now(),
+			ServiceURLs: serviceURLs,
+			Forks:       staticNet.Forks,
+		}
+
+		// Add genesis config if genesis time is provided
+		if staticNet.GenesisTime > 0 {
+			network.GenesisConfig = &discovery.GenesisConfig{
+				GenesisTime: staticNet.GenesisTime,
+			}
+		}
+
+		networks[staticNet.Name] = network
+		p.log.WithField("network", staticNet.Name).Info("Discovered static network")
 	}
 
-	p.log.Info("Discovered Mainnet")
-
-	// Add Sepolia Testnet
-	networks["sepolia"] = discovery.Network{
-		Name:        "sepolia",
-		Description: "Smaller testnet for application development with controlled validator set.",
-		Status:      "active",
-		ChainID:     11155111,
-		LastUpdated: time.Now(),
-		ServiceURLs: &discovery.ServiceURLs{
-			Dora:           "https://dora.sepolia.ethpandaops.io",
-			BeaconExplorer: "https://dora.sepolia.ethpandaops.io",
-			CheckpointSync: "https://checkpoint-sync.sepolia.ethpandaops.io",
-			Ethstats:       "https://ethstats.sepolia.ethpandaops.io",
-			Forkmon:        "https://forkmon.sepolia.ethpandaops.io",
-			BlobArchive:    "https://blob-archive.sepolia.ethpandaops.io",
-			Forky:          "https://forky.sepolia.ethpandaops.io",
-			Tracoor:        "https://tracoor.sepolia.ethpandaops.io",
-		},
-	}
-
-	p.log.Info("Discovered Sepolia")
-
-	// Add Holesky Network
-	networks["holesky"] = discovery.Network{
-		Name:        "holesky",
-		Description: "Long-term public testnet designed for staking/validator testing with high validator counts.",
-		Status:      "active",
-		ChainID:     17000,
-		LastUpdated: time.Now(),
-		ServiceURLs: &discovery.ServiceURLs{
-			Dora:           "https://dora.holesky.ethpandaops.io",
-			BeaconExplorer: "https://dora.holesky.ethpandaops.io",
-			CheckpointSync: "https://checkpoint-sync.holesky.ethpandaops.io",
-			Ethstats:       "https://ethstats.holesky.ethpandaops.io",
-			Forkmon:        "https://forkmon.holesky.ethpandaops.io",
-			BlobArchive:    "https://blob-archive.holesky.ethpandaops.io",
-			Forky:          "https://forky.holesky.ethpandaops.io",
-			Tracoor:        "https://tracoor.holesky.ethpandaops.io",
-		},
-	}
-
-	p.log.Info("Discovered Holesky")
-
-	// Add Hoodi Network
-	networks["hoodi"] = discovery.Network{
-		Name:        "hoodi",
-		Description: "New public testnet (launched March 2025) designed for validator testing and protocol upgrades, replacing Holesky.",
-		Status:      "active",
-		ChainID:     560048,
-		LastUpdated: time.Now(),
-		ServiceURLs: &discovery.ServiceURLs{
-			Dora:           "https://dora.hoodi.ethpandaops.io",
-			BeaconExplorer: "https://dora.hoodi.ethpandaops.io",
-			CheckpointSync: "https://checkpoint-sync.hoodi.ethpandaops.io",
-			Forkmon:        "https://forkmon.hoodi.ethpandaops.io",
-			Forky:          "https://forky.hoodi.ethpandaops.io",
-			Tracoor:        "https://tracoor.hoodi.ethpandaops.io",
-		},
-	}
-
-	p.log.Info("Discovered Hoodi")
+	p.log.WithField("count", len(networks)).Info("Static network discovery complete")
 
 	return networks, nil
 }
