@@ -78,8 +78,14 @@ discovery:
         forks:
           consensus:
             electra:
-              epoch: 0  # Or appropriate epoch when known
-              # minClientVersions can be omitted if not yet determined
+              epoch: 115968
+              minClientVersions:
+                grandine: "1.0.0"
+                lighthouse: "7.0.0-beta.0"
+                lodestar: "1.27.0"
+                nimbus: "25.2.0"
+                prysm: "5.3.0"
+                teku: "25.2.0"
 
       - name: hoodi
         description: New public testnet (launched March 2025) designed for validator testing and protocol upgrades, replacing Holesky.
@@ -96,7 +102,13 @@ discovery:
           consensus:
             electra:
               epoch: 2048
-              # minClientVersions will be added when specifications are finalized
+              minClientVersions:
+                grandine: "1.0.0"
+                lighthouse: "7.0.0-beta.0"
+                lodestar: "1.27.0"
+                nimbus: "25.2.0"
+                prysm: "5.3.0"
+                teku: "25.2.0"
 
   # GitHub discovery configuration
   github:
