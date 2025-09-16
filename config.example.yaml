@@ -65,3 +65,28 @@ storage:
   retryDuration: 5s
   maxRetries: 3
   backoffJitterPercent: 20
+
+# Validator ranges configuration (optional)
+validatorRanges:
+  # Additional third-party validator sources
+  # 
+  # Validator Range Distribution:
+  # On testnets, validators are typically distributed across multiple organizations.
+  # Each organization may number their validators locally starting from 0, but globally
+  # they're assigned specific ranges to avoid conflicts.
+  #
+  # Example for fusaka-devnet-5:
+  #   - ethpandaops:     0-50,912    (owned and operated by ethpandaops)
+  #   - Reserved:    50,913-51,311    (400 validators reserved for Prysm, not yet deployed)
+  #   - testinprod:  51,312-56,000    (assigned to testinprod/Sunny Side Labs)
+  #
+  # Since external organizations number their validators locally (e.g., testinprod uses 0-4,688),
+  # we need to apply an offset to map their local ranges to the global validator numbering.
+  #
+  # rangeOffset: The value to add to all validator_start and validator_end values from this source
+  #              to map them to their globally assigned range.
+  additionalSources:
+    fusaka-devnet-5:
+      - url: https://raw.githubusercontent.com/testinprod-io/fusaka-devnets/refs/heads/main/ansible/inventories/devnet-5/inventory.ini
+        name: testinprod
+        rangeOffset: 51312  # Maps testinprod's local 0-4688 to global 51312-56000
