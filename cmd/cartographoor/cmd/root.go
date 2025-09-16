@@ -15,6 +15,7 @@ func NewRootCommand(log *logrus.Logger) *cobra.Command {
 	// Add subcommands.
 	cmd.AddCommand(newRunCmd(log))
 	cmd.AddCommand(newInventoryCmd(log))
+	cmd.AddCommand(newValidatorRangesCmd(log))
 
 	return cmd
 }

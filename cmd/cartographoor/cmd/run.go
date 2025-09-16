@@ -26,10 +26,22 @@ type runConfig struct {
 	Logging struct {
 		Level string `mapstructure:"level"`
 	} `mapstructure:"logging"`
-	ConfigFile string
-	Discovery  discovery.Config `mapstructure:"discovery"`
-	Storage    s3.Config        `mapstructure:"storage"`
-	RunOnce    bool             `mapstructure:"runOnce"`
+	ConfigFile      string
+	Discovery       discovery.Config       `mapstructure:"discovery"`
+	Storage         s3.Config              `mapstructure:"storage"`
+	RunOnce         bool                   `mapstructure:"runOnce"`
+	ValidatorRanges *ValidatorRangesConfig `mapstructure:"validatorRanges"`
+}
+
+// ValidatorRangesConfig holds configuration for validator ranges generation.
+type ValidatorRangesConfig struct {
+	AdditionalSources map[string][]ValidatorSource `mapstructure:"additionalSources"`
+}
+
+// ValidatorSource represents a single validator data source.
+type ValidatorSource struct {
+	URL  string `mapstructure:"url"`
+	Name string `mapstructure:"name"`
 }
 
 func newRunCmd(log *logrus.Logger) *cobra.Command {

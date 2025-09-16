@@ -1,8 +1,8 @@
-name: Inventory Generation
+name: Validator Ranges Generation
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # Every 15 minutes
+    - cron: '0 * * * *'  # Run every hour
   workflow_dispatch:  # Manual trigger
 
 jobs:
@@ -22,9 +22,9 @@ jobs:
         run: |
           go build -o cartographoor ./cmd/cartographoor
 
-      - name: Run Inventory Generation
+      - name: Run Validator Ranges Generation
         run: |
-          ./cartographoor inventory --config=.github/config.production.yaml
+          ./cartographoor validator-ranges --config=.github/config.production.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.CARTOGRAPHOOR_GITHUB_TOKEN }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
