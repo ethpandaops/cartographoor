@@ -6,7 +6,7 @@ on:
   workflow_dispatch:  # Manual trigger
 
 jobs:
-  generate-inventory:
+  generate-validator-ranges:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
