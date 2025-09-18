@@ -126,6 +126,7 @@ type StaticNetworkConfig struct {
 	Description string            `mapstructure:"description"`
 	ChainID     uint64            `mapstructure:"chainId"`
 	GenesisTime uint64            `mapstructure:"genesisTime"`
+	ConfigURL   string            `mapstructure:"configUrl"`
 	ServiceURLs map[string]string `mapstructure:"serviceUrls"`
 	Forks       *ForksConfig      `mapstructure:"forks"`
 }
