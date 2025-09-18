@@ -2,6 +2,7 @@ package static
 
 import (
 	"context"
+	"net/url"
 	"time"
 
 	"github.com/ethpandaops/cartographoor/pkg/discovery"
@@ -86,13 +87,24 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 		}
 
 		// Add genesis config if genesis time is provided
-		if staticNet.GenesisTime > 0 {
+		if staticNet.GenesisTime > 0 || staticNet.ConfigURL != "" {
+			u, err := url.Parse(staticNet.ConfigURL)
+			if err != nil {
+				p.log.Errorf("Error parsing config url for static network %s: %v", staticNet.Name, err)
+
+				continue
+			}
+
 			network.GenesisConfig = &discovery.GenesisConfig{
 				GenesisTime: staticNet.GenesisTime,
+				Metadata: []discovery.ConfigFile{
+					{URL: staticNet.ConfigURL, Path: u.Path},
+				},
 			}
 		}
 
 		networks[staticNet.Name] = network
+
 		p.log.WithField("network", staticNet.Name).Info("Discovered static network")
 	}
 
