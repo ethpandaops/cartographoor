@@ -72,7 +72,7 @@ discovery:
                 nimbus: "25.9.2"
                 prysm: "6.1.0"
                 teku: "25.9.3"
-                tysm: "0.42.0"
+                tysm: "0.43.0"
 
       - name: holesky
         description: Long-term public testnet designed for staking/validator testing with high validator counts.
@@ -108,7 +108,7 @@ discovery:
                 nimbus: "25.9.2"
                 prysm: "6.1.0"
                 teku: "25.9.3"
-                tysm: "0.42.0"
+                tysm: "0.43.0"
 
       - name: hoodi
         description: New public testnet (launched March 2025) designed for validator testing and protocol upgrades, replacing Holesky.
@@ -142,7 +142,7 @@ discovery:
                 nimbus: "25.9.2"
                 prysm: "6.1.0"
                 teku: "25.9.3"
-                tysm: "0.42.0"
+                tysm: "0.43.0"
 
   # GitHub discovery configuration
   github:
