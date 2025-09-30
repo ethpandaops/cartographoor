@@ -63,6 +63,15 @@ discovery:
                 nimbus: "25.2.0"
                 prysm: "5.3.0"
                 teku: "25.2.0"
+            fusaka:
+              epoch: 272640
+              minClientVersions:
+                grandine: "2.0.0.rc0"
+                lighthouse: "8.0.0-rc.0"
+                lodestar: "1.35.0-rc.1"
+                nimbus: "25.9.2"
+                prysm: "6.1.0"
+                teku: "25.9.3"
 
       - name: holesky
         description: Long-term public testnet designed for staking/validator testing with high validator counts.
@@ -122,6 +131,15 @@ discovery:
                 nimbus: "25.2.0"
                 prysm: "5.3.0"
                 teku: "25.2.0"
+            fusaka:
+              epoch: 50688
+              minClientVersions:
+                grandine: "2.0.0.rc0"
+                lighthouse: "8.0.0-rc.0"
+                lodestar: "1.35.0-rc.1"
+                nimbus: "25.9.2"
+                prysm: "6.1.0"
+                teku: "25.9.3"
 
   # GitHub discovery configuration
   github:
