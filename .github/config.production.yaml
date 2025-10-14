@@ -41,7 +41,7 @@ discovery:
       - name: sepolia
         description: Smaller testnet for application development with controlled validator set.
         chainId: 11155111
-        genesisTime: 1655726400
+        genesisTime: 1655733600
         configUrl: "https://raw.githubusercontent.com/eth-clients/sepolia/refs/heads/main/metadata/config.yaml"
         serviceUrls:
           dora: https://dora.sepolia.ethpandaops.io
