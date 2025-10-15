@@ -66,10 +66,24 @@ storage:
   maxRetries: 3
   backoffJitterPercent: 20
 
+# Inventory generation configuration
+inventory:
+  validation:
+    # Enable/disable DNS validation of constructed URLs
+    # When enabled, clients with unresolvable hostnames are excluded from inventory
+    # When disabled, all clients are included regardless of DNS validity
+    enabled: true
+
+    # DNS validation timeout per hostname
+    dnsTimeout: 3s
+
+    # Maximum concurrent DNS validations
+    maxConcurrentValidations: 100
+
 # Validator ranges configuration (optional)
 validatorRanges:
   # Additional third-party validator sources
-  # 
+  #
   # Validator Range Distribution:
   # On testnets, validators are typically distributed across multiple organizations.
   # Each organization may number their validators locally starting from 0, but globally
