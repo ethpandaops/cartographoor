@@ -19,20 +19,41 @@ type Service struct {
 	log       *logrus.Entry
 	generator *Generator
 	storage   *s3.Provider
+	config    Config
 }
 
 // NewService creates a new inventory service.
-func NewService(log *logrus.Entry, storageConfig s3.Config) (*Service, error) {
+func NewService(log *logrus.Entry, storageConfig s3.Config, config Config) (*Service, error) {
 	// Create S3 storage provider
 	storage, err := s3.NewProvider(log.Logger, storageConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create storage provider: %w", err)
 	}
 
+	// Create generator with validation configuration
+	generator := NewGenerator(
+		log,
+		config.Validation.Enabled,
+		config.Validation.DNSTimeout,
+		config.Validation.MaxConcurrentValidations,
+	)
+
+	// Log validation configuration
+	if config.Validation.Enabled {
+		log.WithFields(logrus.Fields{
+			"dns_timeout":        config.Validation.DNSTimeout,
+			"max_concurrent":     config.Validation.MaxConcurrentValidations,
+			"validation_enabled": config.Validation.Enabled,
+		}).Info("DNS URL validation enabled for inventory generation")
+	} else {
+		log.Info("DNS URL validation disabled for inventory generation")
+	}
+
 	return &Service{
 		log:       log.WithField("component", "inventory_service"),
-		generator: NewGenerator(log),
+		generator: generator,
 		storage:   storage,
+		config:    config,
 	}, nil
 }
 

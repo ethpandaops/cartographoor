@@ -13,15 +13,25 @@ import (
 
 // Generator is responsible for generating inventory data.
 type Generator struct {
-	log     *logrus.Entry
-	fetcher *Fetcher
+	log               *logrus.Entry
+	fetcher           *Fetcher
+	validator         *Validator
+	validationEnabled bool
 }
 
 // NewGenerator creates a new Generator instance.
-func NewGenerator(log *logrus.Entry) *Generator {
+//
+// Parameters:
+//   - log: logger instance
+//   - validationEnabled: whether URL validation is enabled
+//   - dnsTimeout: timeout for each DNS lookup (e.g., 3*time.Second)
+//   - maxConcurrent: max concurrent validation operations (e.g., 100)
+func NewGenerator(log *logrus.Entry, validationEnabled bool, dnsTimeout time.Duration, maxConcurrent int64) *Generator {
 	return &Generator{
-		log:     log.WithField("component", "inventory_generator"),
-		fetcher: NewFetcher(log),
+		log:               log.WithField("component", "inventory_generator"),
+		fetcher:           NewFetcher(log),
+		validator:         NewValidator(log, dnsTimeout, maxConcurrent),
+		validationEnabled: validationEnabled,
 	}
 }
 
@@ -115,11 +125,14 @@ func (g *Generator) GenerateForNetwork(ctx context.Context, fullNetworkName stri
 		inventory.ExecutionClients = append(inventory.ExecutionClients, clientInfo)
 	}
 
+	inventory.ConsensusClients = g.filterValidClients(ctx, inventory.ConsensusClients, fullNetworkName, "consensus")
+	inventory.ExecutionClients = g.filterValidClients(ctx, inventory.ExecutionClients, fullNetworkName, "execution")
+
 	g.log.WithFields(logrus.Fields{
 		"network":           network.Name,
 		"consensus_clients": len(inventory.ConsensusClients),
 		"execution_clients": len(inventory.ExecutionClients),
-	}).Info("Generated inventory for network")
+	}).Info("Generated and validated inventory for network")
 
 	return inventory, nil
 }
@@ -303,6 +316,58 @@ func (g *Generator) convertMetadata(input map[string]interface{}) map[string]str
 				result[key] = fmt.Sprintf("%v", v)
 			}
 		}
+	}
+
+	return result
+}
+
+// filterValidClients validates each client and excludes clients that fail validation.
+// If ANY URL fails validation for a client, the entire client is excluded.
+// If validation is disabled, all clients are returned without validation.
+func (g *Generator) filterValidClients(ctx context.Context, clients []ClientInfo, fullNetworkName, clientLayer string) []ClientInfo {
+	// If validation is disabled, return all clients
+	if !g.validationEnabled {
+		g.log.WithFields(logrus.Fields{
+			"network": fullNetworkName,
+			"layer":   clientLayer,
+		}).Debug("Validation disabled, skipping client validation")
+
+		return clients
+	}
+
+	if len(clients) == 0 {
+		return clients
+	}
+
+	g.log.WithFields(logrus.Fields{
+		"network": fullNetworkName,
+		"layer":   clientLayer,
+		"count":   len(clients),
+	}).Info("Validating client URLs")
+
+	result := make([]ClientInfo, 0, len(clients))
+	excludedCount := 0
+
+	for _, client := range clients {
+		// Validate the client - if any URL fails, exclude the entire client
+		if err := g.validator.ValidateClient(ctx, client); err != nil {
+			excludedCount++
+
+			continue
+		}
+
+		// Only include clients that pass all validations
+		result = append(result, client)
+	}
+
+	if excludedCount > 0 {
+		g.log.WithFields(logrus.Fields{
+			"network":  fullNetworkName,
+			"layer":    clientLayer,
+			"total":    len(clients),
+			"valid":    len(result),
+			"excluded": excludedCount,
+		}).Info("Excluded clients due to invalid URLs")
 	}
 
 	return result
