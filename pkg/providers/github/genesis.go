@@ -2,85 +2,107 @@ package github
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"path"
 	"strconv"
+
+	"gopkg.in/yaml.v3"
 )
 
-// parseGenesisJSON extracts chainId and genesisTime from genesis.json file.
-func (p *Provider) parseGenesisJSON(
+// parseConfigYAML extracts chainId, genesisTime and genesisDelay from config.yaml file.
+func (p *Provider) parseConfigYAML(
 	ctx context.Context,
 	owner, repo, networkName string,
-) (chainID uint64, genesisTime uint64, err error) {
-	// Construct path to genesis.json
-	genesisPath := path.Join(networkConfigDir, networkName, "metadata", "genesis.json")
+) (chainID uint64, genesisTime uint64, genesisDelay uint64, err error) {
+	// Construct path to config.yaml
+	configPath := path.Join(networkConfigDir, networkName, "metadata", "config.yaml")
 
 	// Try to get file content
-	fileContent, _, _, err := p.githubClient.Repositories.GetContents(ctx, owner, repo, genesisPath, nil)
+	fileContent, _, _, err := p.githubClient.Repositories.GetContents(ctx, owner, repo, configPath, nil)
 	if err != nil {
-		return 0, 0, fmt.Errorf("failed to get genesis.json: %w", err)
+		return 0, 0, 0, fmt.Errorf("failed to get config.yaml: %w", err)
 	}
 
 	// Decode content
 	content, err := fileContent.GetContent()
 	if err != nil {
-		return 0, 0, fmt.Errorf("failed to decode genesis.json content: %w", err)
+		return 0, 0, 0, fmt.Errorf("failed to decode config.yaml content: %w", err)
 	}
 
-	// Parse JSON
-	var genesisData map[string]interface{}
-	if gdErr := json.Unmarshal([]byte(content), &genesisData); gdErr != nil {
-		return 0, 0, fmt.Errorf("failed to parse genesis.json: %w", gdErr)
+	// Parse YAML
+	var configData map[string]interface{}
+	if yamlErr := yaml.Unmarshal([]byte(content), &configData); yamlErr != nil {
+		return 0, 0, 0, fmt.Errorf("failed to parse config.yaml: %w", yamlErr)
 	}
 
-	// Extract chainId
-	config, ok := genesisData["config"].(map[string]interface{})
-	if !ok {
-		return 0, 0, fmt.Errorf("config not found in genesis.json")
-	}
-
-	// Get chainId (could be numeric or string)
-	chainIDVal := config["chainId"]
-
-	switch v := chainIDVal.(type) {
-	case float64:
-		chainID = uint64(v)
-	case json.Number:
-		chainID, err = strconv.ParseUint(string(v), 10, 64)
-		if err != nil {
-			return 0, 0, fmt.Errorf("failed to parse chainId as uint64: %w", err)
-		}
-	case string:
-		chainID, err = strconv.ParseUint(v, 10, 64)
-		if err != nil {
-			return 0, 0, fmt.Errorf("failed to parse chainId as uint64: %w", err)
-		}
-	default:
-		return 0, 0, fmt.Errorf("chainId has unexpected type")
-	}
-
-	// Extract timestamp from genesis.json
-	timestampVal, ok := genesisData["timestamp"]
-	if ok {
-		// Parse timestamp based on its type
-		switch v := timestampVal.(type) {
-		case float64:
-			genesisTime = uint64(v)
-		case json.Number:
-			genesisTime, err = strconv.ParseUint(string(v), 10, 64)
-			if err != nil {
-				p.log.WithError(err).WithField("network", networkName).Debug("Failed to parse timestamp as uint64")
+	// Extract DEPOSIT_CHAIN_ID
+	if depositChainIDVal, ok := configData["DEPOSIT_CHAIN_ID"]; ok {
+		switch v := depositChainIDVal.(type) {
+		case int:
+			if v >= 0 {
+				chainID = uint64(v)
 			}
+		case int64:
+			if v >= 0 {
+				chainID = uint64(v)
+			}
+		case uint64:
+			chainID = v
+		case string:
+			chainID, err = strconv.ParseUint(v, 10, 64)
+			if err != nil {
+				p.log.WithError(err).WithField("network", networkName).Debug("Failed to parse DEPOSIT_CHAIN_ID as uint64")
+			}
+		default:
+			p.log.WithField("network", networkName).Debug("DEPOSIT_CHAIN_ID has unexpected type")
+		}
+	}
+
+	// Extract MIN_GENESIS_TIME
+	if minGenesisTimeVal, ok := configData["MIN_GENESIS_TIME"]; ok {
+		switch v := minGenesisTimeVal.(type) {
+		case int:
+			if v >= 0 {
+				genesisTime = uint64(v)
+			}
+		case int64:
+			if v >= 0 {
+				genesisTime = uint64(v)
+			}
+		case uint64:
+			genesisTime = v
 		case string:
 			genesisTime, err = strconv.ParseUint(v, 10, 64)
 			if err != nil {
-				p.log.WithError(err).WithField("network", networkName).Debug("Failed to parse timestamp as uint64")
+				p.log.WithError(err).WithField("network", networkName).Debug("Failed to parse MIN_GENESIS_TIME as uint64")
 			}
 		default:
-			p.log.WithField("network", networkName).Debug("Timestamp has unexpected type")
+			p.log.WithField("network", networkName).Debug("MIN_GENESIS_TIME has unexpected type")
 		}
 	}
 
-	return chainID, genesisTime, nil
+	// Extract GENESIS_DELAY
+	if genesisDelayVal, ok := configData["GENESIS_DELAY"]; ok {
+		switch v := genesisDelayVal.(type) {
+		case int:
+			if v >= 0 {
+				genesisDelay = uint64(v)
+			}
+		case int64:
+			if v >= 0 {
+				genesisDelay = uint64(v)
+			}
+		case uint64:
+			genesisDelay = v
+		case string:
+			genesisDelay, err = strconv.ParseUint(v, 10, 64)
+			if err != nil {
+				p.log.WithError(err).WithField("network", networkName).Debug("Failed to parse GENESIS_DELAY as uint64")
+			}
+		default:
+			p.log.WithField("network", networkName).Debug("GENESIS_DELAY has unexpected type")
+		}
+	}
+
+	return chainID, genesisTime, genesisDelay, nil
 }

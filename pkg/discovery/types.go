@@ -57,6 +57,7 @@ type GenesisConfig struct {
 	Metadata       []ConfigFile `json:"metadata,omitempty"`
 	API            []ConfigFile `json:"api,omitempty"`
 	GenesisTime    uint64       `json:"genesisTime,omitempty"`
+	GenesisDelay   uint64       `json:"genesisDelay,omitempty"`
 }
 
 // ConfigFile represents a configuration file URL.
@@ -122,13 +123,14 @@ type GitHubRepositoryConfig struct {
 
 // StaticNetworkConfig represents the configuration for a static network.
 type StaticNetworkConfig struct {
-	Name        string            `mapstructure:"name"`
-	Description string            `mapstructure:"description"`
-	ChainID     uint64            `mapstructure:"chainId"`
-	GenesisTime uint64            `mapstructure:"genesisTime"`
-	ConfigURL   string            `mapstructure:"configUrl"`
-	ServiceURLs map[string]string `mapstructure:"serviceUrls"`
-	Forks       *ForksConfig      `mapstructure:"forks"`
+	Name         string            `mapstructure:"name"`
+	Description  string            `mapstructure:"description"`
+	ChainID      uint64            `mapstructure:"chainId"`
+	GenesisTime  uint64            `mapstructure:"genesisTime"`
+	GenesisDelay uint64            `mapstructure:"genesisDelay"`
+	ConfigURL    string            `mapstructure:"configUrl"`
+	ServiceURLs  map[string]string `mapstructure:"serviceUrls"`
+	Forks        *ForksConfig      `mapstructure:"forks"`
 }
 
 // ForksConfig represents fork configuration for both consensus and execution layers.
