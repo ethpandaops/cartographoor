@@ -96,7 +96,8 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 			}
 
 			network.GenesisConfig = &discovery.GenesisConfig{
-				GenesisTime: staticNet.GenesisTime,
+				GenesisTime:  staticNet.GenesisTime,
+				GenesisDelay: staticNet.GenesisDelay,
 				Metadata: []discovery.ConfigFile{
 					{URL: staticNet.ConfigURL, Path: u.Path},
 				},
