@@ -18,8 +18,8 @@ discovery:
       - name: mainnet
         description: Production Ethereum network
         chainId: 1
-        genesisTime: 1606824000
-        genesisDelay: 604800
+        genesisTime: 1606824023
+        genesisDelay: 0
         configUrl: "https://raw.githubusercontent.com/eth-clients/mainnet/refs/heads/main/metadata/config.yaml"
         serviceUrls:
           ethstats: https://ethstats.mainnet.ethpandaops.io
@@ -42,8 +42,8 @@ discovery:
       - name: sepolia
         description: Smaller testnet for application development with controlled validator set.
         chainId: 11155111
-        genesisTime: 1655647200
-        genesisDelay: 86400
+        genesisTime: 1655733600
+        genesisDelay: 0
         configUrl: "https://raw.githubusercontent.com/eth-clients/sepolia/refs/heads/main/metadata/config.yaml"
         serviceUrls:
           dora: https://dora.sepolia.ethpandaops.io
@@ -79,8 +79,8 @@ discovery:
       - name: holesky
         description: Long-term public testnet designed for staking/validator testing with high validator counts.
         chainId: 17000
-        genesisTime: 1695902100
-        genesisDelay: 300
+        genesisTime: 1695902400
+        genesisDelay: 0
         configUrl: "https://raw.githubusercontent.com/eth-clients/holesky/refs/heads/main/metadata/config.yaml"
         serviceUrls:
           dora: https://dora.holesky.ethpandaops.io
@@ -116,8 +116,8 @@ discovery:
       - name: hoodi
         description: New public testnet (launched March 2025) designed for validator testing and protocol upgrades, replacing Holesky.
         chainId: 560048
-        genesisTime: 1742212800
-        genesisDelay: 600
+        genesisTime: 1742213400
+        genesisDelay: 0
         configUrl: "https://raw.githubusercontent.com/eth-clients/hoodi/refs/heads/main/metadata/config.yaml"
         serviceUrls:
           dora: https://dora.hoodi.ethpandaops.io
