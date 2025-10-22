@@ -18,7 +18,7 @@ discovery:
       - name: mainnet
         description: Production Ethereum network
         chainId: 1
-        genesisTime: 1606824000
+        genesisTime: 1606824023
         genesisDelay: 604800
         configUrl: "https://raw.githubusercontent.com/eth-clients/mainnet/refs/heads/main/metadata/config.yaml"
         serviceUrls:
