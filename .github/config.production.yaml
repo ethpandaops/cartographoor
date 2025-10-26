@@ -141,11 +141,11 @@ discovery:
               epoch: 50688
               minClientVersions:
                 grandine: "2.0.0.rc0"
-                lighthouse: "8.0.0-rc.0"
-                lodestar: "1.35.0-rc.1"
+                lighthouse: "8.0.0-rc.2"
+                lodestar: "1.35.0"
                 nimbus: "25.9.2"
-                prysm: "6.1.0"
-                teku: "25.9.3"
+                prysm: "6.1.3"
+                teku: "25.10.0"
                 tysm: "0.43.0"
 
   # GitHub discovery configuration
