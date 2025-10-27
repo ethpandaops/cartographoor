@@ -114,6 +114,8 @@ func (p *Provider) parseConfigYAML(
 
 // extractForkEpochs extracts fork epochs from the config data.
 func (p *Provider) extractForkEpochs(configData map[string]interface{}, networkName string) *discovery.ForksConfig {
+	const farFutureEpoch = uint64(18446744073709551615)
+
 	consensusForks := make(map[string]discovery.ForkConfig)
 
 	for key, value := range configData {
@@ -130,6 +132,13 @@ func (p *Provider) extractForkEpochs(configData map[string]interface{}, networkN
 		// Parse epoch value
 		epoch, ok := p.parseEpochValue(value, networkName, forkName)
 		if !ok {
+			continue
+		}
+
+		// Skip forks set to FAR_FUTURE_EPOCH (not scheduled)
+		if epoch == farFutureEpoch {
+			p.log.WithField("network", networkName).WithField("fork", forkName).Debug("Skipping fork with FAR_FUTURE_EPOCH")
+
 			continue
 		}
 
