@@ -143,8 +143,8 @@ func (p *Provider) createNetwork(ctx context.Context, config *NetworkConfig) dis
 			network.HiveURL = config.HiveURL
 		}
 
-		// Try to extract chainId, genesisTime and genesisDelay from config.yaml
-		chainID, genesisTime, genesisDelay, err := p.parseConfigYAML(ctx, config.Owner, config.Repo, config.Name)
+		// Try to extract chainId, genesisTime, genesisDelay and fork epochs from config.yaml
+		chainID, genesisTime, genesisDelay, forks, err := p.parseConfigYAML(ctx, config.Owner, config.Repo, config.Name)
 		if err == nil {
 			// Set the ChainID in the Network struct
 			network.ChainID = chainID
@@ -153,6 +153,11 @@ func (p *Provider) createNetwork(ctx context.Context, config *NetworkConfig) dis
 			if network.GenesisConfig != nil {
 				network.GenesisConfig.GenesisTime = genesisTime
 				network.GenesisConfig.GenesisDelay = genesisDelay
+			}
+
+			// Set the Forks in the Network struct if any forks were found
+			if forks != nil {
+				network.Forks = forks
 			}
 		} else {
 			p.log.WithError(err).WithField("network", config.Name).Debug("Failed to parse config.yaml")
