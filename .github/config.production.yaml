@@ -38,6 +38,16 @@ discovery:
                 nimbus: "25.4.1"
                 prysm: "6.0.0"
                 teku: "25.4.1"
+            fusaka:
+              epoch: 411392
+              minClientVersions:
+                grandine: ""
+                lighthouse: ""
+                lodestar: ""
+                nimbus: "25.11.0"
+                prysm: ""
+                teku: "25.11.0"
+                tysm: ""
 
       - name: sepolia
         description: Smaller testnet for application development with controlled validator set.
