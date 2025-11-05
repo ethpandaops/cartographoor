@@ -22,6 +22,7 @@ type Network struct {
 	HiveURL       string         `json:"hiveUrl,omitempty"`
 	SelfHostedDNS bool           `json:"selfHostedDns"`
 	Forks         *ForksConfig   `json:"forks,omitempty"`
+	BlobSchedule  []BlobSchedule `json:"blobSchedule,omitempty"`
 }
 
 // Link represents a related link with title and URL.
@@ -185,4 +186,10 @@ type ClientImage struct {
 type ToolImage struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
+}
+
+// BlobSchedule represents a blob capacity increase at a specific epoch.
+type BlobSchedule struct {
+	Epoch            uint64 `json:"epoch" mapstructure:"epoch"`
+	MaxBlobsPerBlock uint64 `json:"maxBlobsPerBlock" mapstructure:"maxBlobsPerBlock"`
 }
