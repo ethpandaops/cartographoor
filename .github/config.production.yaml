@@ -47,7 +47,7 @@ discovery:
                 prysm: "6.0.0"
                 teku: "25.4.1"
             fulu:
-              epoch: 364032
+              epoch: 411392
 
 
       - name: sepolia
