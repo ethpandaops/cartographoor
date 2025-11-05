@@ -3,6 +3,7 @@ package static
 import (
 	"context"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/ethpandaops/cartographoor/pkg/discovery"
@@ -40,16 +41,16 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 		serviceURLs := &discovery.ServiceURLs{}
 
 		for key, value := range staticNet.ServiceURLs {
-			switch key {
+			switch strings.ToLower(key) {
 			case "faucet":
 				serviceURLs.Faucet = value
-			case "jsonRpc":
+			case "jsonrpc":
 				serviceURLs.JSONRPC = value
-			case "beaconRpc":
+			case "beaconrpc":
 				serviceURLs.BeaconRPC = value
-			case "explorer":
+			case "explorer", "etherscan":
 				serviceURLs.Explorer = value
-			case "beaconExplorer":
+			case "beaconexplorer":
 				serviceURLs.BeaconExplorer = value
 			case "forkmon":
 				serviceURLs.Forkmon = value
@@ -57,15 +58,15 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 				serviceURLs.Assertoor = value
 			case "dora":
 				serviceURLs.Dora = value
-			case "checkpointSync":
+			case "checkpointsync":
 				serviceURLs.CheckpointSync = value
 			case "blobscan":
 				serviceURLs.Blobscan = value
 			case "ethstats":
 				serviceURLs.Ethstats = value
-			case "devnetSpec":
+			case "devnetspec":
 				serviceURLs.DevnetSpec = value
-			case "blobArchive":
+			case "blobarchive":
 				serviceURLs.BlobArchive = value
 			case "forky":
 				serviceURLs.Forky = value
