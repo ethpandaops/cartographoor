@@ -22,11 +22,14 @@ discovery:
         genesisDelay: 0
         configUrl: "https://raw.githubusercontent.com/eth-clients/mainnet/refs/heads/main/metadata/config.yaml"
         serviceUrls:
+          dora: https://light-mainnet.beaconcha.in
+          beaconExplorer: https://beaconcha.in
           ethstats: https://ethstats.mainnet.ethpandaops.io
           forkmon: https://forkmon.mainnet.ethpandaops.io
           blobArchive: https://blob-archive.mainnet.ethpandaops.io
           forky: https://forky.mainnet.ethpandaops.io
           tracoor: https://tracoor.mainnet.ethpandaops.io
+          etherscan: https://etherscan.io
         forks:
           consensus:
             altair:
@@ -58,13 +61,14 @@ discovery:
         configUrl: "https://raw.githubusercontent.com/eth-clients/sepolia/refs/heads/main/metadata/config.yaml"
         serviceUrls:
           dora: https://dora.sepolia.ethpandaops.io
-          beaconExplorer: https://dora.sepolia.ethpandaops.io
+          beaconExplorer: https://light-sepolia.beaconcha.in
           checkpointSync: https://checkpoint-sync.sepolia.ethpandaops.io
           ethstats: https://ethstats.sepolia.ethpandaops.io
           forkmon: https://forkmon.sepolia.ethpandaops.io
           blobArchive: https://blob-archive.sepolia.ethpandaops.io
           forky: https://forky.sepolia.ethpandaops.io
           tracoor: https://tracoor.sepolia.ethpandaops.io
+          etherscan: https://sepolia.etherscan.io
         forks:
           consensus:
             altair:
@@ -150,11 +154,12 @@ discovery:
         configUrl: "https://raw.githubusercontent.com/eth-clients/hoodi/refs/heads/main/metadata/config.yaml"
         serviceUrls:
           dora: https://dora.hoodi.ethpandaops.io
-          beaconExplorer: https://dora.hoodi.ethpandaops.io
+          beaconExplorer: https://hoodi.beaconcha.in
           checkpointSync: https://checkpoint-sync.hoodi.ethpandaops.io
           forkmon: https://forkmon.hoodi.ethpandaops.io
           forky: https://forky.hoodi.ethpandaops.io
           tracoor: https://tracoor.hoodi.ethpandaops.io
+          etherscan: https://hoodi.etherscan.io
         forks:
           consensus:
             altair:

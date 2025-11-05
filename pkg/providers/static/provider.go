@@ -38,6 +38,7 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 	for _, staticNet := range config.Static.Networks {
 		// Map service URLs from config to ServiceURLs struct
 		serviceURLs := &discovery.ServiceURLs{}
+
 		for key, value := range staticNet.ServiceURLs {
 			switch key {
 			case "faucet":
