@@ -52,9 +52,9 @@ discovery:
             fulu:
               epoch: 411392
         blobSchedule:
-        - epoch: 412672  # December 9, 2025, 02:21:11pm UTC
+        - epoch: 412672
           maxBlobsPerBlock: 15
-        - epoch: 419072  # January 7, 2026, 01:01:11am UTC
+        - epoch: 419072
           maxBlobsPerBlock: 21
 
       - name: sepolia
