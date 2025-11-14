@@ -132,6 +132,7 @@ type StaticNetworkConfig struct {
 	ConfigURL    string            `mapstructure:"configUrl"`
 	ServiceURLs  map[string]string `mapstructure:"serviceUrls"`
 	Forks        *ForksConfig      `mapstructure:"forks"`
+	BlobSchedule []BlobSchedule    `mapstructure:"blobSchedule"`
 }
 
 // ForksConfig represents fork configuration for both consensus and execution layers.

@@ -414,3 +414,92 @@ func TestProvider_Discover(t *testing.T) {
 	assert.Equal(t, "https://dora.hoodi.ethpandaops.io", hoodi.ServiceURLs.BeaconExplorer)
 	assert.Equal(t, "https://checkpoint-sync.hoodi.ethpandaops.io", hoodi.ServiceURLs.CheckpointSync)
 }
+
+func TestProvider_DiscoverWithBlobSchedule(t *testing.T) {
+	log := logrus.New()
+	provider, err := NewProvider(log)
+	require.NoError(t, err)
+
+	t.Run("network with blob schedule", func(t *testing.T) {
+		config := discovery.Config{}
+		config.Static.Networks = []discovery.StaticNetworkConfig{
+			{
+				Name:        "test-mainnet",
+				Description: "Test network with blob schedule",
+				ChainID:     1,
+				GenesisTime: 1606824023,
+				ServiceURLs: map[string]string{
+					"ethstats": "https://ethstats.test.io",
+				},
+				BlobSchedule: []discovery.BlobSchedule{
+					{
+						Epoch:            412672,
+						MaxBlobsPerBlock: 15,
+					},
+					{
+						Epoch:            419072,
+						MaxBlobsPerBlock: 21,
+					},
+				},
+			},
+		}
+
+		networks, err := provider.Discover(context.Background(), config)
+		require.NoError(t, err)
+		require.Len(t, networks, 1)
+
+		network := networks["test-mainnet"]
+		require.NotNil(t, network.BlobSchedule)
+		require.Len(t, network.BlobSchedule, 2)
+
+		assert.Equal(t, uint64(412672), network.BlobSchedule[0].Epoch)
+		assert.Equal(t, uint64(15), network.BlobSchedule[0].MaxBlobsPerBlock)
+		assert.Equal(t, uint64(419072), network.BlobSchedule[1].Epoch)
+		assert.Equal(t, uint64(21), network.BlobSchedule[1].MaxBlobsPerBlock)
+	})
+
+	t.Run("network without blob schedule", func(t *testing.T) {
+		config := discovery.Config{}
+		config.Static.Networks = []discovery.StaticNetworkConfig{
+			{
+				Name:        "test-network",
+				Description: "Test network without blob schedule",
+				ChainID:     1000,
+				GenesisTime: 1700000000,
+				ServiceURLs: map[string]string{
+					"ethstats": "https://ethstats.test.io",
+				},
+				// No BlobSchedule field
+			},
+		}
+
+		networks, err := provider.Discover(context.Background(), config)
+		require.NoError(t, err)
+		require.Len(t, networks, 1)
+
+		network := networks["test-network"]
+		assert.Nil(t, network.BlobSchedule)
+	})
+
+	t.Run("network with empty blob schedule", func(t *testing.T) {
+		config := discovery.Config{}
+		config.Static.Networks = []discovery.StaticNetworkConfig{
+			{
+				Name:         "test-holesky",
+				Description:  "Test network with empty blob schedule",
+				ChainID:      17000,
+				GenesisTime:  1695902400,
+				ServiceURLs:  map[string]string{"ethstats": "https://ethstats.test.io"},
+				BlobSchedule: []discovery.BlobSchedule{},
+			},
+		}
+
+		networks, err := provider.Discover(context.Background(), config)
+		require.NoError(t, err)
+		require.Len(t, networks, 1)
+
+		network := networks["test-holesky"]
+		assert.NotNil(t, network.BlobSchedule)
+		assert.Len(t, network.BlobSchedule, 0)
+	})
+}
