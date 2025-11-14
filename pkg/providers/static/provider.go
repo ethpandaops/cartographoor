@@ -79,13 +79,14 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 
 		// Create network from configuration
 		network := discovery.Network{
-			Name:        staticNet.Name,
-			Description: staticNet.Description,
-			Status:      "active", // All configured networks are active by definition
-			ChainID:     staticNet.ChainID,
-			LastUpdated: time.Now(),
-			ServiceURLs: serviceURLs,
-			Forks:       staticNet.Forks,
+			Name:         staticNet.Name,
+			Description:  staticNet.Description,
+			Status:       "active", // All configured networks are active by definition
+			ChainID:      staticNet.ChainID,
+			LastUpdated:  time.Now(),
+			ServiceURLs:  serviceURLs,
+			Forks:        staticNet.Forks,
+			BlobSchedule: staticNet.BlobSchedule,
 		}
 
 		// Add genesis config if genesis time is provided
