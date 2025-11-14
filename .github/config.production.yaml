@@ -51,7 +51,11 @@ discovery:
                 teku: "25.4.1"
             fulu:
               epoch: 411392
-
+        blobSchedule:
+        - epoch: 412672  # December 9, 2025, 02:21:11pm UTC
+          maxBlobsPerBlock: 15
+        - epoch: 419072  # January 7, 2026, 01:01:11am UTC
+          maxBlobsPerBlock: 21
 
       - name: sepolia
         description: Smaller testnet for application development with controlled validator set.
@@ -108,6 +112,11 @@ discovery:
                 prysm: "6.1.0"
                 teku: "25.9.3"
                 tysm: "0.43.0"
+        blobSchedule:
+        - epoch: 274176
+          maxBlobsPerBlock: 15
+        - epoch: 275712
+          maxBlobsPerBlock: 21
 
       - name: holesky
         description: Long-term public testnet designed for staking/validator testing with high validator counts.
@@ -199,6 +208,11 @@ discovery:
                 prysm: "6.1.3"
                 teku: "25.10.0"
                 tysm: "0.43.0"
+        blobSchedule:
+        - epoch: 52480
+          maxBlobsPerBlock: 15
+        - epoch: 54016
+          maxBlobsPerBlock: 21
 
   # GitHub discovery configuration
   github:
