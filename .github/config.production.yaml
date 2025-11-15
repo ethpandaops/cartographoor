@@ -51,6 +51,14 @@ discovery:
                 teku: "25.4.1"
             fulu:
               epoch: 411392
+              minClientVersions:
+                grandine: "2.0.0"
+                lighthouse: "8.0.0"
+                lodestar: "1.36.0"
+                nimbus: "25.11.0"
+                prysm: "7.0.0"
+                teku: "25.11.0"
+                # tysm: "0.43.0"
         blobSchedule:
         - epoch: 412672
           maxBlobsPerBlock: 15
