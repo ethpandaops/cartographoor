@@ -58,7 +58,7 @@ discovery:
                 nimbus: "25.11.0"
                 prysm: "7.0.0"
                 teku: "25.11.0"
-                # tysm: "0.43.0"
+                tysm: "0.49.0"
         blobSchedule:
         - epoch: 412672
           maxBlobsPerBlock: 15
