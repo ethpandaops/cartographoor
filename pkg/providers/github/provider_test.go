@@ -314,7 +314,7 @@ func TestServiceURLs(t *testing.T) {
 		})
 
 		t.Run("Blobscan", func(t *testing.T) {
-			blobscanURL := specialServicePatterns["blobscan"]("test-domain.com")
+			blobscanURL := specialServicePatterns["blobscan"]("mainnet.test-domain.com")
 			assert.Equal(t, "https://blobscan.com", blobscanURL)
 		})
 
