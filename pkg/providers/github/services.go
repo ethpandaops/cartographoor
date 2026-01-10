@@ -198,7 +198,7 @@ func (p *Provider) getServiceURLs(ctx context.Context, domain string) *discovery
 
 // isURLValid checks if a URL is reachable.
 func (p *Provider) isURLValid(ctx context.Context, client *http.Client, url string) bool {
-	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return false
 	}
