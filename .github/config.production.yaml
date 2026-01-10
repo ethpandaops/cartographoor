@@ -126,45 +126,8 @@ discovery:
         - epoch: 275712
           maxBlobsPerBlock: 21
 
-      - name: holesky
-        description: Long-term public testnet designed for staking/validator testing with high validator counts.
-        chainId: 17000
-        genesisTime: 1695902400
-        genesisDelay: 0
-        configUrl: "https://raw.githubusercontent.com/eth-clients/holesky/refs/heads/main/metadata/config.yaml"
-        serviceUrls:
-          dora: https://dora.holesky.ethpandaops.io
-          beaconExplorer: https://dora.holesky.ethpandaops.io
-          checkpointSync: https://checkpoint-sync.holesky.ethpandaops.io
-          ethstats: https://ethstats.holesky.ethpandaops.io
-          forkmon: https://forkmon.holesky.ethpandaops.io
-          blobArchive: https://blob-archive.holesky.ethpandaops.io
-          forky: https://forky.holesky.ethpandaops.io
-          tracoor: https://tracoor.holesky.ethpandaops.io
-        forks:
-          consensus:
-            electra:
-              epoch: 115968
-              minClientVersions:
-                grandine: "1.0.0"
-                lighthouse: "7.0.0-beta.0"
-                lodestar: "1.27.0"
-                nimbus: "25.2.0"
-                prysm: "5.3.0"
-                teku: "25.2.0"
-            fusaka:
-              epoch: 165120
-              minClientVersions:
-                grandine: "2.0.0.rc0"
-                lighthouse: "8.0.0-rc.0"
-                lodestar: "1.35.0-rc.1"
-                nimbus: "25.9.2"
-                prysm: "6.1.0"
-                teku: "25.9.3"
-                tysm: "0.43.0"
-
       - name: hoodi
-        description: New public testnet (launched March 2025) designed for validator testing and protocol upgrades, replacing Holesky.
+        description: Long-term public testnet designed for staking/validator testing with high validator counts.
         chainId: 560048
         genesisTime: 1742213400
         genesisDelay: 0
