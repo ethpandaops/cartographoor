@@ -9,11 +9,28 @@ import (
 )
 
 // HelmChartParser parses Helm chart values.yaml files to extract base commands.
-type HelmChartParser struct{}
+type HelmChartParser struct {
+	portOverrides PortOverrides
+}
 
-// NewHelmChartParser creates a new HelmChartParser.
-func NewHelmChartParser() *HelmChartParser {
-	return &HelmChartParser{}
+// NewHelmChartParser creates a new HelmChartParser with optional port overrides.
+func NewHelmChartParser(portOverrides PortOverrides) *HelmChartParser {
+	return &HelmChartParser{
+		portOverrides: portOverrides,
+	}
+}
+
+// resolvePort returns the first non-zero value from: override, helmValue, defaultValue.
+func (p *HelmChartParser) resolvePort(override, helmValue, defaultValue int) int {
+	if override != 0 {
+		return override
+	}
+
+	if helmValue != 0 {
+		return helmValue
+	}
+
+	return defaultValue
 }
 
 // ParseBaseCommand parses a Helm chart values.yaml and extracts the base command arguments.
@@ -36,26 +53,12 @@ func (p *HelmChartParser) ParseBaseCommand(valuesYAML []byte, client string) ([]
 		}
 	}
 
-	// Set defaults if not specified
-	if values.HTTPPort == 0 {
-		values.HTTPPort = 8545
-	}
-
-	if values.WSPort == 0 {
-		values.WSPort = 8546
-	}
-
-	if values.AuthPort == 0 {
-		values.AuthPort = 8551
-	}
-
-	if values.MetricsPort == 0 {
-		values.MetricsPort = 9545
-	}
-
-	if values.P2PPort == 0 {
-		values.P2PPort = 30303
-	}
+	// Apply port overrides from config, falling back to helm chart values, then defaults
+	values.HTTPPort = p.resolvePort(p.portOverrides.HTTPPort, values.HTTPPort, 8545)
+	values.WSPort = p.resolvePort(p.portOverrides.WSPort, values.WSPort, 8546)
+	values.AuthPort = p.resolvePort(p.portOverrides.AuthPort, values.AuthPort, 8551)
+	values.MetricsPort = p.resolvePort(p.portOverrides.MetricsPort, values.MetricsPort, 9545)
+	values.P2PPort = p.resolvePort(p.portOverrides.P2PPort, values.P2PPort, 30303)
 
 	// Render the template to extract arguments
 	args := p.renderTemplate(template, values, client)

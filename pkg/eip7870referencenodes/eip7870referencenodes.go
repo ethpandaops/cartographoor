@@ -69,8 +69,21 @@ type Config struct {
 	// SecretPatterns is a list of patterns to redact in the output.
 	SecretPatterns []string `mapstructure:"secretPatterns"`
 
+	// PortOverrides allows overriding default port values from helm charts.
+	// This is useful when production uses different ports than helm chart defaults.
+	PortOverrides PortOverrides `mapstructure:"portOverrides"`
+
 	// Storage configuration for the output file.
 	Storage StorageConfig `mapstructure:"storage"`
+}
+
+// PortOverrides contains port values to override helm chart defaults.
+type PortOverrides struct {
+	HTTPPort    int `mapstructure:"httpPort"`
+	WSPort      int `mapstructure:"wsPort"`
+	AuthPort    int `mapstructure:"authPort"`
+	MetricsPort int `mapstructure:"metricsPort"`
+	P2PPort     int `mapstructure:"p2pPort"`
 }
 
 // RepositoryConfig contains GitHub repository configuration.

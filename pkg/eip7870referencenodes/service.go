@@ -39,7 +39,7 @@ func NewService(
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
-		helmParser:     NewHelmChartParser(),
+		helmParser:     NewHelmChartParser(config.PortOverrides),
 		platformParser: NewPlatformParser(config.SecretPatterns),
 		commandBuilder: NewCommandBuilder(),
 		logger:         log.WithField("module", "eip7870_reference_nodes"),
