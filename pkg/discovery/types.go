@@ -49,6 +49,7 @@ type ServiceURLs struct {
 	Forky          string `json:"forky,omitempty"`
 	Tracoor        string `json:"tracoor,omitempty"`
 	Syncoor        string `json:"syncoor,omitempty"`
+	Cbt            string `json:"cbt,omitempty"`
 }
 
 // GenesisConfig represents the configuration URLs for a network.
