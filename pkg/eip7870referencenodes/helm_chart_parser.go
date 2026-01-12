@@ -251,9 +251,16 @@ func (p *HelmChartParser) processPureTemplateLine(line string, bs *blockStack) {
 
 // shouldSkipLine returns true if the line should be skipped.
 func (p *HelmChartParser) shouldSkipLine(line string) bool {
-	// Skip lines that use POD_IP (we want EXTERNAL_IP)
+	// Skip lines where $(POD_IP) is used as a substitute for EXTERNAL_IP
+	// (e.g., --nat=extip:$(POD_IP) in non-NodePort mode)
+	// But keep lines where $(POD_IP) is used for a different purpose
+	// (e.g., --Network.LocalIp=$(POD_IP) which is the local bind address)
 	if strings.Contains(line, "$(POD_IP)") {
-		return true
+		// Skip if POD_IP is used in nat/extip context (alternative to EXTERNAL_IP)
+		if strings.Contains(line, "nat=") || strings.Contains(line, "extip") {
+			return true
+		}
+		// Keep other uses of POD_IP (like LocalIp, which is a different setting)
 	}
 
 	// Skip lines with include functions for P2P port (we use EXTERNAL_PORT)

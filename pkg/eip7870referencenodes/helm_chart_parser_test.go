@@ -428,3 +428,53 @@ func TestHelmChartParser_RealGethChart(t *testing.T) {
 		t.Logf("  [%d] %s", i, arg)
 	}
 }
+
+// TestHelmChartParser_RealNethermindChart tests parsing against the actual nethermind helm chart.
+// Specifically verifies that --Network.LocalIp=$(POD_IP) is included.
+func TestHelmChartParser_RealNethermindChart(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
+
+	parser := NewHelmChartParser()
+	valuesYAML := fetchHelmChartValues(t, "nethermind")
+
+	args, err := parser.ParseBaseCommand(valuesYAML, "nethermind")
+	require.NoError(t, err)
+
+	// Verify essential args are present
+	assert.NotEmpty(t, args, "Should have parsed some args")
+
+	// Check for specific nethermind args
+	foundLocalIP := false
+	foundExternalIP := false
+	foundDataPath := false
+
+	for _, arg := range args {
+		if strings.HasPrefix(arg, "--Network.LocalIp=") {
+			foundLocalIP = true
+			// Verify it uses POD_IP
+			assert.Contains(t, arg, "$(POD_IP)", "LocalIp should use POD_IP")
+		}
+
+		if strings.HasPrefix(arg, "--Network.ExternalIp=") {
+			foundExternalIP = true
+			// Verify it uses EXTERNAL_IP
+			assert.Contains(t, arg, "$EXTERNAL_IP", "ExternalIp should use EXTERNAL_IP")
+		}
+
+		if strings.HasPrefix(arg, "--datadir=") {
+			foundDataPath = true
+		}
+	}
+
+	assert.True(t, foundLocalIP, "Should have --Network.LocalIp arg")
+	assert.True(t, foundExternalIP, "Should have --Network.ExternalIp arg")
+	assert.True(t, foundDataPath, "Should have --datadir arg")
+
+	// Log all parsed args for visibility
+	t.Logf("Parsed %d args from real nethermind chart:", len(args))
+	for i, arg := range args {
+		t.Logf("  [%d] %s", i, arg)
+	}
+}
