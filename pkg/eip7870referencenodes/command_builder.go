@@ -76,7 +76,9 @@ func (b *CommandBuilder) BuildCommand(
 
 // buildCommandString creates the complete command string from args breakdown.
 func (b *CommandBuilder) buildCommandString(client string, args ArgsBreakdown) string {
-	var allArgs []string
+	// Preallocate with capacity: 1 (client) + base + client-specific + feature args
+	capacity := 1 + len(args.Base) + len(args.ClientSpecific) + len(args.Feature7870)
+	allArgs := make([]string, 0, capacity)
 
 	// Start with the client binary
 	allArgs = append(allArgs, client)
