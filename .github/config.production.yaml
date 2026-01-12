@@ -339,6 +339,7 @@ eip7870ReferenceNodes:
     - reth
     - nethermind
     - erigon
+    - ethrex
 
   # Patterns to redact in output (secrets)
   secretPatterns:
