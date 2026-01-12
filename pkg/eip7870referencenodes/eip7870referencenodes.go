@@ -19,7 +19,6 @@ type ClientCommand struct {
 	StartupCommand string            `json:"startupCommand"`
 	ArgsBreakdown  ArgsBreakdown     `json:"argsBreakdown"`
 	EnvVars        map[string]string `json:"envVars,omitempty"`
-	Notes          string            `json:"notes,omitempty"`
 }
 
 // ImageInfo contains container image information.
@@ -94,6 +93,9 @@ type StorageConfig struct {
 
 // HelmChartValues represents the parsed values from a Helm chart values.yaml.
 type HelmChartValues struct {
+	// DefaultCommandArgsTemplate is used by some clients (reth, besu, etc.)
+	DefaultCommandArgsTemplate string `yaml:"defaultCommandArgsTemplate"`
+	// DefaultCommandTemplate is used by clients that inline args (geth, erigon, etc.)
 	DefaultCommandTemplate string `yaml:"defaultCommandTemplate"`
 	HTTPPort               int    `yaml:"httpPort"`
 	WSPort                 int    `yaml:"wsPort"`
@@ -160,10 +162,11 @@ var ClientDisplayNames = map[string]string{
 	"reth":       "Reth",
 	"nethermind": "Nethermind",
 	"erigon":     "Erigon",
+	"ethrex":     "Ethrex",
 }
 
 // DefaultClients is the default list of execution clients to process.
-var DefaultClients = []string{"besu", "geth", "reth", "nethermind", "erigon"}
+var DefaultClients = []string{"besu", "geth", "reth", "nethermind", "erigon", "ethrex"}
 
 // DefaultSecretPatterns is the default list of patterns to redact.
 var DefaultSecretPatterns = []string{

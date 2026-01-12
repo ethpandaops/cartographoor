@@ -35,9 +35,10 @@ type ClientOverlay struct {
 
 // FeatureOverlay contains the parsed feature-specific configuration.
 type FeatureOverlay struct {
-	Args    []string
-	EnvVars map[string]string
-	Image   *ImageInfo // Optional override from feature
+	Args              []string
+	EnvVars           map[string]string
+	Image             *ImageInfo // Optional override from feature
+	HasKeelAutoUpdate bool       // Whether Keel auto-update is configured
 }
 
 // ParseClientConfig parses a client configuration YAML file from the platform repo.
@@ -142,6 +143,11 @@ func (p *PlatformParser) ParseFeatureConfig(yamlData []byte, client string) (*Fe
 				Repository: clientConfig.Image.Repository,
 				Tag:        clientConfig.Image.Tag,
 			}
+		}
+
+		// Check for Keel auto-update annotations
+		if _, hasKeel := clientConfig.Annotations["keel.sh/policy"]; hasKeel {
+			overlay.HasKeelAutoUpdate = true
 		}
 	}
 

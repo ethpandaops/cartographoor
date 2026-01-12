@@ -59,13 +59,6 @@ func (b *CommandBuilder) BuildCommand(
 	// Build the complete startup command string
 	cmd.StartupCommand = b.buildCommandString(client, cmd.ArgsBreakdown)
 
-	// Add notes about Keel auto-updates if applicable
-	if len(cmd.EnvVars) > 0 {
-		cmd.Notes = "Image auto-updates via Keel every 60 minutes. OTLP tracing enabled for EIP-7870."
-	} else {
-		cmd.Notes = "Image auto-updates via Keel every 60 minutes"
-	}
-
 	// Remove empty env vars map
 	if len(cmd.EnvVars) == 0 {
 		cmd.EnvVars = nil
