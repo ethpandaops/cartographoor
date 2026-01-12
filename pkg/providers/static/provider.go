@@ -74,6 +74,8 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 				serviceURLs.Tracoor = value
 			case "syncoor":
 				serviceURLs.Syncoor = value
+			case "cbt":
+				serviceURLs.Cbt = value
 			}
 		}
 

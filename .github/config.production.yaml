@@ -30,6 +30,7 @@ discovery:
           forky: https://forky.mainnet.ethpandaops.io
           tracoor: https://tracoor.mainnet.ethpandaops.io
           etherscan: https://etherscan.io
+          cbt: https://cbt.mainnet.ethpandaops.io
         forks:
           consensus:
             altair:
@@ -81,6 +82,7 @@ discovery:
           forky: https://forky.sepolia.ethpandaops.io
           tracoor: https://tracoor.sepolia.ethpandaops.io
           etherscan: https://sepolia.etherscan.io
+          cbt: https://cbt.sepolia.ethpandaops.io
         forks:
           consensus:
             altair:
@@ -140,6 +142,7 @@ discovery:
           forky: https://forky.hoodi.ethpandaops.io
           tracoor: https://tracoor.hoodi.ethpandaops.io
           etherscan: https://hoodi.etherscan.io
+          cbt: https://cbt.hoodi.ethpandaops.io
         forks:
           consensus:
             altair:
