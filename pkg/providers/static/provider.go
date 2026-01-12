@@ -76,6 +76,8 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 				serviceURLs.Syncoor = value
 			case "cbt":
 				serviceURLs.Cbt = value
+			case "cbtapi":
+				serviceURLs.CbtApi = value
 			}
 		}
 
