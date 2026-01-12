@@ -31,6 +31,7 @@ discovery:
           tracoor: https://tracoor.mainnet.ethpandaops.io
           etherscan: https://etherscan.io
           cbt: https://cbt.mainnet.ethpandaops.io
+          cbtApi: https://cbt-api-mainnet.analytics.production.platform.ethpandaops.io
         forks:
           consensus:
             altair:
@@ -83,6 +84,7 @@ discovery:
           tracoor: https://tracoor.sepolia.ethpandaops.io
           etherscan: https://sepolia.etherscan.io
           cbt: https://cbt.sepolia.ethpandaops.io
+          cbtApi: https://cbt-api-sepolia.analytics.production.platform.ethpandaops.io
         forks:
           consensus:
             altair:
@@ -143,6 +145,7 @@ discovery:
           tracoor: https://tracoor.hoodi.ethpandaops.io
           etherscan: https://hoodi.etherscan.io
           cbt: https://cbt.hoodi.ethpandaops.io
+          cbtApi: https://cbt-api-hoodi.analytics.production.platform.ethpandaops.io
         forks:
           consensus:
             altair:

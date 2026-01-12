@@ -50,6 +50,7 @@ type ServiceURLs struct {
 	Tracoor        string `json:"tracoor,omitempty"`
 	Syncoor        string `json:"syncoor,omitempty"`
 	Cbt            string `json:"cbt,omitempty"`
+	CbtApi         string `json:"cbtApi,omitempty"`
 }
 
 // GenesisConfig represents the configuration URLs for a network.
