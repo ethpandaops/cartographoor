@@ -71,7 +71,7 @@ defaultCommandArgsTemplate: |
 `
 
 func TestHelmChartParser_ParseBaseCommand_Reth(t *testing.T) {
-	parser := NewHelmChartParser()
+	parser := NewHelmChartParser(PortOverrides{})
 
 	args, err := parser.ParseBaseCommand([]byte(rethValuesYAML), "reth")
 	require.NoError(t, err)
@@ -145,7 +145,7 @@ defaultCommandArgsTemplate: |
 `
 
 func TestHelmChartParser_ParseBaseCommand_Geth(t *testing.T) {
-	parser := NewHelmChartParser()
+	parser := NewHelmChartParser(PortOverrides{})
 
 	args, err := parser.ParseBaseCommand([]byte(gethValuesYAML), "geth")
 	require.NoError(t, err)
@@ -177,7 +177,7 @@ func TestHelmChartParser_ParseBaseCommand_Geth(t *testing.T) {
 }
 
 func TestHelmChartParser_ParseBaseCommand_NoTemplate(t *testing.T) {
-	parser := NewHelmChartParser()
+	parser := NewHelmChartParser(PortOverrides{})
 
 	yamlWithNoTemplate := `
 httpPort: 8545
@@ -190,7 +190,7 @@ wsPort: 8546
 }
 
 func TestHelmChartParser_ParseBaseCommand_DefaultPorts(t *testing.T) {
-	parser := NewHelmChartParser()
+	parser := NewHelmChartParser(PortOverrides{})
 
 	// YAML without explicit port values - should use defaults
 	yamlWithDefaults := `
@@ -216,7 +216,7 @@ defaultCommandArgsTemplate: |
 }
 
 func TestHelmChartParser_SkipsDevnetArgs(t *testing.T) {
-	parser := NewHelmChartParser()
+	parser := NewHelmChartParser(PortOverrides{})
 
 	yamlWithDevnet := `
 defaultCommandArgsTemplate: |
@@ -239,7 +239,7 @@ defaultCommandArgsTemplate: |
 }
 
 func TestHelmChartParser_IncludesNodePortArgs(t *testing.T) {
-	parser := NewHelmChartParser()
+	parser := NewHelmChartParser(PortOverrides{})
 
 	yamlWithNodePort := `
 defaultCommandArgsTemplate: |
@@ -262,7 +262,7 @@ defaultCommandArgsTemplate: |
 }
 
 func TestHelmChartParser_FileLoggingElseBranch(t *testing.T) {
-	parser := NewHelmChartParser()
+	parser := NewHelmChartParser(PortOverrides{})
 
 	yamlWithFileLogging := `
 defaultCommandArgsTemplate: |
@@ -357,7 +357,7 @@ func TestHelmChartParser_RealRethChart(t *testing.T) {
 		t.Skip("Skipping integration test in short mode")
 	}
 
-	parser := NewHelmChartParser()
+	parser := NewHelmChartParser(PortOverrides{})
 	valuesYAML := fetchHelmChartValues(t, "reth")
 
 	args, err := parser.ParseBaseCommand(valuesYAML, "reth")
@@ -413,7 +413,7 @@ func TestHelmChartParser_RealGethChart(t *testing.T) {
 		t.Skip("Skipping integration test in short mode")
 	}
 
-	parser := NewHelmChartParser()
+	parser := NewHelmChartParser(PortOverrides{})
 	valuesYAML := fetchHelmChartValues(t, "geth")
 
 	args, err := parser.ParseBaseCommand(valuesYAML, "geth")
@@ -436,7 +436,7 @@ func TestHelmChartParser_RealNethermindChart(t *testing.T) {
 		t.Skip("Skipping integration test in short mode")
 	}
 
-	parser := NewHelmChartParser()
+	parser := NewHelmChartParser(PortOverrides{})
 	valuesYAML := fetchHelmChartValues(t, "nethermind")
 
 	args, err := parser.ParseBaseCommand(valuesYAML, "nethermind")

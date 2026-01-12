@@ -341,6 +341,10 @@ eip7870ReferenceNodes:
     - erigon
     - ethrex
 
+  # Port overrides for production (helm charts may have different defaults)
+  portOverrides:
+    wsPort: 8546  # Helm charts default to 8545, production uses 8546
+
   # Patterns to redact in output (secrets)
   secretPatterns:
     - "<path:/secrets/"
