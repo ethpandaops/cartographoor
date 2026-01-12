@@ -317,6 +317,38 @@ validatorRanges:
         name: testinprod
         rangeOffset: 51312  # Maps testinprod's local 0-4688 to global 51312-56000
 
+# EIP-7870 Reference Nodes configuration
+eip7870ReferenceNodes:
+  enabled: true
+
+  # Source for base command templates
+  helmChartsRepository:
+    name: ethpandaops/ethereum-helm-charts
+    branch: master
+
+  # Source for client and feature overlays
+  platformRepository:
+    name: ethpandaops/platform
+    branch: master
+    environment: production
+
+  # Execution clients to generate commands for
+  clients:
+    - besu
+    - geth
+    - reth
+    - nethermind
+    - erigon
+
+  # Patterns to redact in output (secrets)
+  secretPatterns:
+    - "<path:/secrets/"
+    - "argocd-vault-plugin"
+
+  # Storage key for the output file
+  storage:
+    key: eip7870-reference-nodes.json
+
 # S3 storage configuration
 storage:
   # S3 bucket name - environment variable example: ${S3_BUCKET_NAME}

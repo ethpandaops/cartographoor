@@ -16,6 +16,7 @@ func NewRootCommand(log *logrus.Logger) *cobra.Command {
 	cmd.AddCommand(newRunCmd(log))
 	cmd.AddCommand(newInventoryCmd(log))
 	cmd.AddCommand(newValidatorRangesCmd(log))
+	cmd.AddCommand(newEIP7870ReferenceNodesCmd(log))
 
 	return cmd
 }

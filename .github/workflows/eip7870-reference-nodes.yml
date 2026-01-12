@@ -1,0 +1,30 @@
+name: EIP-7870 Reference Nodes
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Hourly
+  workflow_dispatch:
+
+jobs:
+  eip7870-reference-nodes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build
+        run: go build -o cartographoor ./cmd/cartographoor
+
+      - name: Generate EIP-7870 Reference Nodes
+        run: ./cartographoor eip7870-reference-nodes --config=.github/config.production.yaml
+        env:
+          GITHUB_TOKEN: ${{ secrets.CARTOGRAPHOOR_GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
