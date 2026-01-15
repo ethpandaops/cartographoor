@@ -9,6 +9,13 @@ import (
 )
 
 func TestExtractBlobSchedule(t *testing.T) {
+	// Test timing parameters
+	testTiming := chainTiming{
+		genesisTime:         1000,
+		slotsPerEpoch:       32,
+		slotDurationSeconds: 12,
+	}
+
 	tests := []struct {
 		name        string
 		configData  map[string]interface{}
@@ -30,8 +37,8 @@ func TestExtractBlobSchedule(t *testing.T) {
 				},
 			},
 			expected: []discovery.BlobSchedule{
-				{Epoch: 412672, MaxBlobsPerBlock: 15},
-				{Epoch: 419072, MaxBlobsPerBlock: 21},
+				{Epoch: 412672, Timestamp: testTiming.genesisTime + (412672 * testTiming.slotsPerEpoch * testTiming.slotDurationSeconds), MaxBlobsPerBlock: 15},
+				{Epoch: 419072, Timestamp: testTiming.genesisTime + (419072 * testTiming.slotsPerEpoch * testTiming.slotDurationSeconds), MaxBlobsPerBlock: 21},
 			},
 			expectEmpty: false,
 		},
@@ -46,7 +53,7 @@ func TestExtractBlobSchedule(t *testing.T) {
 				},
 			},
 			expected: []discovery.BlobSchedule{
-				{Epoch: 412672, MaxBlobsPerBlock: 15},
+				{Epoch: 412672, Timestamp: testTiming.genesisTime + (412672 * testTiming.slotsPerEpoch * testTiming.slotDurationSeconds), MaxBlobsPerBlock: 15},
 			},
 			expectEmpty: false,
 		},
@@ -100,7 +107,7 @@ func TestExtractBlobSchedule(t *testing.T) {
 				log: log,
 			}
 
-			result := p.extractBlobSchedule(tt.configData, "test-network")
+			result := p.extractBlobSchedule(tt.configData, "test-network", testTiming)
 
 			if tt.expectEmpty {
 				assert.Nil(t, result, "Expected nil blob schedule")
@@ -110,6 +117,7 @@ func TestExtractBlobSchedule(t *testing.T) {
 
 				for i, expected := range tt.expected {
 					assert.Equal(t, expected.Epoch, result[i].Epoch, "Epoch mismatch at index %d", i)
+					assert.Equal(t, expected.Timestamp, result[i].Timestamp, "Timestamp mismatch at index %d", i)
 					assert.Equal(t, expected.MaxBlobsPerBlock, result[i].MaxBlobsPerBlock, "MaxBlobsPerBlock mismatch at index %d", i)
 				}
 			}

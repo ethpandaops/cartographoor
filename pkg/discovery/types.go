@@ -139,13 +139,21 @@ type StaticNetworkConfig struct {
 
 // ForksConfig represents fork configuration for both consensus and execution layers.
 type ForksConfig struct {
-	Consensus map[string]ForkConfig `json:"consensus" mapstructure:"consensus"`
+	Consensus map[string]ConsensusForkConfig `json:"consensus,omitempty" mapstructure:"consensus"`
+	Execution map[string]ExecutionForkConfig `json:"execution,omitempty" mapstructure:"execution"`
 }
 
-// ForkConfig represents configuration for a specific fork.
-type ForkConfig struct {
+// ConsensusForkConfig represents configuration for a specific consensus layer fork.
+type ConsensusForkConfig struct {
 	Epoch             uint64            `json:"epoch" mapstructure:"epoch"`
+	Timestamp         uint64            `json:"timestamp,omitempty" mapstructure:"timestamp"`
 	MinClientVersions map[string]string `json:"minClientVersions,omitempty" mapstructure:"minClientVersions"`
+}
+
+// ExecutionForkConfig represents configuration for a specific execution layer fork.
+type ExecutionForkConfig struct {
+	Block     uint64 `json:"block" mapstructure:"block"`
+	Timestamp uint64 `json:"timestamp,omitempty" mapstructure:"timestamp"`
 }
 
 // Config represents the configuration for the discovery service.
@@ -194,5 +202,6 @@ type ToolImage struct {
 // BlobSchedule represents a blob capacity increase at a specific epoch.
 type BlobSchedule struct {
 	Epoch            uint64 `json:"epoch" mapstructure:"epoch"`
+	Timestamp        uint64 `json:"timestamp,omitempty" mapstructure:"timestamp"`
 	MaxBlobsPerBlock uint64 `json:"maxBlobsPerBlock" mapstructure:"maxBlobsPerBlock"`
 }

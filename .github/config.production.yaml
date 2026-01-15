@@ -61,6 +61,52 @@ discovery:
                 prysm: "7.0.0"
                 teku: "25.11.0"
                 tysm: "0.49.0"
+          execution:
+            frontier:
+              block: 0
+              timestamp: 1438269973
+            homestead:
+              block: 1150000
+              timestamp: 1457981393
+            dao:
+              block: 1920000
+              timestamp: 1469020840
+            tangerine_whistle:
+              block: 2463000
+              timestamp: 1476796771
+            spurious_dragon:
+              block: 2675000
+              timestamp: 1479831344
+            byzantium:
+              block: 4370000
+              timestamp: 1508131331
+            constantinople:
+              block: 7280000
+              timestamp: 1551383524
+            petersburg:
+              block: 7280000
+              timestamp: 1551383524
+            istanbul:
+              block: 9069000
+              timestamp: 1575764709
+            muir_glacier:
+              block: 9200000
+              timestamp: 1577953849
+            berlin:
+              block: 12244000
+              timestamp: 1618481223
+            london:
+              block: 12965000
+              timestamp: 1628166822
+            arrow_glacier:
+              block: 13773000
+              timestamp: 1639079723
+            gray_glacier:
+              block: 15050000
+              timestamp: 1656586444
+            paris:
+              block: 15537394
+              timestamp: 1663224179
         blobSchedule:
         - epoch: 412672
           maxBlobsPerBlock: 15

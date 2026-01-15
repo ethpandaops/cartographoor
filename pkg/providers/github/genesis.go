@@ -11,6 +11,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// chainTiming holds timing parameters needed for timestamp calculations.
+type chainTiming struct {
+	genesisTime         uint64
+	slotsPerEpoch       uint64
+	slotDurationSeconds uint64
+}
+
 // parseConfigYAML extracts chainId, genesisTime, genesisDelay, fork epochs and blob schedule from config.yaml file.
 func (p *Provider) parseConfigYAML(
 	ctx context.Context,
@@ -106,20 +113,61 @@ func (p *Provider) parseConfigYAML(
 		}
 	}
 
-	// Extract fork epochs
-	forks = p.extractForkEpochs(configData, networkName)
+	// Extract timing parameters from config.
+	// NOTE: Currently assumes slot duration and slots per epoch are constant across all forks.
+	// If future forks change these values (e.g., 12s -> 6s slots), timestamp calculation
+	// will need to be updated to sum segments with different timing parameters per epoch range.
+	timing := chainTiming{
+		genesisTime:         genesisTime,
+		slotsPerEpoch:       p.extractSlotsPerEpoch(configData, networkName),
+		slotDurationSeconds: p.extractSlotDurationSeconds(configData, networkName),
+	}
+
+	// Extract consensus forks (with timestamp calculation)
+	forks = p.extractConsensusForks(configData, networkName, timing)
 
 	// Extract blob schedule
-	blobSchedule = p.extractBlobSchedule(configData, networkName)
+	blobSchedule = p.extractBlobSchedule(configData, networkName, timing)
 
 	return chainID, genesisTime, genesisDelay, forks, blobSchedule, nil
 }
 
-// extractForkEpochs extracts fork epochs from the config data.
-func (p *Provider) extractForkEpochs(configData map[string]interface{}, networkName string) *discovery.ForksConfig {
+// extractSlotsPerEpoch extracts slots per epoch from config, defaulting to 32 (mainnet preset).
+func (p *Provider) extractSlotsPerEpoch(configData map[string]interface{}, networkName string) uint64 {
+	const defaultSlotsPerEpoch = 32
+
+	if val, ok := configData["SLOTS_PER_EPOCH"]; ok {
+		if spe, ok := p.parseUint64Value(val, networkName, "SLOTS_PER_EPOCH"); ok {
+			return spe
+		}
+	}
+
+	return defaultSlotsPerEpoch
+}
+
+// extractSlotDurationSeconds extracts slot duration from config in seconds.
+func (p *Provider) extractSlotDurationSeconds(configData map[string]interface{}, networkName string) uint64 {
+	const defaultSlotDurationSeconds = 12
+
+	// Use SLOT_DURATION_MS (SECONDS_PER_SLOT is deprecated)
+	if val, ok := configData["SLOT_DURATION_MS"]; ok {
+		if ms, ok := p.parseUint64Value(val, networkName, "SLOT_DURATION_MS"); ok {
+			return ms / 1000
+		}
+	}
+
+	return defaultSlotDurationSeconds
+}
+
+// extractConsensusForks extracts consensus fork configurations from the config data and calculates timestamps.
+func (p *Provider) extractConsensusForks(
+	configData map[string]interface{},
+	networkName string,
+	timing chainTiming,
+) *discovery.ForksConfig {
 	const farFutureEpoch = uint64(18446744073709551615)
 
-	consensusForks := make(map[string]discovery.ForkConfig)
+	consensusForks := make(map[string]discovery.ConsensusForkConfig)
 
 	for key, value := range configData {
 		// Look for keys ending with _FORK_EPOCH (case-insensitive)
@@ -145,9 +193,13 @@ func (p *Provider) extractForkEpochs(configData map[string]interface{}, networkN
 			continue
 		}
 
+		// Calculate timestamp from epoch
+		timestamp := timing.genesisTime + (epoch * timing.slotsPerEpoch * timing.slotDurationSeconds)
+
 		// Add to consensus forks
-		consensusForks[forkName] = discovery.ForkConfig{
-			Epoch: epoch,
+		consensusForks[forkName] = discovery.ConsensusForkConfig{
+			Epoch:     epoch,
+			Timestamp: timestamp,
 		}
 	}
 
@@ -198,8 +250,12 @@ func (p *Provider) parseEpochValue(value interface{}, networkName, forkName stri
 	}
 }
 
-// extractBlobSchedule extracts blob schedule from the config data.
-func (p *Provider) extractBlobSchedule(configData map[string]interface{}, networkName string) []discovery.BlobSchedule {
+// extractBlobSchedule extracts blob schedule from the config data and calculates timestamps.
+func (p *Provider) extractBlobSchedule(
+	configData map[string]interface{},
+	networkName string,
+	timing chainTiming,
+) []discovery.BlobSchedule {
 	// Look for BLOB_SCHEDULE key
 	blobScheduleVal, ok := configData["BLOB_SCHEDULE"]
 	if !ok {
@@ -250,8 +306,12 @@ func (p *Provider) extractBlobSchedule(configData map[string]interface{}, networ
 			continue
 		}
 
+		// Calculate timestamp from epoch
+		timestamp := timing.genesisTime + (epoch * timing.slotsPerEpoch * timing.slotDurationSeconds)
+
 		blobSchedule = append(blobSchedule, discovery.BlobSchedule{
 			Epoch:            epoch,
+			Timestamp:        timestamp,
 			MaxBlobsPerBlock: maxBlobs,
 		})
 	}
