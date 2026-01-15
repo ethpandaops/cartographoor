@@ -58,7 +58,7 @@ func TestCombinedProviders(t *testing.T) {
 				"tracoor":     "https://tracoor.mainnet.ethpandaops.io",
 			},
 			Forks: &discovery.ForksConfig{
-				Consensus: map[string]discovery.ForkConfig{
+				Consensus: map[string]discovery.ConsensusForkConfig{
 					"electra": {
 						Epoch: 364032,
 						MinClientVersions: map[string]string{
@@ -184,7 +184,7 @@ func TestProvider_DiscoverWithForks(t *testing.T) {
 					"ethstats": "https://ethstats.test.io",
 				},
 				Forks: &discovery.ForksConfig{
-					Consensus: map[string]discovery.ForkConfig{
+					Consensus: map[string]discovery.ConsensusForkConfig{
 						"electra": {
 							Epoch: 364032,
 							MinClientVersions: map[string]string{
@@ -249,7 +249,7 @@ func TestProvider_DiscoverWithForks(t *testing.T) {
 					"ethstats": "https://ethstats.test.io",
 				},
 				Forks: &discovery.ForksConfig{
-					Consensus: map[string]discovery.ForkConfig{
+					Consensus: map[string]discovery.ConsensusForkConfig{
 						"electra": {
 							Epoch: 0,
 							// No MinClientVersions - this is valid for future/unknown requirements
@@ -285,7 +285,7 @@ func TestProvider_DiscoverWithForks(t *testing.T) {
 					"ethstats": "https://ethstats.test.io",
 				},
 				Forks: &discovery.ForksConfig{
-					Consensus: map[string]discovery.ForkConfig{
+					Consensus: map[string]discovery.ConsensusForkConfig{
 						"electra": {
 							Epoch: 100,
 							MinClientVersions: map[string]string{
