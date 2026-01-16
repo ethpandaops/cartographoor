@@ -126,15 +126,17 @@ type GitHubRepositoryConfig struct {
 
 // StaticNetworkConfig represents the configuration for a static network.
 type StaticNetworkConfig struct {
-	Name         string            `mapstructure:"name"`
-	Description  string            `mapstructure:"description"`
-	ChainID      uint64            `mapstructure:"chainId"`
-	GenesisTime  uint64            `mapstructure:"genesisTime"`
-	GenesisDelay uint64            `mapstructure:"genesisDelay"`
-	ConfigURL    string            `mapstructure:"configUrl"`
-	ServiceURLs  map[string]string `mapstructure:"serviceUrls"`
-	Forks        *ForksConfig      `mapstructure:"forks"`
-	BlobSchedule []BlobSchedule    `mapstructure:"blobSchedule"`
+	Name                string            `mapstructure:"name"`
+	Description         string            `mapstructure:"description"`
+	ChainID             uint64            `mapstructure:"chainId"`
+	GenesisTime         uint64            `mapstructure:"genesisTime"`
+	GenesisDelay        uint64            `mapstructure:"genesisDelay"`
+	SlotsPerEpoch       uint64            `mapstructure:"slotsPerEpoch"`       // Optional, defaults to 32
+	SlotDurationSeconds uint64            `mapstructure:"slotDurationSeconds"` // Optional, defaults to 12
+	ConfigURL           string            `mapstructure:"configUrl"`
+	ServiceURLs         map[string]string `mapstructure:"serviceUrls"`
+	Forks               *ForksConfig      `mapstructure:"forks"`
+	BlobSchedule        []BlobSchedule    `mapstructure:"blobSchedule"`
 }
 
 // ForksConfig represents fork configuration for both consensus and execution layers.
