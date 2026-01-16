@@ -499,7 +499,218 @@ func TestProvider_DiscoverWithBlobSchedule(t *testing.T) {
 		require.Len(t, networks, 1)
 
 		network := networks["test-holesky"]
-		assert.NotNil(t, network.BlobSchedule)
-		assert.Len(t, network.BlobSchedule, 0)
+		assert.Nil(t, network.BlobSchedule)
+	})
+}
+
+func TestProvider_TimestampCalculation(t *testing.T) {
+	log := logrus.New()
+	provider, err := NewProvider(log)
+	require.NoError(t, err)
+
+	// Constants for timestamp calculation (mainnet defaults)
+	const (
+		slotsPerEpoch       = uint64(32)
+		slotDurationSeconds = uint64(12)
+	)
+
+	t.Run("calculates timestamps for consensus forks", func(t *testing.T) {
+		genesisTime := uint64(1606824023) // Mainnet genesis
+		epoch := uint64(364032)           // Electra epoch
+		expectedTimestamp := genesisTime + (epoch * slotsPerEpoch * slotDurationSeconds)
+
+		config := discovery.Config{}
+		config.Static.Networks = []discovery.StaticNetworkConfig{
+			{
+				Name:        "test-mainnet",
+				Description: "Test network",
+				ChainID:     1,
+				GenesisTime: genesisTime,
+				ServiceURLs: map[string]string{"ethstats": "https://ethstats.test.io"},
+				Forks: &discovery.ForksConfig{
+					Consensus: map[string]discovery.ConsensusForkConfig{
+						"electra": {Epoch: epoch},
+					},
+				},
+			},
+		}
+
+		networks, err := provider.Discover(context.Background(), config)
+		require.NoError(t, err)
+
+		network := networks["test-mainnet"]
+		require.NotNil(t, network.Forks)
+		require.Contains(t, network.Forks.Consensus, "electra")
+
+		electra := network.Forks.Consensus["electra"]
+		assert.Equal(t, epoch, electra.Epoch)
+		assert.Equal(t, expectedTimestamp, electra.Timestamp)
+	})
+
+	t.Run("calculates timestamps for blob schedule", func(t *testing.T) {
+		genesisTime := uint64(1606824023) // Mainnet genesis
+		epoch1 := uint64(412672)
+		epoch2 := uint64(419072)
+		expectedTimestamp1 := genesisTime + (epoch1 * slotsPerEpoch * slotDurationSeconds)
+		expectedTimestamp2 := genesisTime + (epoch2 * slotsPerEpoch * slotDurationSeconds)
+
+		config := discovery.Config{}
+		config.Static.Networks = []discovery.StaticNetworkConfig{
+			{
+				Name:        "test-mainnet",
+				Description: "Test network",
+				ChainID:     1,
+				GenesisTime: genesisTime,
+				ServiceURLs: map[string]string{"ethstats": "https://ethstats.test.io"},
+				BlobSchedule: []discovery.BlobSchedule{
+					{Epoch: epoch1, MaxBlobsPerBlock: 15},
+					{Epoch: epoch2, MaxBlobsPerBlock: 21},
+				},
+			},
+		}
+
+		networks, err := provider.Discover(context.Background(), config)
+		require.NoError(t, err)
+
+		network := networks["test-mainnet"]
+		require.Len(t, network.BlobSchedule, 2)
+
+		assert.Equal(t, epoch1, network.BlobSchedule[0].Epoch)
+		assert.Equal(t, expectedTimestamp1, network.BlobSchedule[0].Timestamp)
+		assert.Equal(t, uint64(15), network.BlobSchedule[0].MaxBlobsPerBlock)
+
+		assert.Equal(t, epoch2, network.BlobSchedule[1].Epoch)
+		assert.Equal(t, expectedTimestamp2, network.BlobSchedule[1].Timestamp)
+		assert.Equal(t, uint64(21), network.BlobSchedule[1].MaxBlobsPerBlock)
+	})
+
+	t.Run("uses custom timing parameters", func(t *testing.T) {
+		genesisTime := uint64(1700000000)
+		customSlotsPerEpoch := uint64(8) // Custom minimal preset
+		customSlotDuration := uint64(6)  // 6 second slots
+		epoch := uint64(100)
+		expectedTimestamp := genesisTime + (epoch * customSlotsPerEpoch * customSlotDuration)
+
+		config := discovery.Config{}
+		config.Static.Networks = []discovery.StaticNetworkConfig{
+			{
+				Name:                "test-custom",
+				Description:         "Test network with custom timing",
+				ChainID:             9999,
+				GenesisTime:         genesisTime,
+				SlotsPerEpoch:       customSlotsPerEpoch,
+				SlotDurationSeconds: customSlotDuration,
+				ServiceURLs:         map[string]string{"ethstats": "https://ethstats.test.io"},
+				Forks: &discovery.ForksConfig{
+					Consensus: map[string]discovery.ConsensusForkConfig{
+						"test-fork": {Epoch: epoch},
+					},
+				},
+			},
+		}
+
+		networks, err := provider.Discover(context.Background(), config)
+		require.NoError(t, err)
+
+		network := networks["test-custom"]
+		fork := network.Forks.Consensus["test-fork"]
+		assert.Equal(t, expectedTimestamp, fork.Timestamp)
+	})
+
+	t.Run("preserves existing timestamps", func(t *testing.T) {
+		genesisTime := uint64(1606824023)
+		epoch := uint64(100)
+		existingTimestamp := uint64(9999999999) // Explicit timestamp in config
+
+		config := discovery.Config{}
+		config.Static.Networks = []discovery.StaticNetworkConfig{
+			{
+				Name:        "test-preserve",
+				Description: "Test network",
+				ChainID:     1,
+				GenesisTime: genesisTime,
+				ServiceURLs: map[string]string{"ethstats": "https://ethstats.test.io"},
+				Forks: &discovery.ForksConfig{
+					Consensus: map[string]discovery.ConsensusForkConfig{
+						"test-fork": {Epoch: epoch, Timestamp: existingTimestamp},
+					},
+				},
+				BlobSchedule: []discovery.BlobSchedule{
+					{Epoch: epoch, Timestamp: existingTimestamp, MaxBlobsPerBlock: 6},
+				},
+			},
+		}
+
+		networks, err := provider.Discover(context.Background(), config)
+		require.NoError(t, err)
+
+		network := networks["test-preserve"]
+
+		// Timestamp should be preserved, not overwritten
+		assert.Equal(t, existingTimestamp, network.Forks.Consensus["test-fork"].Timestamp)
+		assert.Equal(t, existingTimestamp, network.BlobSchedule[0].Timestamp)
+	})
+
+	t.Run("handles zero genesis time", func(t *testing.T) {
+		epoch := uint64(100)
+
+		config := discovery.Config{}
+		config.Static.Networks = []discovery.StaticNetworkConfig{
+			{
+				Name:        "test-no-genesis",
+				Description: "Test network without genesis time",
+				ChainID:     1,
+				GenesisTime: 0, // No genesis time
+				ServiceURLs: map[string]string{"ethstats": "https://ethstats.test.io"},
+				Forks: &discovery.ForksConfig{
+					Consensus: map[string]discovery.ConsensusForkConfig{
+						"test-fork": {Epoch: epoch},
+					},
+				},
+				BlobSchedule: []discovery.BlobSchedule{
+					{Epoch: epoch, MaxBlobsPerBlock: 6},
+				},
+			},
+		}
+
+		networks, err := provider.Discover(context.Background(), config)
+		require.NoError(t, err)
+
+		network := networks["test-no-genesis"]
+
+		// Timestamp should remain 0 when genesis time is not set
+		assert.Equal(t, uint64(0), network.Forks.Consensus["test-fork"].Timestamp)
+		assert.Equal(t, uint64(0), network.BlobSchedule[0].Timestamp)
+	})
+
+	t.Run("execution forks passed through unchanged", func(t *testing.T) {
+		genesisTime := uint64(1606824023)
+		existingTimestamp := uint64(1663224179) // Paris timestamp
+
+		config := discovery.Config{}
+		config.Static.Networks = []discovery.StaticNetworkConfig{
+			{
+				Name:        "test-execution",
+				Description: "Test network with execution forks",
+				ChainID:     1,
+				GenesisTime: genesisTime,
+				ServiceURLs: map[string]string{"ethstats": "https://ethstats.test.io"},
+				Forks: &discovery.ForksConfig{
+					Execution: map[string]discovery.ExecutionForkConfig{
+						"paris": {Block: 15537394, Timestamp: existingTimestamp},
+					},
+				},
+			},
+		}
+
+		networks, err := provider.Discover(context.Background(), config)
+		require.NoError(t, err)
+
+		network := networks["test-execution"]
+		require.NotNil(t, network.Forks.Execution)
+
+		paris := network.Forks.Execution["paris"]
+		assert.Equal(t, uint64(15537394), paris.Block)
+		assert.Equal(t, existingTimestamp, paris.Timestamp)
 	})
 }
