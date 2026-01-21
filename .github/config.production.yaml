@@ -241,6 +241,11 @@ discovery:
   github:
     # List of repositories to check for networks
     repositories:
+      - name: ethpandaops/blob-devnets
+        namePrefix: blob-
+        displayName: Blob Devnets
+        description: "<desc here>"
+        image: https://ethpandaops.io/img/blob.jpg
       - name: ethpandaops/bal-devnets
         namePrefix: bal-
         displayName: BAL Devnets
