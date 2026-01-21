@@ -244,7 +244,7 @@ discovery:
       - name: ethpandaops/blob-devnets
         namePrefix: blob-
         displayName: Blob Devnets
-        description: "<desc here>"
+        description: "Cell‑based data‑availability sampling breaks erasure‑coded blobs into smaller cells, enabling nodes to verify availability by fetching just a fraction of the total data—key infrastructure for PeerDAS and Ethereum's danksharding roadmap."
         image: https://ethpandaops.io/img/blob.jpg
       - name: ethpandaops/bal-devnets
         namePrefix: bal-
