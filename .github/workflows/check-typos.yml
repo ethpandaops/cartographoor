@@ -15,3 +15,5 @@ jobs:
 
       - name: Check for typos
         uses: crate-ci/typos@631208b7aac2daa8b707f55e7331f9112b0e062d # v1.44.0
+        with:
+          config: .github/typos.toml
