@@ -293,7 +293,7 @@ func (g *Generator) matchDockerImage(clientType string, images *discovery.Images
 }
 
 // convertMetadata converts metadata from interface{} to string map.
-func (g *Generator) convertMetadata(input map[string]interface{}) map[string]string {
+func (g *Generator) convertMetadata(input map[string]any) map[string]string {
 	result := make(map[string]string)
 
 	for key, value := range input {

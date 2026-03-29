@@ -323,10 +323,7 @@ func TestDebugRethTemplate(t *testing.T) {
 
 	t.Logf("DefaultCommandArgsTemplate length: %d", len(values.DefaultCommandArgsTemplate))
 
-	maxLen := 500
-	if len(values.DefaultCommandArgsTemplate) < maxLen {
-		maxLen = len(values.DefaultCommandArgsTemplate)
-	}
+	maxLen := min(len(values.DefaultCommandArgsTemplate), 500)
 
 	t.Logf("DefaultCommandArgsTemplate first 500 chars:\n%s", values.DefaultCommandArgsTemplate[:maxLen])
 	t.Logf("DefaultCommandTemplate length: %d", len(values.DefaultCommandTemplate))

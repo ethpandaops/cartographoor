@@ -1,6 +1,8 @@
 package validatorranges
 
 import (
+	"maps"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -72,7 +74,7 @@ func mergeNodes(target, source map[string]*Node) {
 		newNode := &Node{
 			Groups:          make([]string, len(node.Groups)),
 			Tags:            make([]string, len(node.Tags)),
-			Attributes:      make(map[string]interface{}),
+			Attributes:      make(map[string]any),
 			ValidatorRanges: make([]*ValidatorRange, len(node.ValidatorRanges)),
 			Source:          node.Source,
 		}
@@ -81,9 +83,7 @@ func mergeNodes(target, source map[string]*Node) {
 		copy(newNode.Tags, node.Tags)
 		copy(newNode.ValidatorRanges, node.ValidatorRanges)
 
-		for k, v := range node.Attributes {
-			newNode.Attributes[k] = v
-		}
+		maps.Copy(newNode.Attributes, node.Attributes)
 
 		target[name] = newNode
 	}

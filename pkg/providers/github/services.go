@@ -136,7 +136,7 @@ func (p *Provider) getServiceURLs(ctx context.Context, domain string) *discovery
 	for i := 0; i < numChecks; i++ {
 		result := <-resultCh
 
-		p.log.WithFields(map[string]interface{}{
+		p.log.WithFields(map[string]any{
 			"service": result.serviceKey,
 			"url":     result.url,
 			"valid":   result.valid,
@@ -184,7 +184,7 @@ func (p *Provider) getServiceURLs(ctx context.Context, domain string) *discovery
 					services.DevnetSpec = url
 				}
 
-				p.log.WithFields(map[string]interface{}{
+				p.log.WithFields(map[string]any{
 					"service": serviceKey,
 					"url":     url,
 					"valid":   true, // Assumed valid for static URLs

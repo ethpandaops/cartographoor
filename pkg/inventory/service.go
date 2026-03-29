@@ -156,10 +156,8 @@ func (s *Service) generateInventories(ctx context.Context, networks map[string]d
 	)
 
 	for name, network := range networks {
-		wg.Add(1)
 
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 
 			// Acquire semaphore
 			if err := sem.Acquire(ctx, 1); err != nil {
@@ -195,7 +193,7 @@ func (s *Service) generateInventories(ctx context.Context, networks map[string]d
 
 			successCount.Add(1)
 			s.log.WithField("network", name).Debug("Successfully generated inventory")
-		}()
+		})
 	}
 
 	wg.Wait()
@@ -218,10 +216,8 @@ func (s *Service) uploadInventories(ctx context.Context, inventories map[string]
 	)
 
 	for name, inventory := range inventories {
-		wg.Add(1)
 
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 
 			// Marshal inventory to JSON
 			data, err := json.MarshalIndent(inventory, "", "  ")
@@ -265,7 +261,7 @@ func (s *Service) uploadInventories(ctx context.Context, inventories map[string]
 			}
 
 			s.log.WithField("network", name).Debug("Successfully uploaded inventory")
-		}()
+		})
 	}
 
 	wg.Wait()

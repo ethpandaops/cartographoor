@@ -18,19 +18,19 @@ func TestExtractBlobSchedule(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		configData  map[string]interface{}
+		configData  map[string]any
 		expected    []discovery.BlobSchedule
 		expectEmpty bool
 	}{
 		{
 			name: "valid blob schedule with two entries",
-			configData: map[string]interface{}{
-				"BLOB_SCHEDULE": []interface{}{
-					map[string]interface{}{
+			configData: map[string]any{
+				"BLOB_SCHEDULE": []any{
+					map[string]any{
 						"EPOCH":               412672,
 						"MAX_BLOBS_PER_BLOCK": 15,
 					},
-					map[string]interface{}{
+					map[string]any{
 						"EPOCH":               419072,
 						"MAX_BLOBS_PER_BLOCK": 21,
 					},
@@ -44,9 +44,9 @@ func TestExtractBlobSchedule(t *testing.T) {
 		},
 		{
 			name: "valid blob schedule with string values",
-			configData: map[string]interface{}{
-				"BLOB_SCHEDULE": []interface{}{
-					map[string]interface{}{
+			configData: map[string]any{
+				"BLOB_SCHEDULE": []any{
+					map[string]any{
 						"EPOCH":               "412672",
 						"MAX_BLOBS_PER_BLOCK": "15",
 					},
@@ -59,15 +59,15 @@ func TestExtractBlobSchedule(t *testing.T) {
 		},
 		{
 			name:        "no blob schedule",
-			configData:  map[string]interface{}{},
+			configData:  map[string]any{},
 			expected:    nil,
 			expectEmpty: true,
 		},
 		{
 			name: "blob schedule with missing epoch",
-			configData: map[string]interface{}{
-				"BLOB_SCHEDULE": []interface{}{
-					map[string]interface{}{
+			configData: map[string]any{
+				"BLOB_SCHEDULE": []any{
+					map[string]any{
 						"MAX_BLOBS_PER_BLOCK": 15,
 					},
 				},
@@ -77,9 +77,9 @@ func TestExtractBlobSchedule(t *testing.T) {
 		},
 		{
 			name: "blob schedule with missing max blobs",
-			configData: map[string]interface{}{
-				"BLOB_SCHEDULE": []interface{}{
-					map[string]interface{}{
+			configData: map[string]any{
+				"BLOB_SCHEDULE": []any{
+					map[string]any{
 						"EPOCH": 412672,
 					},
 				},
@@ -89,7 +89,7 @@ func TestExtractBlobSchedule(t *testing.T) {
 		},
 		{
 			name: "blob schedule with invalid type",
-			configData: map[string]interface{}{
+			configData: map[string]any{
 				"BLOB_SCHEDULE": "not an array",
 			},
 			expected:    nil,

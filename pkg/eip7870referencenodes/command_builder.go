@@ -1,6 +1,7 @@
 package eip7870referencenodes
 
 import (
+	"maps"
 	"strings"
 )
 
@@ -53,9 +54,7 @@ func (b *CommandBuilder) BuildCommand(
 
 	// Set env vars and image override from feature overlay
 	if featureOverlay != nil {
-		for k, v := range featureOverlay.EnvVars {
-			cmd.EnvVars[k] = v
-		}
+		maps.Copy(cmd.EnvVars, featureOverlay.EnvVars)
 
 		// Feature can override image
 		if featureOverlay.Image != nil {
@@ -172,8 +171,8 @@ func (b *CommandBuilder) deduplicateArgs(base, clientSpecific, feature []string)
 // e.g., "--http" -> "--http", "--http.port=8545" -> "--http.port", "--http=false" -> "--http".
 func extractFlagName(arg string) string {
 	// Find the position of '=' if present
-	if idx := strings.Index(arg, "="); idx != -1 {
-		return arg[:idx]
+	if before, _, ok := strings.Cut(arg, "="); ok {
+		return before
 	}
 
 	return arg
