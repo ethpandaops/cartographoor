@@ -332,6 +332,7 @@ func IsKnownClient(clientName string) bool {
 
 	// Check all known clients
 	allClients := append(CLClients, ELClients...)
+
 	return slices.Contains(allClients, normalizedName)
 }
 

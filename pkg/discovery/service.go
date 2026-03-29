@@ -71,7 +71,6 @@ func (s *Service) Start(ctx context.Context) error {
 	// Start the result processor
 
 	s.wg.Go(func() {
-
 		for {
 			select {
 			case <-ctx.Done():
@@ -92,7 +91,6 @@ func (s *Service) Start(ctx context.Context) error {
 	s.ticker = time.NewTicker(s.config.Interval)
 
 	s.wg.Go(func() {
-
 		// Run an initial discovery
 		if err := s.runDiscovery(ctx); err != nil {
 			s.log.WithError(err).Error("Failed to run initial discovery")

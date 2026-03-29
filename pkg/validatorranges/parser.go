@@ -316,6 +316,7 @@ func snakeToCamel(s string) string {
 
 	var result strings.Builder
 	result.WriteString(parts[0])
+
 	for i := 1; i < len(parts); i++ {
 		if len(parts[i]) > 0 {
 			result.WriteString(strings.ToUpper(parts[i][:1]) + parts[i][1:])

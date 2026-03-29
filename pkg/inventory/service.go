@@ -156,9 +156,7 @@ func (s *Service) generateInventories(ctx context.Context, networks map[string]d
 	)
 
 	for name, network := range networks {
-
 		wg.Go(func() {
-
 			// Acquire semaphore
 			if err := sem.Acquire(ctx, 1); err != nil {
 				s.log.WithError(err).WithField("network", name).Error("Failed to acquire semaphore")
@@ -216,9 +214,7 @@ func (s *Service) uploadInventories(ctx context.Context, inventories map[string]
 	)
 
 	for name, inventory := range inventories {
-
 		wg.Go(func() {
-
 			// Marshal inventory to JSON
 			data, err := json.MarshalIndent(inventory, "", "  ")
 			if err != nil {
