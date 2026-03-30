@@ -89,7 +89,7 @@ func (p *Provider) Initialize(ctx context.Context) error {
 	if p.config.Endpoint != "" {
 		p.log.WithField("endpoint", p.config.Endpoint).Debug("Using custom S3 endpoint")
 		//nolint:staticcheck // fine.
-		customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+		customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...any) (aws.Endpoint, error) {
 			return aws.Endpoint{
 				URL:               p.config.Endpoint,
 				SigningRegion:     p.config.Region,

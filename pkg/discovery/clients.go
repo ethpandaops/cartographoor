@@ -314,17 +314,13 @@ func GetClientType(clientName string) string {
 	normalizedName := strings.ToLower(strings.TrimSpace(clientName))
 
 	// Check consensus clients
-	for _, cl := range CLClients {
-		if normalizedName == cl {
-			return CLClientType
-		}
+	if slices.Contains(CLClients, normalizedName) {
+		return CLClientType
 	}
 
 	// Check execution clients
-	for _, el := range ELClients {
-		if normalizedName == el {
-			return ELClientType
-		}
+	if slices.Contains(ELClients, normalizedName) {
+		return ELClientType
 	}
 
 	return ""
@@ -336,13 +332,8 @@ func IsKnownClient(clientName string) bool {
 
 	// Check all known clients
 	allClients := append(CLClients, ELClients...)
-	for _, known := range allClients {
-		if normalizedName == known {
-			return true
-		}
-	}
 
-	return false
+	return slices.Contains(allClients, normalizedName)
 }
 
 // GetClientDisplayName returns the display name for a client.

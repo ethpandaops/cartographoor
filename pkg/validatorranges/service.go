@@ -135,8 +135,8 @@ func (s *Service) fetchEthpandaopsRanges(ctx context.Context, networkName string
 	// Common prefixes to strip (e.g., "fusaka-devnet-5" -> "devnet-5")
 	prefixes := []string{"fusaka-", "pectra-", "dencun-", "eof-", "verkle-"}
 	for _, prefix := range prefixes {
-		if strings.HasPrefix(networkName, prefix) {
-			inventoryName = strings.TrimPrefix(networkName, prefix)
+		if after, ok := strings.CutPrefix(networkName, prefix); ok {
+			inventoryName = after
 
 			break
 		}

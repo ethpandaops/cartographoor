@@ -39,7 +39,7 @@ func (p *Provider) parseConfigYAML(
 	}
 
 	// Parse YAML
-	var configData map[string]interface{}
+	var configData map[string]any
 	if yamlErr := yaml.Unmarshal([]byte(content), &configData); yamlErr != nil {
 		return 0, 0, 0, nil, nil, fmt.Errorf("failed to parse config.yaml: %w", yamlErr)
 	}
@@ -133,7 +133,7 @@ func (p *Provider) parseConfigYAML(
 }
 
 // extractSlotsPerEpoch extracts slots per epoch from config, defaulting to 32 (mainnet preset).
-func (p *Provider) extractSlotsPerEpoch(configData map[string]interface{}, networkName string) uint64 {
+func (p *Provider) extractSlotsPerEpoch(configData map[string]any, networkName string) uint64 {
 	const defaultSlotsPerEpoch = 32
 
 	if val, ok := configData["SLOTS_PER_EPOCH"]; ok {
@@ -146,7 +146,7 @@ func (p *Provider) extractSlotsPerEpoch(configData map[string]interface{}, netwo
 }
 
 // extractSlotDurationSeconds extracts slot duration from config in seconds.
-func (p *Provider) extractSlotDurationSeconds(configData map[string]interface{}, networkName string) uint64 {
+func (p *Provider) extractSlotDurationSeconds(configData map[string]any, networkName string) uint64 {
 	const defaultSlotDurationSeconds = 12
 
 	// Use SLOT_DURATION_MS (SECONDS_PER_SLOT is deprecated)
@@ -161,7 +161,7 @@ func (p *Provider) extractSlotDurationSeconds(configData map[string]interface{},
 
 // extractConsensusForks extracts consensus fork configurations from the config data and calculates timestamps.
 func (p *Provider) extractConsensusForks(
-	configData map[string]interface{},
+	configData map[string]any,
 	networkName string,
 	timing chainTiming,
 ) *discovery.ForksConfig {
@@ -214,7 +214,7 @@ func (p *Provider) extractConsensusForks(
 }
 
 // parseEpochValue parses an epoch value from various types.
-func (p *Provider) parseEpochValue(value interface{}, networkName, forkName string) (uint64, bool) {
+func (p *Provider) parseEpochValue(value any, networkName, forkName string) (uint64, bool) {
 	switch v := value.(type) {
 	case int:
 		if v >= 0 {
@@ -252,7 +252,7 @@ func (p *Provider) parseEpochValue(value interface{}, networkName, forkName stri
 
 // extractBlobSchedule extracts blob schedule from the config data and calculates timestamps.
 func (p *Provider) extractBlobSchedule(
-	configData map[string]interface{},
+	configData map[string]any,
 	networkName string,
 	timing chainTiming,
 ) []discovery.BlobSchedule {
@@ -263,7 +263,7 @@ func (p *Provider) extractBlobSchedule(
 	}
 
 	// BLOB_SCHEDULE should be a slice of maps
-	blobScheduleSlice, ok := blobScheduleVal.([]interface{})
+	blobScheduleSlice, ok := blobScheduleVal.([]any)
 	if !ok {
 		p.log.WithField("network", networkName).Debug("BLOB_SCHEDULE has unexpected type, expected array")
 
@@ -273,7 +273,7 @@ func (p *Provider) extractBlobSchedule(
 	blobSchedule := make([]discovery.BlobSchedule, 0, len(blobScheduleSlice))
 
 	for i, item := range blobScheduleSlice {
-		itemMap, ok := item.(map[string]interface{})
+		itemMap, ok := item.(map[string]any)
 		if !ok {
 			p.log.WithField("network", networkName).WithField("index", i).Debug("BLOB_SCHEDULE item has unexpected type")
 
@@ -324,7 +324,7 @@ func (p *Provider) extractBlobSchedule(
 }
 
 // parseUint64Value parses a uint64 value from various types.
-func (p *Provider) parseUint64Value(value interface{}, networkName, fieldName string) (uint64, bool) {
+func (p *Provider) parseUint64Value(value any, networkName, fieldName string) (uint64, bool) {
 	switch v := value.(type) {
 	case int:
 		if v >= 0 {

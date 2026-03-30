@@ -25,7 +25,7 @@ func (p *Provider) getImages(
 
 	fileContent, _, _, err := client.Repositories.GetContents(ctx, owner, repo, imagePath, nil)
 	if err != nil || fileContent == nil {
-		p.log.WithError(err).WithFields(map[string]interface{}{
+		p.log.WithError(err).WithFields(map[string]any{
 			"network": networkName,
 			"path":    imagePath,
 		}).Debug("Failed to get images.yaml file")

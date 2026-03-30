@@ -43,7 +43,7 @@ func (p *Provider) parseValuesYaml(
 func (p *Provider) extractDomain(content string) string {
 	var domain string
 
-	for _, line := range strings.Split(content, "\n") {
+	for line := range strings.SplitSeq(content, "\n") {
 		if strings.HasPrefix(strings.TrimSpace(line), "domain:") {
 			parts := strings.SplitN(line, ":", 2)
 			if len(parts) > 1 {
@@ -65,7 +65,7 @@ func (p *Provider) extractConfigPaths(content string) []string {
 		inFilesSection  = false
 	)
 
-	for _, line := range strings.Split(content, "\n") {
+	for line := range strings.SplitSeq(content, "\n") {
 		trimmedLine := strings.TrimSpace(line)
 
 		// Check if we're entering the config section

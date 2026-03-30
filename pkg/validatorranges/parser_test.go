@@ -32,7 +32,7 @@ prysm-nethermind-1 ansible_host=192.168.1.3 validator_start=200 validator_end=20
 					"lighthouse-geth-1": {
 						Groups: []string{"lighthouse_geth"},
 						Tags:   []string{"el:geth", "cl:lighthouse"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"cloud":       "aws",
 							"cloudRegion": "us-east-1",
 						},
@@ -44,7 +44,7 @@ prysm-nethermind-1 ansible_host=192.168.1.3 validator_start=200 validator_end=20
 					"lighthouse-geth-2": {
 						Groups: []string{"lighthouse_geth"},
 						Tags:   []string{"el:geth", "cl:lighthouse"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"cloud":       "aws",
 							"cloudRegion": "us-west-2",
 						},
@@ -56,7 +56,7 @@ prysm-nethermind-1 ansible_host=192.168.1.3 validator_start=200 validator_end=20
 					"prysm-nethermind-1": {
 						Groups: []string{"prysm_nethermind"},
 						Tags:   []string{"el:nethermind", "cl:prysm"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"ipv6": "2001:db8::1",
 						},
 						ValidatorRanges: []*ValidatorRange{
@@ -101,7 +101,7 @@ teku-geth-1 ansible_host=10.0.0.3 validator_start=100 validator_end=108 ethereum
 					"lighthouse-besu-1": {
 						Groups: []string{"lighthouse_besu"},
 						Tags:   []string{"el:besu", "cl:lighthouse"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"cloud":       "digitalocean",
 							"cloudRegion": "nyc1",
 						},
@@ -113,7 +113,7 @@ teku-geth-1 ansible_host=10.0.0.3 validator_start=100 validator_end=108 ethereum
 					"lighthouse-besu-2": {
 						Groups: []string{"lighthouse_besu"},
 						Tags:   []string{"el:besu", "cl:lighthouse"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"cloud":       "digitalocean",
 							"cloudRegion": "sfo3",
 						},
@@ -125,7 +125,7 @@ teku-geth-1 ansible_host=10.0.0.3 validator_start=100 validator_end=108 ethereum
 					"teku-geth-1": {
 						Groups: []string{"teku_geth"},
 						Tags:   []string{"el:geth", "cl:teku"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"isClSupernode": true,
 						},
 						ValidatorRanges: []*ValidatorRange{
@@ -174,7 +174,7 @@ prometheus ansible_host=192.168.1.5
 					"lighthouse-geth-1": {
 						Groups:     []string{"lighthouse_geth"},
 						Tags:       []string{"el:geth", "cl:lighthouse"},
-						Attributes: map[string]interface{}{},
+						Attributes: map[string]any{},
 						ValidatorRanges: []*ValidatorRange{
 							{Start: 100, End: 108},
 						},
@@ -212,7 +212,7 @@ nimbus-reth-3 ansible_host=192.168.1.3 validator_start=16 validator_end=24 ether
 					"nimbus-reth-1": {
 						Groups: []string{"nimbus_reth"},
 						Tags:   []string{"el:reth", "cl:nimbus"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"isClSupernode": true,
 						},
 						ValidatorRanges: []*ValidatorRange{
@@ -223,7 +223,7 @@ nimbus-reth-3 ansible_host=192.168.1.3 validator_start=16 validator_end=24 ether
 					"nimbus-reth-2": {
 						Groups: []string{"nimbus_reth"},
 						Tags:   []string{"el:reth", "cl:nimbus"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"isClSupernode": false,
 						},
 						ValidatorRanges: []*ValidatorRange{
@@ -234,7 +234,7 @@ nimbus-reth-3 ansible_host=192.168.1.3 validator_start=16 validator_end=24 ether
 					"nimbus-reth-3": {
 						Groups: []string{"nimbus_reth"},
 						Tags:   []string{"el:reth", "cl:nimbus"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"isClSupernode": true,
 						},
 						ValidatorRanges: []*ValidatorRange{
@@ -272,7 +272,7 @@ lodestar-erigon-1 ansible_host=192.168.1.1 validator_start=0 validator_end=8 clo
 					"lodestar-erigon-1": {
 						Groups: []string{"lodestar_erigon"},
 						Tags:   []string{"el:erigon", "cl:lodestar"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"cloudRegion":       "us-east-1",
 							"someLongAttribute": "value",
 							"bandwidth":         "100",
@@ -312,7 +312,7 @@ grandine-besu-1 ansible_host=192.168.1.1 validator_start=0 validator_end=8
 					"grandine-besu-1": {
 						Groups:     []string{"grandine_besu"},
 						Tags:       []string{"el:besu", "cl:grandine"},
-						Attributes: map[string]interface{}{},
+						Attributes: map[string]any{},
 						ValidatorRanges: []*ValidatorRange{
 							{Start: 0, End: 8},
 						},
@@ -348,7 +348,7 @@ validator-lighthouse-1 ansible_host=192.168.1.1 validator_start=0 validator_end=
 					"validator-lighthouse-1": {
 						Groups:     []string{"validator_lighthouse"},
 						Tags:       []string{"cl:lighthouse", "vc:validator"},
-						Attributes: map[string]interface{}{},
+						Attributes: map[string]any{},
 						ValidatorRanges: []*ValidatorRange{
 							{Start: 0, End: 8},
 						},
@@ -408,7 +408,7 @@ teku-besu-1 ansible_host=192.168.1.2 validator_start=100 validator_end=108
 					"lighthouse-geth-1": {
 						Groups:     []string{"lighthouse_geth"},
 						Tags:       []string{"el:geth", "cl:lighthouse"},
-						Attributes: map[string]interface{}{},
+						Attributes: map[string]any{},
 						ValidatorRanges: []*ValidatorRange{
 							{Start: 0, End: 8},
 						},
@@ -417,7 +417,7 @@ teku-besu-1 ansible_host=192.168.1.2 validator_start=100 validator_end=108
 					"teku-besu-1": {
 						Groups:     []string{"teku_besu"},
 						Tags:       []string{"el:besu", "cl:teku"},
-						Attributes: map[string]interface{}{},
+						Attributes: map[string]any{},
 						ValidatorRanges: []*ValidatorRange{
 							{Start: 100, End: 108},
 						},

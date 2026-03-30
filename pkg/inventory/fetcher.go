@@ -137,7 +137,7 @@ func (f *Fetcher) fetchWithRetry(ctx context.Context, url string) ([]byte, error
 
 	var lastErr error
 
-	for attempt := 0; attempt < maxRetries; attempt++ {
+	for attempt := range maxRetries {
 		data, err := f.doFetch(ctx, url)
 		if err == nil {
 			return data, nil
