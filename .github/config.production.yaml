@@ -241,6 +241,11 @@ discovery:
   github:
     # List of repositories to check for networks
     repositories:
+      - name: ethpandaops/glamsterdam-devnets
+        namePrefix: glamsterdam-
+        displayName: Glamsterdam Devnets
+        description: "Glamsterdam is the planned Ethereum hard fork following Fusaka, focused on scaling the L1 and improving UX with EIPs spanning execution, consensus, and protocol-level changes."
+        image: https://ethpandaops.io/img/bal.jpg
       - name: ethpandaops/blob-devnets
         namePrefix: blob-
         displayName: Blob Devnets
