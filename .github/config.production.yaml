@@ -245,7 +245,7 @@ discovery:
         namePrefix: glamsterdam-
         displayName: Glamsterdam Devnets
         description: "Glamsterdam is the planned Ethereum hard fork following Fusaka, focused on scaling the L1 and improving UX with EIPs spanning execution, consensus, and protocol-level changes."
-        image: https://ethpandaops.io/img/glamsterdam.jpg
+        image: https://ethpandaops.io/img/bal.jpg
       - name: ethpandaops/blob-devnets
         namePrefix: blob-
         displayName: Blob Devnets
