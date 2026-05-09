@@ -78,6 +78,10 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 				serviceURLs.Cbt = value
 			case "cbtapi":
 				serviceURLs.CbtApi = value
+			case "spamoor":
+				serviceURLs.Spamoor = value
+			case "buildoor":
+				serviceURLs.Buildoor = value
 			}
 		}
 
