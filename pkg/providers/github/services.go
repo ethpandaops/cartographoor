@@ -113,7 +113,6 @@ func (p *Provider) getServiceURLs(ctx context.Context, domain string) *discovery
 	// Start goroutines for special services that need validation
 	for serviceKey, patternFunc := range specialServicePatterns {
 		// Skip static URLs that don't need validation.
-		//nolint:goconst // No need.
 		if serviceKey == "devnet_spec" {
 			continue
 		}
