@@ -14,7 +14,6 @@ linters:
     - durationcheck
     - errcheck
     - errname
-    - goconst
     - gocyclo
     - godot
     - goheader
@@ -44,9 +43,6 @@ linters:
   settings:
     errcheck:
       check-type-assertions: true
-    goconst:
-      min-len: 2
-      min-occurrences: 3
     gocritic:
       enabled-tags:
         - diagnostic

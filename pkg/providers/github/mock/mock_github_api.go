@@ -81,7 +81,7 @@ func NewMockGitHubAPIContainer(ctx context.Context, log *logrus.Logger) (*MockGi
 	mockAPI := &MockGitHubAPIContainer{
 		Container: container,
 		URL:       fmt.Sprintf("http://%s", net.JoinHostPort(host, mappedPort.Port())),
-		Port:      mappedPort.Int(),
+		Port:      int(mappedPort.Num()),
 	}
 
 	log.WithFields(logrus.Fields{
