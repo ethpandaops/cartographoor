@@ -28,8 +28,10 @@ type Service struct {
 	clientDiscoverer ClientDiscovererInterface
 }
 
-// NewService creates a new discovery service.
-func NewService(log *logrus.Logger, cfg Config) (*Service, error) {
+// NewService creates a new discovery service. The clientDiscoverer is injected
+// so that this package does not depend on the GitHub client; pass nil to skip
+// client discovery (e.g. in tests).
+func NewService(log *logrus.Logger, cfg Config, clientDiscoverer ClientDiscovererInterface) (*Service, error) {
 	log = log.WithField("module", "discovery").Logger
 
 	// Set default values if not specified
@@ -43,7 +45,7 @@ func NewService(log *logrus.Logger, cfg Config) (*Service, error) {
 		providers:        []Provider{},
 		resultChan:       make(chan Result, 10),
 		resultFuncs:      []ResultHandler{},
-		clientDiscoverer: NewClientDiscoverer(log, cfg.GitHub.Token),
+		clientDiscoverer: clientDiscoverer,
 	}, nil
 }
 
@@ -251,12 +253,16 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 	// Build repository metadata from config
 	networkMetadata := buildNetworkMetadata(s.config, allNetworks)
 
-	// Discover client information
-	clientInfo, err := s.clientDiscoverer.DiscoverClients(ctx)
-	if err != nil {
-		s.log.WithError(err).Warn("Failed to discover client information")
+	// Discover client information (skipped if no discoverer was injected)
+	clientInfo := make(map[string]ClientInfo)
 
-		clientInfo = make(map[string]ClientInfo)
+	if s.clientDiscoverer != nil {
+		discovered, err := s.clientDiscoverer.DiscoverClients(ctx)
+		if err != nil {
+			s.log.WithError(err).Warn("Failed to discover client information")
+		} else {
+			clientInfo = discovered
+		}
 	}
 
 	// Create result

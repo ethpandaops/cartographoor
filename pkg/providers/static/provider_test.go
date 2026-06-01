@@ -118,7 +118,7 @@ func TestCombinedProviders(t *testing.T) {
 	}
 
 	// Create discovery service
-	service, err := discovery.NewService(log, config)
+	service, err := discovery.NewService(log, config, nil)
 	require.NoError(t, err)
 
 	// Register both providers

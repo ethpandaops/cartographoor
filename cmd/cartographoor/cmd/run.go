@@ -16,6 +16,7 @@ import (
 
 	"github.com/ethpandaops/cartographoor/pkg/utils"
 
+	"github.com/ethpandaops/cartographoor/pkg/clientdiscovery"
 	"github.com/ethpandaops/cartographoor/pkg/discovery"
 	"github.com/ethpandaops/cartographoor/pkg/providers/github"
 	"github.com/ethpandaops/cartographoor/pkg/providers/static"
@@ -97,8 +98,10 @@ func runService(ctx context.Context, log *logrus.Logger, cfg *runConfig) error {
 		Timeout: 10 * time.Second,
 	}
 
-	// Create discovery service
-	discoveryService, err := discovery.NewService(log, cfg.Discovery)
+	// Create discovery service with a GitHub-backed client discoverer
+	clientDiscoverer := clientdiscovery.New(log, cfg.Discovery.GitHub.Token)
+
+	discoveryService, err := discovery.NewService(log, cfg.Discovery, clientDiscoverer)
 	if err != nil {
 		return err
 	}
