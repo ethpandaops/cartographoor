@@ -70,6 +70,7 @@ func TestMemoryProviderFiltering(t *testing.T) {
 		networks: map[string]discovery.Network{
 			"active-net":   {Name: "active-net", Status: "active"},
 			"inactive-net": {Name: "inactive-net", Status: "inactive"},
+			"upper-net":    {Name: "upper-net", Status: "ACTIVE"},
 		},
 		clients: map[string]discovery.ClientInfo{
 			"lighthouse": {Name: "lighthouse", Type: "consensus"},
@@ -80,11 +81,24 @@ func TestMemoryProviderFiltering(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Test GetActiveNetworks
+	// Test GetActiveNetworks (case-insensitive: matches "active" and "ACTIVE")
 	active, err := provider.GetActiveNetworks(ctx)
 	require.NoError(t, err)
-	assert.Len(t, active, 1)
+	assert.Len(t, active, 2)
 	assert.Contains(t, active, "active-net")
+	assert.Contains(t, active, "upper-net")
+
+	// Test GetInactiveNetworks
+	inactive, err := provider.GetInactiveNetworks(ctx)
+	require.NoError(t, err)
+	assert.Len(t, inactive, 1)
+	assert.Contains(t, inactive, "inactive-net")
+
+	// Test GetNetworksByStatus with an arbitrary status
+	byStatus, err := provider.GetNetworksByStatus(ctx, "inactive")
+	require.NoError(t, err)
+	assert.Len(t, byStatus, 1)
+	assert.Contains(t, byStatus, "inactive-net")
 
 	// Test GetClientsByType
 	consensus, err := provider.GetClientsByType(ctx, "consensus")

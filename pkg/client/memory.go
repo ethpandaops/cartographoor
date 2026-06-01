@@ -150,6 +150,16 @@ func (m *MemoryProvider) GetNetwork(ctx context.Context, name string) (discovery
 
 // GetActiveNetworks returns only active networks.
 func (m *MemoryProvider) GetActiveNetworks(ctx context.Context) (map[string]discovery.Network, error) {
+	return m.GetNetworksByStatus(ctx, "active")
+}
+
+// GetInactiveNetworks returns only inactive networks.
+func (m *MemoryProvider) GetInactiveNetworks(ctx context.Context) (map[string]discovery.Network, error) {
+	return m.GetNetworksByStatus(ctx, "inactive")
+}
+
+// GetNetworksByStatus returns networks filtered by status (case-insensitive).
+func (m *MemoryProvider) GetNetworksByStatus(ctx context.Context, status string) (map[string]discovery.Network, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -158,9 +168,10 @@ func (m *MemoryProvider) GetActiveNetworks(ctx context.Context) (map[string]disc
 	}
 
 	result := make(map[string]discovery.Network)
+	normalizedStatus := strings.ToLower(status)
 
 	for k, v := range m.networks {
-		if v.Status == "active" {
+		if strings.ToLower(v.Status) == normalizedStatus {
 			result[k] = v
 		}
 	}

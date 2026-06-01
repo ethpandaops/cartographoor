@@ -32,6 +32,13 @@ type Provider interface {
 	// GetActiveNetworks returns only networks with status "active".
 	GetActiveNetworks(ctx context.Context) (map[string]discovery.Network, error)
 
+	// GetInactiveNetworks returns only networks with status "inactive".
+	GetInactiveNetworks(ctx context.Context) (map[string]discovery.Network, error)
+
+	// GetNetworksByStatus returns networks filtered by status (case-insensitive),
+	// e.g. "active" or "inactive".
+	GetNetworksByStatus(ctx context.Context, status string) (map[string]discovery.Network, error)
+
 	// GetClients returns all known Ethereum clients.
 	GetClients(ctx context.Context) (map[string]discovery.ClientInfo, error)
 

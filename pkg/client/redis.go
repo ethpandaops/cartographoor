@@ -184,15 +184,26 @@ func (r *RedisProvider) GetNetwork(ctx context.Context, name string) (discovery.
 
 // GetActiveNetworks returns only active networks from Redis.
 func (r *RedisProvider) GetActiveNetworks(ctx context.Context) (map[string]discovery.Network, error) {
+	return r.GetNetworksByStatus(ctx, "active")
+}
+
+// GetInactiveNetworks returns only inactive networks from Redis.
+func (r *RedisProvider) GetInactiveNetworks(ctx context.Context) (map[string]discovery.Network, error) {
+	return r.GetNetworksByStatus(ctx, "inactive")
+}
+
+// GetNetworksByStatus returns networks filtered by status (case-insensitive) from Redis.
+func (r *RedisProvider) GetNetworksByStatus(ctx context.Context, status string) (map[string]discovery.Network, error) {
 	networks, err := r.GetNetworks(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	result := make(map[string]discovery.Network)
+	normalizedStatus := strings.ToLower(status)
 
 	for k, v := range networks {
-		if v.Status == "active" {
+		if strings.ToLower(v.Status) == normalizedStatus {
 			result[k] = v
 		}
 	}

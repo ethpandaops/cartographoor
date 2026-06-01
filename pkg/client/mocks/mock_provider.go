@@ -102,6 +102,21 @@ func (mr *MockProviderMockRecorder) GetClientsByType(ctx, clientType any) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClientsByType", reflect.TypeOf((*MockProvider)(nil).GetClientsByType), ctx, clientType)
 }
 
+// GetInactiveNetworks mocks base method.
+func (m *MockProvider) GetInactiveNetworks(ctx context.Context) (map[string]discovery.Network, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetInactiveNetworks", ctx)
+	ret0, _ := ret[0].(map[string]discovery.Network)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetInactiveNetworks indicates an expected call of GetInactiveNetworks.
+func (mr *MockProviderMockRecorder) GetInactiveNetworks(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInactiveNetworks", reflect.TypeOf((*MockProvider)(nil).GetInactiveNetworks), ctx)
+}
+
 // GetNetwork mocks base method.
 func (m *MockProvider) GetNetwork(ctx context.Context, name string) (discovery.Network, bool, error) {
 	m.ctrl.T.Helper()
@@ -131,6 +146,21 @@ func (m *MockProvider) GetNetworks(ctx context.Context) (map[string]discovery.Ne
 func (mr *MockProviderMockRecorder) GetNetworks(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetworks", reflect.TypeOf((*MockProvider)(nil).GetNetworks), ctx)
+}
+
+// GetNetworksByStatus mocks base method.
+func (m *MockProvider) GetNetworksByStatus(ctx context.Context, status string) (map[string]discovery.Network, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNetworksByStatus", ctx, status)
+	ret0, _ := ret[0].(map[string]discovery.Network)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNetworksByStatus indicates an expected call of GetNetworksByStatus.
+func (mr *MockProviderMockRecorder) GetNetworksByStatus(ctx, status any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetworksByStatus", reflect.TypeOf((*MockProvider)(nil).GetNetworksByStatus), ctx, status)
 }
 
 // NotifyChannel mocks base method.
