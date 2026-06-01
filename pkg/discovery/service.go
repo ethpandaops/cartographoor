@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"maps"
 	"strings"
 	"sync"
 	"time"
@@ -68,11 +69,8 @@ func (s *Service) Start(ctx context.Context) error {
 	s.log.WithField("interval", s.config.Interval).Info("Starting discovery service")
 
 	// Start the result processor
-	s.wg.Add(1)
 
-	go func() {
-		defer s.wg.Done()
-
+	s.wg.Go(func() {
 		for {
 			select {
 			case <-ctx.Done():
@@ -87,15 +85,12 @@ func (s *Service) Start(ctx context.Context) error {
 				s.mutex.Unlock()
 			}
 		}
-	}()
+	})
 
 	// Start the ticker
 	s.ticker = time.NewTicker(s.config.Interval)
-	s.wg.Add(1)
 
-	go func() {
-		defer s.wg.Done()
-
+	s.wg.Go(func() {
 		// Run an initial discovery
 		if err := s.runDiscovery(ctx); err != nil {
 			s.log.WithError(err).Error("Failed to run initial discovery")
@@ -111,7 +106,7 @@ func (s *Service) Start(ctx context.Context) error {
 				}
 			}
 		}
-	}()
+	})
 
 	return nil
 }
@@ -235,7 +230,7 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 	)
 
 	// Wait for all provider goroutines to complete
-	for i := 0; i < len(providers); i++ {
+	for range providers {
 		select {
 		case <-ctx.Done():
 			return Result{
@@ -246,9 +241,7 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 		case pr := <-resultCh:
 			if pr.err == nil && pr.networks != nil {
 				// Merge networks, newer ones will overwrite older ones with the same key
-				for key, network := range pr.networks {
-					allNetworks[key] = network
-				}
+				maps.Copy(allNetworks, pr.networks)
 
 				provInfos = append(provInfos, ProviderInfo{Name: pr.provider.Name()})
 			}

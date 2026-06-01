@@ -50,17 +50,17 @@ type DoraExecutionResponse struct {
 //
 //nolint:tagliatelle // Dora API uses snake_case
 type DoraConsensusClient struct {
-	ClientName    string                 `json:"client_name"`
-	ClientType    string                 `json:"client_type"`
-	Version       string                 `json:"version"`
-	PeerID        string                 `json:"peer_id"`
-	NodeID        string                 `json:"node_id"`
-	ENR           string                 `json:"enr,omitempty"`
-	Status        string                 `json:"status"`
-	PeerCount     int                    `json:"peer_count"`
-	PeersInbound  int                    `json:"peers_inbound"`
-	PeersOutbound int                    `json:"peers_outbound"`
-	Metadata      map[string]interface{} `json:"metadata"`
+	ClientName    string         `json:"client_name"`
+	ClientType    string         `json:"client_type"`
+	Version       string         `json:"version"`
+	PeerID        string         `json:"peer_id"`
+	NodeID        string         `json:"node_id"`
+	ENR           string         `json:"enr,omitempty"`
+	Status        string         `json:"status"`
+	PeerCount     int            `json:"peer_count"`
+	PeersInbound  int            `json:"peers_inbound"`
+	PeersOutbound int            `json:"peers_outbound"`
+	Metadata      map[string]any `json:"metadata"`
 	// Blockchain fields are intentionally omitted (head_slot, head_root)
 }
 

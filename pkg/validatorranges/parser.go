@@ -2,6 +2,7 @@ package validatorranges
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -95,7 +96,7 @@ func parseSection(section *ini.Section, nodes map[string]*Node, sourceName strin
 			node = &Node{
 				Groups:     []string{},
 				Tags:       []string{},
-				Attributes: make(map[string]interface{}),
+				Attributes: make(map[string]any),
 				Source:     sourceName,
 			}
 			nodes[nodeName] = node
@@ -126,7 +127,7 @@ func parseSection(section *ini.Section, nodes map[string]*Node, sourceName strin
 			}
 
 			// Store all attributes with camelCase keys (excluding validator_start/end)
-			for _, attr := range strings.Fields(key.Value()) {
+			for attr := range strings.FieldsSeq(key.Value()) {
 				if strings.Contains(attr, "=") {
 					parts := strings.SplitN(attr, "=", 2)
 					if len(parts) == 2 {
@@ -168,7 +169,7 @@ func extractValidatorRange(key *ini.Key, rangeOffset int) *ValidatorRange {
 	var hasStart, hasEnd bool
 
 	// Parse attributes in the value
-	for _, attr := range strings.Fields(value) {
+	for attr := range strings.FieldsSeq(value) {
 		if strings.HasPrefix(attr, "validator_start=") {
 			parts := strings.Split(attr, "=")
 			if len(parts) == 2 {
@@ -303,13 +304,7 @@ func calculateTotalValidators(nodes map[string]*Node) int {
 
 // contains checks if a string slice contains a specific string.
 func contains(slice []string, str string) bool {
-	for _, s := range slice {
-		if s == str {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(slice, str)
 }
 
 // snakeToCamel converts snake_case to camelCase.
@@ -319,12 +314,14 @@ func snakeToCamel(s string) string {
 		return s
 	}
 
-	result := parts[0]
+	var result strings.Builder
+	result.WriteString(parts[0])
+
 	for i := 1; i < len(parts); i++ {
 		if len(parts[i]) > 0 {
-			result += strings.ToUpper(parts[i][:1]) + parts[i][1:]
+			result.WriteString(strings.ToUpper(parts[i][:1]) + parts[i][1:])
 		}
 	}
 
-	return result
+	return result.String()
 }

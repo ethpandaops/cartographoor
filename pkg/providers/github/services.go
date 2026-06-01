@@ -17,12 +17,15 @@ var servicePatterns = map[string]string{
 	"beacon_rpc":      "https://beacon.%s",
 	"explorer":        "https://explorer.%s",
 	"forkmon":         "https://forkmon.%s",
+	"forky":           "https://forky.%s",
 	"assertoor":       "https://assertoor.%s",
 	"dora":            "https://dora.%s",
 	"checkpoint_sync": "https://checkpoint-sync.%s",
 	"ethstats":        "https://ethstats.%s",
 	"tracoor":         "https://tracoor.%s",
 	"syncoor":         "https://syncoor.%s",
+	"spamoor":         "https://spamoor.%s",
+	"buildoor":        "https://buildoor.%s",
 }
 
 // Special case services with custom patterns.
@@ -36,8 +39,16 @@ var specialServicePatterns = map[string]func(string) string{
 		return ""
 	},
 	"blobscan": func(domain string) string {
-		// Global blobscan service.
-		return "https://blobscan.com"
+		parts := strings.Split(domain, ".")
+		if len(parts) > 0 {
+			if parts[0] == "mainnet" {
+				return "https://blobscan.com"
+			}
+
+			return fmt.Sprintf("https://%s.blobscan.com", parts[0])
+		}
+
+		return ""
 	},
 	"devnet_spec": func(domain string) string {
 		parts := strings.Split(domain, ".")
@@ -102,8 +113,7 @@ func (p *Provider) getServiceURLs(ctx context.Context, domain string) *discovery
 	// Start goroutines for special services that need validation
 	for serviceKey, patternFunc := range specialServicePatterns {
 		// Skip static URLs that don't need validation.
-		//nolint:goconst // No need.
-		if serviceKey == "devnet_spec" || serviceKey == "blobscan" {
+		if serviceKey == "devnet_spec" {
 			continue
 		}
 
@@ -127,7 +137,7 @@ func (p *Provider) getServiceURLs(ctx context.Context, domain string) *discovery
 	for i := 0; i < numChecks; i++ {
 		result := <-resultCh
 
-		p.log.WithFields(map[string]interface{}{
+		p.log.WithFields(map[string]any{
 			"service": result.serviceKey,
 			"url":     result.url,
 			"valid":   result.valid,
@@ -135,6 +145,8 @@ func (p *Provider) getServiceURLs(ctx context.Context, domain string) *discovery
 
 		if result.valid {
 			switch result.serviceKey {
+			case "blobscan":
+				services.Blobscan = result.url
 			case "faucet":
 				services.Faucet = result.url
 			case "json_rpc":
@@ -159,6 +171,10 @@ func (p *Provider) getServiceURLs(ctx context.Context, domain string) *discovery
 				services.Tracoor = result.url
 			case "syncoor":
 				services.Syncoor = result.url
+			case "spamoor":
+				services.Spamoor = result.url
+			case "buildoor":
+				services.Buildoor = result.url
 			}
 		}
 	}
@@ -171,12 +187,9 @@ func (p *Provider) getServiceURLs(ctx context.Context, domain string) *discovery
 				switch serviceKey {
 				case "devnet_spec":
 					services.DevnetSpec = url
-				case "blobscan":
-					// Always use the global blobscan.com
-					services.Blobscan = url
 				}
 
-				p.log.WithFields(map[string]interface{}{
+				p.log.WithFields(map[string]any{
 					"service": serviceKey,
 					"url":     url,
 					"valid":   true, // Assumed valid for static URLs
@@ -190,7 +203,7 @@ func (p *Provider) getServiceURLs(ctx context.Context, domain string) *discovery
 
 // isURLValid checks if a URL is reachable.
 func (p *Provider) isURLValid(ctx context.Context, client *http.Client, url string) bool {
-	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return false
 	}
@@ -201,7 +214,6 @@ func (p *Provider) isURLValid(ctx context.Context, client *http.Client, url stri
 	}
 	defer resp.Body.Close()
 
-	// Consider 2xx, 3xx, and some 4xx status codes as valid
-	// 404 might be valid for an API that exists but the endpoint is not found
-	return resp.StatusCode < 500
+	// Consider 2xx and 3xx status codes as valid
+	return resp.StatusCode < 300
 }

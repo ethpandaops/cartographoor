@@ -26,6 +26,7 @@ const (
 	ELReth       = "reth"
 	ELErigon     = "erigon"
 	ELEthereumJS = "ethereumjs"
+	ELEthrex     = "ethrex"
 )
 
 const (
@@ -36,7 +37,7 @@ const (
 var (
 	// Buckets of known clients.
 	CLClients = []string{CLLighthouse, CLPrysm, CLLodestar, CLNimbus, CLTeku, CLGrandine}
-	ELClients = []string{ELNethermind, ELNimbusel, ELBesu, ELGeth, ELReth, ELErigon, ELEthereumJS}
+	ELClients = []string{ELNethermind, ELNimbusel, ELBesu, ELGeth, ELReth, ELErigon, ELEthereumJS, ELEthrex}
 
 	// DefaultDisplayNames maps clients to their default display names.
 	DefaultDisplayNames = map[string]string{
@@ -53,6 +54,7 @@ var (
 		ELReth:       "Reth",
 		ELErigon:     "Erigon",
 		ELEthereumJS: "EthereumJS",
+		ELEthrex:     "Ethrex",
 	}
 
 	// DefaultRepositories maps clients to their default source repositories.
@@ -70,6 +72,7 @@ var (
 		ELReth:       "paradigmxyz/reth",
 		ELErigon:     "erigontech/erigon",
 		ELEthereumJS: "ethereumjs/ethereumjs-monorepo",
+		ELEthrex:     "lambdaclass/ethrex",
 	}
 
 	// DefaultBranches maps clients to their default branches.
@@ -87,6 +90,7 @@ var (
 		ELReth:       "main",
 		ELErigon:     "main",
 		ELEthereumJS: "master",
+		ELEthrex:     "main",
 	}
 
 	DefaultWebsiteURLs = map[string]string{
@@ -103,6 +107,7 @@ var (
 		ELReth:       "https://www.paradigm.xyz/",
 		ELErigon:     "https://erigon.tech/",
 		ELEthereumJS: "https://ethereumjs.github.io/",
+		ELEthrex:     "https://ethrex.xyz/",
 	}
 
 	DefaultDocsURLs = map[string]string{
@@ -119,6 +124,7 @@ var (
 		ELReth:       "https://reth.rs/",
 		ELErigon:     "https://docs.erigon.tech/",
 		ELEthereumJS: "https://ethereumjs.readthedocs.io/",
+		ELEthrex:     "https://docs.ethrex.xyz/",
 	}
 )
 
@@ -314,17 +320,13 @@ func GetClientType(clientName string) string {
 	normalizedName := strings.ToLower(strings.TrimSpace(clientName))
 
 	// Check consensus clients
-	for _, cl := range CLClients {
-		if normalizedName == cl {
-			return CLClientType
-		}
+	if slices.Contains(CLClients, normalizedName) {
+		return CLClientType
 	}
 
 	// Check execution clients
-	for _, el := range ELClients {
-		if normalizedName == el {
-			return ELClientType
-		}
+	if slices.Contains(ELClients, normalizedName) {
+		return ELClientType
 	}
 
 	return ""
@@ -336,13 +338,8 @@ func IsKnownClient(clientName string) bool {
 
 	// Check all known clients
 	allClients := append(CLClients, ELClients...)
-	for _, known := range allClients {
-		if normalizedName == known {
-			return true
-		}
-	}
 
-	return false
+	return slices.Contains(allClients, normalizedName)
 }
 
 // GetClientDisplayName returns the display name for a client.

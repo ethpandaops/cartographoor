@@ -11,11 +11,11 @@ type ValidatorRanges struct {
 
 // Node represents a single node with its validator range assignments.
 type Node struct {
-	Groups          []string               `json:"groups"`
-	Tags            []string               `json:"tags"`
-	Attributes      map[string]interface{} `json:"attributes"`
-	ValidatorRanges []*ValidatorRange      `json:"validatorRanges"`
-	Source          string                 `json:"source"`
+	Groups          []string          `json:"groups"`
+	Tags            []string          `json:"tags"`
+	Attributes      map[string]any    `json:"attributes"`
+	ValidatorRanges []*ValidatorRange `json:"validatorRanges"`
+	Source          string            `json:"source"`
 }
 
 // ValidatorRange represents a range of validators assigned to a node.

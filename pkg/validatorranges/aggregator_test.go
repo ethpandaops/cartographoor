@@ -19,7 +19,7 @@ func TestAggregateRanges(t *testing.T) {
 						"lighthouse-geth-1": {
 							Groups: []string{"lighthouse_geth"},
 							Tags:   []string{"el:geth", "cl:lighthouse"},
-							Attributes: map[string]interface{}{
+							Attributes: map[string]any{
 								"cloud": "aws",
 							},
 							ValidatorRanges: []*ValidatorRange{
@@ -30,7 +30,7 @@ func TestAggregateRanges(t *testing.T) {
 						"prysm-besu-1": {
 							Groups: []string{"prysm_besu"},
 							Tags:   []string{"el:besu", "cl:prysm"},
-							Attributes: map[string]interface{}{
+							Attributes: map[string]any{
 								"region": "us-east-1",
 							},
 							ValidatorRanges: []*ValidatorRange{
@@ -59,7 +59,7 @@ func TestAggregateRanges(t *testing.T) {
 						"lighthouse-besu-1": {
 							Groups: []string{"lighthouse_besu"},
 							Tags:   []string{"el:besu", "cl:lighthouse"},
-							Attributes: map[string]interface{}{
+							Attributes: map[string]any{
 								"cloud": "digitalocean",
 							},
 							ValidatorRanges: []*ValidatorRange{
@@ -70,7 +70,7 @@ func TestAggregateRanges(t *testing.T) {
 						"teku-geth-1": {
 							Groups: []string{"teku_geth"},
 							Tags:   []string{"el:geth", "cl:teku"},
-							Attributes: map[string]interface{}{
+							Attributes: map[string]any{
 								"isClSupernode": true,
 							},
 							ValidatorRanges: []*ValidatorRange{
@@ -100,7 +100,7 @@ func TestAggregateRanges(t *testing.T) {
 					"lighthouse-geth-1": {
 						Groups: []string{"lighthouse_geth"},
 						Tags:   []string{"el:geth", "cl:lighthouse"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"cloud": "aws",
 						},
 						ValidatorRanges: []*ValidatorRange{
@@ -111,7 +111,7 @@ func TestAggregateRanges(t *testing.T) {
 					"prysm-besu-1": {
 						Groups: []string{"prysm_besu"},
 						Tags:   []string{"el:besu", "cl:prysm"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"region": "us-east-1",
 						},
 						ValidatorRanges: []*ValidatorRange{
@@ -122,7 +122,7 @@ func TestAggregateRanges(t *testing.T) {
 					"lighthouse-besu-1": {
 						Groups: []string{"lighthouse_besu"},
 						Tags:   []string{"el:besu", "cl:lighthouse"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"cloud": "digitalocean",
 						},
 						ValidatorRanges: []*ValidatorRange{
@@ -133,7 +133,7 @@ func TestAggregateRanges(t *testing.T) {
 					"teku-geth-1": {
 						Groups: []string{"teku_geth"},
 						Tags:   []string{"el:geth", "cl:teku"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"isClSupernode": true,
 						},
 						ValidatorRanges: []*ValidatorRange{
@@ -171,7 +171,7 @@ func TestAggregateRanges(t *testing.T) {
 						"lighthouse-geth-1": {
 							Groups: []string{"lighthouse_geth"},
 							Tags:   []string{"el:geth", "cl:lighthouse"},
-							Attributes: map[string]interface{}{
+							Attributes: map[string]any{
 								"cloud": "aws",
 							},
 							ValidatorRanges: []*ValidatorRange{
@@ -197,7 +197,7 @@ func TestAggregateRanges(t *testing.T) {
 						"lighthouse-geth-1": {
 							Groups: []string{"lighthouse_geth", "validators"},
 							Tags:   []string{"el:geth", "cl:lighthouse", "vc:validator"},
-							Attributes: map[string]interface{}{
+							Attributes: map[string]any{
 								"cloud":  "digitalocean",
 								"region": "nyc1",
 							},
@@ -209,7 +209,7 @@ func TestAggregateRanges(t *testing.T) {
 						"lighthouse-geth-2": {
 							Groups: []string{"lighthouse_geth"},
 							Tags:   []string{"el:geth", "cl:lighthouse"},
-							Attributes: map[string]interface{}{
+							Attributes: map[string]any{
 								"cloud": "digitalocean",
 							},
 							ValidatorRanges: []*ValidatorRange{
@@ -238,7 +238,7 @@ func TestAggregateRanges(t *testing.T) {
 					"lighthouse-geth-1": {
 						Groups: []string{"lighthouse_geth"},
 						Tags:   []string{"el:geth", "cl:lighthouse"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"cloud": "aws",
 						},
 						ValidatorRanges: []*ValidatorRange{
@@ -249,7 +249,7 @@ func TestAggregateRanges(t *testing.T) {
 					"lighthouse-geth-2": {
 						Groups: []string{"lighthouse_geth"},
 						Tags:   []string{"el:geth", "cl:lighthouse"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"cloud": "digitalocean",
 						},
 						ValidatorRanges: []*ValidatorRange{
@@ -294,7 +294,7 @@ func TestAggregateRanges(t *testing.T) {
 						"node1": {
 							Groups: []string{"group1"},
 							Tags:   []string{"tag1"},
-							Attributes: map[string]interface{}{
+							Attributes: map[string]any{
 								"attr": "value",
 							},
 							ValidatorRanges: []*ValidatorRange{
@@ -320,7 +320,7 @@ func TestAggregateRanges(t *testing.T) {
 						"node2": {
 							Groups: []string{"group2"},
 							Tags:   []string{"tag2"},
-							Attributes: map[string]interface{}{
+							Attributes: map[string]any{
 								"attr2": "value2",
 							},
 							ValidatorRanges: []*ValidatorRange{
@@ -346,7 +346,7 @@ func TestAggregateRanges(t *testing.T) {
 					"node1": {
 						Groups: []string{"group1"},
 						Tags:   []string{"tag1"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"attr": "value",
 						},
 						ValidatorRanges: []*ValidatorRange{
@@ -357,7 +357,7 @@ func TestAggregateRanges(t *testing.T) {
 					"node2": {
 						Groups: []string{"group2"},
 						Tags:   []string{"tag2"},
-						Attributes: map[string]interface{}{
+						Attributes: map[string]any{
 							"attr2": "value2",
 						},
 						ValidatorRanges: []*ValidatorRange{

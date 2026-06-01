@@ -9,58 +9,65 @@ import (
 )
 
 func TestExtractBlobSchedule(t *testing.T) {
+	// Test timing parameters
+	testTiming := chainTiming{
+		genesisTime:         1000,
+		slotsPerEpoch:       32,
+		slotDurationSeconds: 12,
+	}
+
 	tests := []struct {
 		name        string
-		configData  map[string]interface{}
+		configData  map[string]any
 		expected    []discovery.BlobSchedule
 		expectEmpty bool
 	}{
 		{
 			name: "valid blob schedule with two entries",
-			configData: map[string]interface{}{
-				"BLOB_SCHEDULE": []interface{}{
-					map[string]interface{}{
+			configData: map[string]any{
+				"BLOB_SCHEDULE": []any{
+					map[string]any{
 						"EPOCH":               412672,
 						"MAX_BLOBS_PER_BLOCK": 15,
 					},
-					map[string]interface{}{
+					map[string]any{
 						"EPOCH":               419072,
 						"MAX_BLOBS_PER_BLOCK": 21,
 					},
 				},
 			},
 			expected: []discovery.BlobSchedule{
-				{Epoch: 412672, MaxBlobsPerBlock: 15},
-				{Epoch: 419072, MaxBlobsPerBlock: 21},
+				{Epoch: 412672, Timestamp: testTiming.genesisTime + (412672 * testTiming.slotsPerEpoch * testTiming.slotDurationSeconds), MaxBlobsPerBlock: 15},
+				{Epoch: 419072, Timestamp: testTiming.genesisTime + (419072 * testTiming.slotsPerEpoch * testTiming.slotDurationSeconds), MaxBlobsPerBlock: 21},
 			},
 			expectEmpty: false,
 		},
 		{
 			name: "valid blob schedule with string values",
-			configData: map[string]interface{}{
-				"BLOB_SCHEDULE": []interface{}{
-					map[string]interface{}{
+			configData: map[string]any{
+				"BLOB_SCHEDULE": []any{
+					map[string]any{
 						"EPOCH":               "412672",
 						"MAX_BLOBS_PER_BLOCK": "15",
 					},
 				},
 			},
 			expected: []discovery.BlobSchedule{
-				{Epoch: 412672, MaxBlobsPerBlock: 15},
+				{Epoch: 412672, Timestamp: testTiming.genesisTime + (412672 * testTiming.slotsPerEpoch * testTiming.slotDurationSeconds), MaxBlobsPerBlock: 15},
 			},
 			expectEmpty: false,
 		},
 		{
 			name:        "no blob schedule",
-			configData:  map[string]interface{}{},
+			configData:  map[string]any{},
 			expected:    nil,
 			expectEmpty: true,
 		},
 		{
 			name: "blob schedule with missing epoch",
-			configData: map[string]interface{}{
-				"BLOB_SCHEDULE": []interface{}{
-					map[string]interface{}{
+			configData: map[string]any{
+				"BLOB_SCHEDULE": []any{
+					map[string]any{
 						"MAX_BLOBS_PER_BLOCK": 15,
 					},
 				},
@@ -70,9 +77,9 @@ func TestExtractBlobSchedule(t *testing.T) {
 		},
 		{
 			name: "blob schedule with missing max blobs",
-			configData: map[string]interface{}{
-				"BLOB_SCHEDULE": []interface{}{
-					map[string]interface{}{
+			configData: map[string]any{
+				"BLOB_SCHEDULE": []any{
+					map[string]any{
 						"EPOCH": 412672,
 					},
 				},
@@ -82,7 +89,7 @@ func TestExtractBlobSchedule(t *testing.T) {
 		},
 		{
 			name: "blob schedule with invalid type",
-			configData: map[string]interface{}{
+			configData: map[string]any{
 				"BLOB_SCHEDULE": "not an array",
 			},
 			expected:    nil,
@@ -100,7 +107,7 @@ func TestExtractBlobSchedule(t *testing.T) {
 				log: log,
 			}
 
-			result := p.extractBlobSchedule(tt.configData, "test-network")
+			result := p.extractBlobSchedule(tt.configData, "test-network", testTiming)
 
 			if tt.expectEmpty {
 				assert.Nil(t, result, "Expected nil blob schedule")
@@ -110,6 +117,7 @@ func TestExtractBlobSchedule(t *testing.T) {
 
 				for i, expected := range tt.expected {
 					assert.Equal(t, expected.Epoch, result[i].Epoch, "Epoch mismatch at index %d", i)
+					assert.Equal(t, expected.Timestamp, result[i].Timestamp, "Timestamp mismatch at index %d", i)
 					assert.Equal(t, expected.MaxBlobsPerBlock, result[i].MaxBlobsPerBlock, "MaxBlobsPerBlock mismatch at index %d", i)
 				}
 			}

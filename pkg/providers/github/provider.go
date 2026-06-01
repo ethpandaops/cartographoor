@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"maps"
 	"net/http"
 	"path"
 	"strings"
@@ -70,9 +71,7 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 		}
 
 		// Add discovered networks to the result
-		for name, network := range discoveredNetworks {
-			networks[name] = network
-		}
+		maps.Copy(networks, discoveredNetworks)
 	}
 
 	return networks, nil
