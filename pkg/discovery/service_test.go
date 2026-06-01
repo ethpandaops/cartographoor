@@ -73,7 +73,7 @@ func TestDiscoveryService(t *testing.T) {
 		Interval: 100 * time.Millisecond,
 	}
 
-	service, err := NewService(log, cfg)
+	service, err := NewService(log, cfg, nil)
 	require.NoError(t, err)
 
 	// Create and set mock client discoverer
@@ -158,7 +158,7 @@ func TestDiscoveryService_NoProviders(t *testing.T) {
 		Interval: 100 * time.Millisecond,
 	}
 
-	service, err := NewService(log, cfg)
+	service, err := NewService(log, cfg, nil)
 	require.NoError(t, err)
 
 	// Create and set mock client discoverer
