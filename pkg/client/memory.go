@@ -71,7 +71,6 @@ func (m *MemoryProvider) Start(ctx context.Context) error {
 	m.ticker = time.NewTicker(m.config.RefreshInterval)
 
 	m.wg.Go(func() {
-
 		for {
 			select {
 			case <-ctx.Done():

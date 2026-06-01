@@ -78,7 +78,6 @@ func (r *RedisProvider) Start(ctx context.Context) error {
 	r.ticker = time.NewTicker(r.config.RefreshInterval)
 
 	r.wg.Go(func() {
-
 		// Immediate refresh if leader
 		if r.elector.IsLeader() {
 			if err := r.refresh(ctx); err != nil {
