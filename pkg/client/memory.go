@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"strings"
 	"sync"
@@ -68,10 +69,8 @@ func (m *MemoryProvider) Start(ctx context.Context) error {
 
 	// Start background refresh loop
 	m.ticker = time.NewTicker(m.config.RefreshInterval)
-	m.wg.Add(1)
 
-	go func() {
-		defer m.wg.Done()
+	m.wg.Go(func() {
 
 		for {
 			select {
@@ -85,7 +84,7 @@ func (m *MemoryProvider) Start(ctx context.Context) error {
 				}
 			}
 		}
-	}()
+	})
 
 	m.log.Info("Memory provider started")
 
@@ -127,9 +126,7 @@ func (m *MemoryProvider) GetNetworks(ctx context.Context) (map[string]discovery.
 
 	// Return copy to prevent external modification
 	result := make(map[string]discovery.Network, len(m.networks))
-	for k, v := range m.networks {
-		result[k] = v
-	}
+	maps.Copy(result, m.networks)
 
 	return result, nil
 }
@@ -190,9 +187,7 @@ func (m *MemoryProvider) GetClients(ctx context.Context) (map[string]discovery.C
 
 	// Return copy
 	result := make(map[string]discovery.ClientInfo, len(m.clients))
-	for k, v := range m.clients {
-		result[k] = v
-	}
+	maps.Copy(result, m.clients)
 
 	return result, nil
 }

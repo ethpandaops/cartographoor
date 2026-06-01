@@ -76,10 +76,8 @@ func (r *RedisProvider) Start(ctx context.Context) error {
 
 	// Start refresh loop (leader only)
 	r.ticker = time.NewTicker(r.config.RefreshInterval)
-	r.wg.Add(1)
 
-	go func() {
-		defer r.wg.Done()
+	r.wg.Go(func() {
 
 		// Immediate refresh if leader
 		if r.elector.IsLeader() {
@@ -102,7 +100,7 @@ func (r *RedisProvider) Start(ctx context.Context) error {
 				}
 			}
 		}
-	}()
+	})
 
 	// Wait for initial data
 	readyCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
