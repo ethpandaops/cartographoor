@@ -157,6 +157,8 @@ func (p *Provider) getServiceURLs(ctx context.Context, domain string) *discovery
 				services.Explorer = result.url
 			case "forkmon":
 				services.Forkmon = result.url
+			case "forky":
+				services.Forky = result.url
 			case "assertoor":
 				services.Assertoor = result.url
 			case "dora":
