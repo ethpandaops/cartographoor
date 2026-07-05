@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"net/http"
 	"path"
 
 	"github.com/ethpandaops/cartographoor/pkg/discovery"
@@ -25,7 +26,7 @@ func (p *Provider) determineNetworkStatus(
 	kubePath := path.Join(kubernetesDir, networkName)
 
 	_, _, resp, err := client.Repositories.GetContents(ctx, owner, repo, kubePath, nil)
-	if err == nil || (resp != nil && resp.StatusCode != 404) {
+	if err == nil && resp != nil && resp.StatusCode == http.StatusOK {
 		status = active
 
 		// For active networks, try to get config values
@@ -35,7 +36,7 @@ func (p *Provider) determineNetworkStatus(
 		archivePath := path.Join(kubernetesArchiveDir, networkName)
 
 		_, _, resp, err := client.Repositories.GetContents(ctx, owner, repo, archivePath, nil)
-		if err == nil || (resp != nil && resp.StatusCode != 404) {
+		if err == nil && resp != nil && resp.StatusCode == http.StatusOK {
 			status = inactive
 		}
 	}
