@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"fmt"
 	"maps"
 	"strings"
 	"sync"
@@ -227,8 +228,9 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 
 	// Collect results
 	var (
-		allNetworks = make(map[string]Network)
-		provInfos   = make([]ProviderInfo, 0)
+		allNetworks     = make(map[string]Network)
+		provInfos       = make([]ProviderInfo, 0)
+		failedProviders = make([]string, 0)
 	)
 
 	// Wait for all provider goroutines to complete
@@ -241,13 +243,32 @@ func (s *Service) executeDiscovery(ctx context.Context) (Result, error) {
 				Clients:         make(map[string]ClientInfo),
 			}, ctx.Err()
 		case pr := <-resultCh:
-			if pr.err == nil && pr.networks != nil {
+			if pr.err != nil {
+				failedProviders = append(failedProviders, pr.provider.Name())
+
+				continue
+			}
+
+			if pr.networks != nil {
 				// Merge networks, newer ones will overwrite older ones with the same key
 				maps.Copy(allNetworks, pr.networks)
 
 				provInfos = append(provInfos, ProviderInfo{Name: pr.provider.Name()})
 			}
 		}
+	}
+
+	// If any provider failed, the aggregated set is incomplete. Presenting it as a
+	// successful result would let callers publish a partial networks.json that
+	// silently drops the failed provider's networks. Fail the run instead so the
+	// previously published data is preserved.
+	if len(failedProviders) > 0 {
+		return Result{
+				Networks:        make(map[string]Network),
+				NetworkMetadata: make(map[string]RepositoryMetadata),
+				Clients:         make(map[string]ClientInfo),
+			}, fmt.Errorf("discovery incomplete: %d of %d providers failed (%s)",
+				len(failedProviders), len(providers), strings.Join(failedProviders, ", "))
 	}
 
 	// Build repository metadata from config
