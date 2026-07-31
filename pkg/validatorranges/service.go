@@ -130,17 +130,10 @@ func (s *Service) fetchEthpandaopsRanges(ctx context.Context, networkName string
 		repo = "ethpandaops/ansible"
 	}
 
-	// Strip repository-specific prefixes from network name for inventory path
-	inventoryName := networkName
-	// Common prefixes to strip (e.g., "fusaka-devnet-5" -> "devnet-5")
-	prefixes := []string{"fusaka-", "pectra-", "dencun-", "eof-", "verkle-"}
-	for _, prefix := range prefixes {
-		if after, ok := strings.CutPrefix(networkName, prefix); ok {
-			inventoryName = after
-
-			break
-		}
-	}
+	// Strip the repository's own name prefix from the network name for the
+	// inventory path (e.g. repo "ethpandaops/fusaka-devnets" + network
+	// "fusaka-devnet-5" -> "devnet-5").
+	inventoryName := stripRepoPrefix(networkName, repo)
 
 	// Build inventory URLs
 	urls := s.fetcher.BuildInventoryURLs(repo, inventoryName)
@@ -174,6 +167,28 @@ func (s *Service) fetchEthpandaopsRanges(ctx context.Context, networkName string
 
 	// Aggregate all ranges from ethpandaops
 	return AggregateRanges(allRanges), nil
+}
+
+// stripRepoPrefix removes the repository's own name prefix from a network
+// name so it maps to the inventory path used inside that repository. Devnet
+// repositories follow the "<prefix>-devnets" naming convention and prefix
+// their discovered network names with "<prefix>-", e.g. repository
+// "ethpandaops/glamsterdam-devnets" produces a network named
+// "glamsterdam-devnet-7", whose inventory actually lives at
+// "ansible/inventories/devnet-7" inside that repository.
+func stripRepoPrefix(networkName, repo string) string {
+	parts := strings.Split(repo, "/")
+	if len(parts) != 2 {
+		return networkName
+	}
+
+	repoPrefix := strings.TrimSuffix(parts[1], "-devnets")
+
+	if after, ok := strings.CutPrefix(networkName, repoPrefix+"-"); ok {
+		return after
+	}
+
+	return networkName
 }
 
 // fetchAdditionalRanges fetches validator ranges from additional configured sources.
