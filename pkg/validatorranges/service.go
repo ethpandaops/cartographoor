@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/ethpandaops/cartographoor/pkg/discovery"
 	"github.com/ethpandaops/cartographoor/pkg/storage/s3"
@@ -37,6 +38,12 @@ func (s *Service) GenerateValidatorRanges(ctx context.Context, networks map[stri
 	// Use semaphore to limit concurrency to 5 networks at a time
 	sem := semaphore.NewWeighted(5)
 
+	var (
+		mu          sync.Mutex
+		firstErr    error
+		failedCount int
+	)
+
 	for name, network := range networks {
 		if err := sem.Acquire(ctx, 1); err != nil {
 			return fmt.Errorf("failed to acquire semaphore: %w", err)
@@ -50,6 +57,16 @@ func (s *Service) GenerateValidatorRanges(ctx context.Context, networks map[stri
 					"network": networkName,
 					"error":   err,
 				}).Error("Failed to process network")
+
+				mu.Lock()
+
+				failedCount++
+
+				if firstErr == nil {
+					firstErr = fmt.Errorf("network %s: %w", networkName, err)
+				}
+
+				mu.Unlock()
 			}
 		}(name, network)
 	}
@@ -60,6 +77,10 @@ func (s *Service) GenerateValidatorRanges(ctx context.Context, networks map[stri
 	}
 
 	sem.Release(5)
+
+	if firstErr != nil {
+		return fmt.Errorf("%d of %d networks failed to process: %w", failedCount, len(networks), firstErr)
+	}
 
 	s.logger.Info("Validator ranges generation completed")
 
