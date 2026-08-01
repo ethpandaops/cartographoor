@@ -17,20 +17,23 @@ import (
 )
 
 // Config represents the configuration for the S3 storage provider.
+//
+// Retry resilience for Upload/UploadRaw comes from the AWS SDK's own
+// default retryer, not from a field here. RetryDuration and MaxRetries
+// govern only the application-level retry loop in Download.
 type Config struct {
-	BucketName           string        `mapstructure:"bucketName"`
-	Key                  string        `mapstructure:"key"`
-	Region               string        `mapstructure:"region"`
-	Endpoint             string        `mapstructure:"endpoint"`
-	AccessKey            string        `mapstructure:"accessKey"`
-	SecretKey            string        `mapstructure:"secretKey"`
-	ForcePathStyle       bool          `mapstructure:"forcePathStyle"`
-	DisableSSL           bool          `mapstructure:"disableSSL"`
-	ContentType          string        `mapstructure:"contentType"`
-	ACL                  string        `mapstructure:"acl"`
-	RetryDuration        time.Duration `mapstructure:"retryDuration"`
-	MaxRetries           int           `mapstructure:"maxRetries"`
-	BackoffJitterPercent int           `mapstructure:"backoffJitterPercent"`
+	BucketName     string        `mapstructure:"bucketName"`
+	Key            string        `mapstructure:"key"`
+	Region         string        `mapstructure:"region"`
+	Endpoint       string        `mapstructure:"endpoint"`
+	AccessKey      string        `mapstructure:"accessKey"`
+	SecretKey      string        `mapstructure:"secretKey"`
+	ForcePathStyle bool          `mapstructure:"forcePathStyle"`
+	DisableSSL     bool          `mapstructure:"disableSSL"`
+	ContentType    string        `mapstructure:"contentType"`
+	ACL            string        `mapstructure:"acl"`
+	RetryDuration  time.Duration `mapstructure:"retryDuration"`
+	MaxRetries     int           `mapstructure:"maxRetries"`
 }
 
 // Provider implements the storage provider interface for S3.
@@ -59,10 +62,6 @@ func NewProvider(log *logrus.Logger, cfg Config) (*Provider, error) {
 
 	if cfg.MaxRetries == 0 {
 		cfg.MaxRetries = 3
-	}
-
-	if cfg.BackoffJitterPercent == 0 {
-		cfg.BackoffJitterPercent = 20
 	}
 
 	return &Provider{
