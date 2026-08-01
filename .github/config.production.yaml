@@ -437,7 +437,7 @@ storage:
   # Access control list for the uploaded file (REQUIRED for public access)
   acl: public-read
 
-  # Retry configuration
+  # Retry configuration (applies to downloads; uploads rely on the AWS SDK's
+  # own default retry behavior)
   retryDuration: 5s
   maxRetries: 3
-  backoffJitterPercent: 20

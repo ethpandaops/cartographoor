@@ -61,10 +61,10 @@ storage:
   # Access control list for the uploaded file (optional)
   # acl: public-read
 
-  # Retry configuration
+  # Retry configuration (applies to downloads; uploads rely on the AWS SDK's
+  # own default retry behavior)
   retryDuration: 5s
   maxRetries: 3
-  backoffJitterPercent: 20
 
 # Inventory generation configuration
 inventory:
