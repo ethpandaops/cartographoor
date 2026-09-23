@@ -306,6 +306,7 @@ func TestServiceURLs(t *testing.T) {
 		assert.Equal(t, "https://faucet.%s", servicePatterns["faucet"])
 		assert.Equal(t, "https://rpc.%s", servicePatterns["json_rpc"])
 		assert.Equal(t, "https://beacon.%s", servicePatterns["beacon_rpc"])
+		assert.Equal(t, "https://rolloor.%s", servicePatterns["rolloor"])
 
 		// Special patterns
 		t.Run("Beaconcha.in explorer", func(t *testing.T) {
