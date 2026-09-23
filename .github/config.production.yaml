@@ -241,6 +241,22 @@ discovery:
   github:
     # List of repositories to check for networks
     repositories:
+      - name: ethpandaops/frames-devnets
+        namePrefix: frames-
+        displayName: Frames Devnets
+        description: "Frame transactions (EIP-8141) add a new transaction type made of frames that separate validation, payment and execution, enabling native account abstraction with arbitrary signature schemes and paymasters."
+        image: https://ethpandaops.io/img/bal.jpg
+        links:
+          - title: "EIP-8141: Frame Transaction"
+            url: "https://eips.ethereum.org/EIPS/eip-8141"
+      - name: ethpandaops/focil-devnets
+        namePrefix: focil-
+        displayName: FOCIL Devnets
+        description: "Fork-choice enforced inclusion lists (EIP-7805) let a committee of validators force transactions into blocks, strengthening Ethereum's censorship resistance."
+        image: https://ethpandaops.io/img/bal.jpg
+        links:
+          - title: "EIP-7805: Fork-choice enforced Inclusion Lists"
+            url: "https://eips.ethereum.org/EIPS/eip-7805"
       - name: ethpandaops/glamsterdam-devnets
         namePrefix: glamsterdam-
         displayName: Glamsterdam Devnets
