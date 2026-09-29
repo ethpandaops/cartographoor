@@ -176,6 +176,7 @@ discovery:
                 lodestar: "1.49.0"
                 prysm: "7.2.0"
                 teku: "26.9.1"
+                tysm: "1.1.0"
         blobSchedule:
         - epoch: 274176
           maxBlobsPerBlock: 15
