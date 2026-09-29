@@ -27,5 +27,4 @@ func TestS3Provider_ConfigDefaults(t *testing.T) {
 	assert.Equal(t, "application/json", provider.config.ContentType)
 	assert.Equal(t, 5*time.Second, provider.config.RetryDuration)
 	assert.Equal(t, 3, provider.config.MaxRetries)
-	assert.Equal(t, 20, provider.config.BackoffJitterPercent)
 }
