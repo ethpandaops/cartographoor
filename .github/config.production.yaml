@@ -170,6 +170,12 @@ discovery:
                 prysm: "6.1.0"
                 teku: "25.9.3"
                 tysm: "0.43.0"
+            gloas:
+              epoch: 353024
+              minClientVersions:
+                lodestar: "1.49.0"
+                prysm: "7.2.0"
+                teku: "26.9.1"
         blobSchedule:
         - epoch: 274176
           maxBlobsPerBlock: 15
