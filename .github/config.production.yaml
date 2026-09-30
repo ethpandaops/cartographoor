@@ -174,6 +174,7 @@ discovery:
               epoch: 353024
               minClientVersions:
                 lodestar: "1.49.0"
+                nimbus: "26.9.0"
                 prysm: "7.2.0"
                 teku: "26.9.1"
                 tysm: "1.1.0"
