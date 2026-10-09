@@ -13,6 +13,10 @@ import (
 
 // chainTiming holds timing parameters needed for timestamp calculations.
 type chainTiming struct {
+	// genesisTime is the actual beacon chain genesis anchor used to derive
+	// fork and blob schedule timestamps: MIN_GENESIS_TIME + GENESIS_DELAY.
+	// This is not the same as the raw MIN_GENESIS_TIME value stored on
+	// GenesisConfig, which is kept separate from GENESIS_DELAY there.
 	genesisTime         uint64
 	slotsPerEpoch       uint64
 	slotDurationSeconds uint64
@@ -117,8 +121,12 @@ func (p *Provider) parseConfigYAML(
 	// NOTE: Currently assumes slot duration and slots per epoch are constant across all forks.
 	// If future forks change these values (e.g., 12s -> 6s slots), timestamp calculation
 	// will need to be updated to sum segments with different timing parameters per epoch range.
+	//
+	// The beacon chain genesis anchor is MIN_GENESIS_TIME + GENESIS_DELAY, not
+	// MIN_GENESIS_TIME alone, so GENESIS_DELAY must be included here even though
+	// the two are returned and stored separately on GenesisConfig.
 	timing := chainTiming{
-		genesisTime:         genesisTime,
+		genesisTime:         genesisTime + genesisDelay,
 		slotsPerEpoch:       p.extractSlotsPerEpoch(configData, networkName),
 		slotDurationSeconds: p.extractSlotDurationSeconds(configData, networkName),
 	}

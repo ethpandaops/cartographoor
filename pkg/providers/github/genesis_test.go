@@ -1,11 +1,18 @@
 package github
 
 import (
+	"context"
+	"encoding/base64"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/ethpandaops/cartographoor/pkg/discovery"
+	gh "github.com/google/go-github/v53/github"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExtractBlobSchedule(t *testing.T) {
@@ -123,4 +130,50 @@ func TestExtractBlobSchedule(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestParseConfigYAML_TimestampsIncludeGenesisDelay(t *testing.T) {
+	const configYAML = `
+MIN_GENESIS_TIME: 1000
+GENESIS_DELAY: 60
+TEST_FORK_EPOCH: 1
+SLOTS_PER_EPOCH: 32
+SLOT_DURATION_MS: 12000
+`
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/ethpandaops/example-devnets/contents/network-configs/devnet-1/metadata/config.yaml",
+		func(w http.ResponseWriter, r *http.Request) {
+			content := base64.StdEncoding.EncodeToString([]byte(configYAML))
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprintf(w, `{"type":"file","encoding":"base64","content":%q}`, content)
+		})
+
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	log := logrus.New()
+
+	provider, err := NewProvider(log, nil)
+	require.NoError(t, err)
+
+	provider.githubClient = gh.NewClient(&http.Client{Transport: &mockTransport{URL: srv.URL}})
+
+	_, genesisTime, genesisDelay, forks, _, err := provider.parseConfigYAML(
+		context.Background(), "ethpandaops", "example-devnets", "devnet-1")
+	require.NoError(t, err)
+
+	// The raw values returned for GenesisConfig must stay separate and unchanged.
+	assert.Equal(t, uint64(1000), genesisTime)
+	assert.Equal(t, uint64(60), genesisDelay)
+
+	require.NotNil(t, forks)
+
+	fork, ok := forks.Consensus["test"]
+	require.True(t, ok, "expected a 'test' fork entry")
+
+	// The derived timestamp must anchor on MIN_GENESIS_TIME + GENESIS_DELAY,
+	// not MIN_GENESIS_TIME alone.
+	wantTimestamp := uint64(1000) + uint64(60) + uint64(1)*32*12
+	assert.Equal(t, wantTimestamp, fork.Timestamp)
 }
