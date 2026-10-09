@@ -12,6 +12,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// maxDoraResponseBytes bounds how much of a Dora API response body is read
+// into memory. Real client-list responses are well under a megabyte; this
+// leaves generous headroom while still capping a hung or misbehaving
+// endpoint from exhausting memory.
+const maxDoraResponseBytes = 10 * 1024 * 1024
+
 // Fetcher is responsible for fetching data from Dora APIs.
 type Fetcher struct {
 	log     *logrus.Entry
@@ -183,7 +189,7 @@ func (f *Fetcher) doFetch(ctx context.Context, url string) ([]byte, error) {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(http.MaxBytesReader(nil, resp.Body, maxDoraResponseBytes))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
