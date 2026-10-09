@@ -488,3 +488,58 @@ func mockGitHubAPIWithStatus(t *testing.T) *httptest.Server {
 
 	return server
 }
+
+func TestDiscoverRepositoryNetworks_MalformedEntryDoesNotPanic(t *testing.T) {
+	mux := http.NewServeMux()
+
+	// An entry with no type, name, or html_url should be skipped rather
+	// than crash the whole discovery run.
+	mux.HandleFunc("/ethpandaops/dencun-devnets/contents/network-configs", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `[{"type":null,"name":null,"html_url":null}]`)
+	})
+
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	log := logrus.New()
+
+	provider, err := NewProvider(log, nil)
+	require.NoError(t, err)
+
+	provider.githubClient = gh.NewClient(&http.Client{Transport: &mockTransport{URL: server.URL}})
+
+	networks, err := provider.discoverRepositoryNetworks(context.Background(), provider.githubClient, discovery.GitHubRepositoryConfig{
+		Name: "ethpandaops/dencun-devnets",
+	})
+
+	require.NoError(t, err)
+	assert.Empty(t, networks, "an entry with no type should be skipped, not turned into a network")
+}
+
+func TestDiscoverRepositoryNetworks_WellFormedEntryStillWorks(t *testing.T) {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/ethpandaops/dencun-devnets/contents/network-configs", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `[{"type":"dir","name":"devnet-1","html_url":"https://github.com/ethpandaops/dencun-devnets/tree/master/network-configs/devnet-1"}]`)
+	})
+
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	log := logrus.New()
+
+	provider, err := NewProvider(log, nil)
+	require.NoError(t, err)
+
+	provider.githubClient = gh.NewClient(&http.Client{Transport: &mockTransport{URL: server.URL}})
+
+	networks, err := provider.discoverRepositoryNetworks(context.Background(), provider.githubClient, discovery.GitHubRepositoryConfig{
+		Name: "ethpandaops/dencun-devnets",
+	})
+
+	require.NoError(t, err)
+	require.Len(t, networks, 1)
+	assert.Equal(t, "devnet-1", networks["devnet-1"].Name)
+}

@@ -112,18 +112,20 @@ func (p *Provider) discoverRepositoryNetworks(
 
 	// Process directories in network-configs
 	for _, content := range dirContent {
-		if *content.Type != "dir" {
+		if content.GetType() != "dir" {
 			continue
 		}
 
+		name := content.GetName()
+
 		networkConfig := &NetworkConfig{
-			Name:         *content.Name,
-			PrefixedName: *content.Name,
+			Name:         name,
+			PrefixedName: name,
 			Repository:   repoPath,
 			Owner:        owner,
 			Repo:         repo,
-			Path:         path.Join(netConfigPath, *content.Name),
-			URL:          *content.HTMLURL,
+			Path:         path.Join(netConfigPath, name),
+			URL:          content.GetHTMLURL(),
 		}
 
 		// Apply prefix if configured
