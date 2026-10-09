@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -174,4 +175,51 @@ func TestDiscoveryService_NoProviders(t *testing.T) {
 	// Stop service - we'll skip this part to avoid the context deadline errors
 	// Just cancel the main context instead
 	cancel()
+}
+
+// TestRunOnce_PartialProviderFailure verifies that when one provider fails, the
+// run returns an error and does not hand back a partial result. Publishing a
+// partial set would silently drop the failed provider's networks.
+func TestRunOnce_PartialProviderFailure(t *testing.T) {
+	log := logrus.New()
+	log.SetLevel(logrus.PanicLevel)
+
+	service, err := NewService(log, Config{}, nil)
+	require.NoError(t, err)
+
+	// One provider fails transiently, the other succeeds.
+	service.RegisterProvider(NewMockProvider("failing", nil, errors.New("upstream unavailable")))
+	service.RegisterProvider(NewMockProvider("static", map[string]Network{
+		"mainnet": {Name: "mainnet", Status: "active"},
+	}, nil))
+
+	result, err := service.RunOnce(context.Background())
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "failing")
+	assert.Empty(t, result.Networks, "a partial result must not be returned when a provider fails")
+}
+
+// TestRunOnce_AllProvidersSucceed verifies the happy path still returns the
+// merged result with no error.
+func TestRunOnce_AllProvidersSucceed(t *testing.T) {
+	log := logrus.New()
+	log.SetLevel(logrus.PanicLevel)
+
+	service, err := NewService(log, Config{}, nil)
+	require.NoError(t, err)
+
+	service.RegisterProvider(NewMockProvider("static", map[string]Network{
+		"mainnet": {Name: "mainnet", Status: "active"},
+	}, nil))
+	service.RegisterProvider(NewMockProvider("github", map[string]Network{
+		"devnet-1": {Name: "devnet-1", Status: "active"},
+	}, nil))
+
+	result, err := service.RunOnce(context.Background())
+
+	require.NoError(t, err)
+	assert.Len(t, result.Networks, 2)
+	assert.Contains(t, result.Networks, "mainnet")
+	assert.Contains(t, result.Networks, "devnet-1")
 }
