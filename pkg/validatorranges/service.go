@@ -130,20 +130,8 @@ func (s *Service) fetchEthpandaopsRanges(ctx context.Context, networkName string
 		repo = "ethpandaops/ansible"
 	}
 
-	// Strip repository-specific prefixes from network name for inventory path
-	inventoryName := networkName
-	// Common prefixes to strip (e.g., "fusaka-devnet-5" -> "devnet-5")
-	prefixes := []string{"fusaka-", "pectra-", "dencun-", "eof-", "verkle-"}
-	for _, prefix := range prefixes {
-		if after, ok := strings.CutPrefix(networkName, prefix); ok {
-			inventoryName = after
-
-			break
-		}
-	}
-
 	// Build inventory URLs
-	urls := s.fetcher.BuildInventoryURLs(repo, inventoryName)
+	urls := s.fetcher.BuildInventoryURLs(repo, inventoryDirName(networkName, repo))
 
 	// Fetch inventory files
 	contents, successfulURLs, err := s.fetcher.FetchMultiple(ctx, urls)
@@ -234,4 +222,20 @@ func (s *Service) uploadToS3(ctx context.Context, networkName string, data *Vali
 	}
 
 	return nil
+}
+
+// inventoryDirName maps e.g. glamsterdam-devnet-8 in ethpandaops/glamsterdam-devnets to devnet-8.
+func inventoryDirName(networkName, repo string) string {
+	repoName := repo[strings.LastIndex(repo, "/")+1:]
+
+	prefix, ok := strings.CutSuffix(repoName, "devnets")
+	if !ok || prefix == "" {
+		return networkName
+	}
+
+	if after, ok := strings.CutPrefix(networkName, prefix); ok && after != "" {
+		return after
+	}
+
+	return networkName
 }

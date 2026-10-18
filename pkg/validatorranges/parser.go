@@ -11,6 +11,8 @@ import (
 
 // ParseInventory parses an Ansible inventory INI file and extracts validator ranges.
 func ParseInventory(content []byte, sourceURL string, sourceName string, rangeOffset int) (*ValidatorRanges, error) {
+	clientTags := clientTagsByGroup(parseChildGroups(content))
+
 	// Pre-process content to remove standalone host entries like "localhost"
 	// which are valid Ansible but not valid INI format
 	lines := strings.Split(string(content), "\n")
@@ -41,7 +43,7 @@ func ParseInventory(content []byte, sourceURL string, sourceName string, rangeOf
 			continue
 		}
 
-		parseSection(section, nodes, sourceName, rangeOffset)
+		parseSection(section, nodes, sourceName, rangeOffset, clientTags)
 	}
 
 	// Filter out nodes without validator ranges
@@ -73,12 +75,16 @@ func ParseInventory(content []byte, sourceURL string, sourceName string, rangeOf
 }
 
 // parseSection processes a single INI section and updates the nodes map.
-func parseSection(section *ini.Section, nodes map[string]*Node, sourceName string, rangeOffset int) {
+func parseSection(section *ini.Section, nodes map[string]*Node, sourceName string, rangeOffset int, clientTags map[string][]string) {
 	sectionName := section.Name()
 
 	// Extract group and tags from section name
 	groupName := sectionName
+
 	sectionTags := extractTags([]string{groupName})
+	if clientTags != nil {
+		sectionTags = clientTags[groupName]
+	}
 
 	// Parse each key in the section
 	for _, key := range section.Keys() {
@@ -197,6 +203,88 @@ func extractValidatorRange(key *ini.Key, rangeOffset int) *ValidatorRange {
 	}
 
 	return nil
+}
+
+// parseChildGroups returns the members of every [group:children] section.
+func parseChildGroups(content []byte) map[string][]string {
+	children := make(map[string][]string)
+
+	var current string
+
+	for _, line := range strings.Split(string(content), "\n") {
+		trimmed := strings.TrimSpace(line)
+
+		switch {
+		case trimmed == "" || strings.HasPrefix(trimmed, "#") || strings.HasPrefix(trimmed, ";"):
+			continue
+		case strings.HasPrefix(trimmed, "["):
+			name, ok := strings.CutSuffix(strings.Trim(trimmed, "[]"), ":children")
+
+			current = ""
+			if ok {
+				current = name
+			}
+		case current != "":
+			children[current] = append(children[current], strings.Fields(trimmed)[0])
+		}
+	}
+
+	return children
+}
+
+// clientTagsByGroup derives cl:/el: tags from consensus_node/execution_node; names under both are aggregators, not clients.
+func clientTagsByGroup(children map[string][]string) map[string][]string {
+	consensus := children["consensus_node"]
+	execution := children["execution_node"]
+
+	if len(consensus) == 0 && len(execution) == 0 {
+		return nil
+	}
+
+	tags := make(map[string][]string)
+
+	roles := []struct {
+		prefix  string
+		clients []string
+		other   []string
+	}{
+		{prefix: "el:", clients: execution, other: consensus},
+		{prefix: "cl:", clients: consensus, other: execution},
+	}
+
+	for _, role := range roles {
+		for _, client := range role.clients {
+			if slices.Contains(role.other, client) {
+				continue
+			}
+
+			tag := role.prefix + client
+
+			for _, group := range descendantGroups(children, client, map[string]bool{}) {
+				if !slices.Contains(tags[group], tag) {
+					tags[group] = append(tags[group], tag)
+				}
+			}
+		}
+	}
+
+	return tags
+}
+
+// descendantGroups returns group and every group nested beneath it.
+func descendantGroups(children map[string][]string, group string, seen map[string]bool) []string {
+	if seen[group] {
+		return nil
+	}
+
+	seen[group] = true
+
+	groups := []string{group}
+	for _, child := range children[group] {
+		groups = append(groups, descendantGroups(children, child, seen)...)
+	}
+
+	return groups
 }
 
 // extractTags extracts tags from group names.
