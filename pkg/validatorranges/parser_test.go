@@ -519,3 +519,77 @@ teku-besu-1 ansible_host=192.168.1.2 validator_start=100 validator_end=108
 		})
 	}
 }
+
+func TestParseInventoryClientGroups(t *testing.T) {
+	content := `[lighthouse_newel]
+lighthouse-newel-1 ansible_host=10.0.0.1 validator_start=0 validator_end=10
+
+[teku_nimbusel]
+teku-nimbusel-1 ansible_host=10.0.0.2 validator_start=10 validator_end=20
+
+[buildoor_prysm_geth]
+buildoor-prysm-geth-1 ansible_host=10.0.0.3 validator_start=20 validator_end=30
+
+[lighthouse:children]
+lighthouse_newel
+
+[teku:children]
+teku_nimbusel
+
+[prysm:children]
+buildoor_prysm_geth
+
+[newel:children]
+lighthouse_newel
+
+[nimbusel:children]
+teku_nimbusel
+
+[geth:children]
+buildoor_prysm_geth
+
+[buildoor:children]
+buildoor_prysm_geth
+
+# Client roles
+[consensus_node:children]
+lighthouse
+teku
+prysm
+buildoor
+
+[execution_node:children]
+newel
+nimbusel
+geth
+buildoor
+`
+
+	got, err := ParseInventory([]byte(content), "inventory.ini", "ethpandaops", 0)
+	if err != nil {
+		t.Fatalf("ParseInventory() error = %v", err)
+	}
+
+	want := map[string][]string{
+		"lighthouse-newel-1":    {"el:newel", "cl:lighthouse"},
+		"teku-nimbusel-1":       {"el:nimbusel", "cl:teku"},
+		"buildoor-prysm-geth-1": {"el:geth", "cl:prysm"},
+	}
+
+	if len(got.Nodes) != len(want) {
+		t.Fatalf("got %d nodes, want %d", len(got.Nodes), len(want))
+	}
+
+	for name, tags := range want {
+		node, ok := got.Nodes[name]
+		if !ok {
+			t.Errorf("missing node %s", name)
+
+			continue
+		}
+
+		if !reflect.DeepEqual(node.Tags, tags) {
+			t.Errorf("node %s tags = %v, want %v", name, node.Tags, tags)
+		}
+	}
+}
