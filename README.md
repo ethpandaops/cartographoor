@@ -61,7 +61,7 @@ The `cartographoor` binary exposes several subcommands:
 | --- | --- |
 | `run` | Core discovery loop; discovers networks and uploads `networks.json`. Supports `--once`. |
 | `inventory` | Generates a network inventory from Dora APIs (with optional DNS validation). |
-| `validator-ranges` | Downloads `networks.json` and generates validator range data from Ansible inventory files. |
+| `validator-ranges` | Downloads `networks.json` and generates validator range data from Ansible inventory files, using a network's config service `/api/v1/nodes/validator-ranges` as the authority for on-chain indices when it publishes one. |
 | `eip7870-reference-nodes` | Generates EIP-7870 reference node startup commands from the ethereum-helm-charts and platform repositories. |
 
 In production, each subcommand runs as its own scheduled GitHub Actions workflow (see `.github/workflows/`) against `.github/config.production.yaml`.
