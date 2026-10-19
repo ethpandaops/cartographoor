@@ -249,6 +249,7 @@ discovery:
                 nimbus: "26.10.1"
                 prysm: "7.3.0"
                 teku: "26.10.1"
+                tysm: "1.1.3"
         blobSchedule:
         - epoch: 52480
           maxBlobsPerBlock: 15
