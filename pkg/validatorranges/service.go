@@ -70,6 +70,29 @@ func (s *Service) GenerateValidatorRanges(ctx context.Context, networks map[stri
 func (s *Service) processNetwork(ctx context.Context, networkName string, network discovery.Network) error {
 	s.logger.WithField("network", networkName).Debug("Processing network")
 
+	aggregatedRanges := s.buildNetworkRanges(ctx, networkName, network)
+	if aggregatedRanges == nil {
+		s.logger.WithField("network", networkName).Info("No validator ranges found, skipping")
+
+		return nil
+	}
+
+	// Upload to S3
+	if err := s.uploadToS3(ctx, networkName, aggregatedRanges); err != nil {
+		return fmt.Errorf("failed to upload to S3: %w", err)
+	}
+
+	s.logger.WithFields(logrus.Fields{
+		"network":    networkName,
+		"validators": aggregatedRanges.Validators.TotalCount,
+		"nodes":      len(aggregatedRanges.Nodes),
+	}).Info("Successfully processed network")
+
+	return nil
+}
+
+// buildNetworkRanges gathers every validator range source for a network, or returns nil when none has data.
+func (s *Service) buildNetworkRanges(ctx context.Context, networkName string, network discovery.Network) *ValidatorRanges {
 	// Fetch from ethpandaops repository
 	ethpandaopsRanges, err := s.fetchEthpandaopsRanges(ctx, networkName, network)
 	if err != nil {
@@ -98,28 +121,33 @@ func (s *Service) processNetwork(ctx context.Context, networkName string, networ
 
 	allRanges = append(allRanges, additionalRanges...)
 
-	if len(allRanges) == 0 {
-		s.logger.WithField("network", networkName).Info("No validator ranges found, skipping")
+	var configRanges map[string][]*ValidatorRange
 
+	configURL := configRangesURL(network)
+	if configURL != "" {
+		configRanges, err = s.fetchConfigRanges(ctx, configURL)
+		if err != nil {
+			s.logger.WithFields(logrus.Fields{
+				"network": networkName,
+				"url":     configURL,
+				"error":   err,
+			}).Warn("Failed to fetch config service validator ranges")
+		}
+	}
+
+	if len(allRanges) == 0 && configRanges == nil {
 		return nil
 	}
 
 	// Aggregate all ranges
 	aggregatedRanges := AggregateRanges(allRanges)
-	aggregatedRanges.Metadata.NetworkName = networkName
-
-	// Upload to S3
-	if err := s.uploadToS3(ctx, networkName, aggregatedRanges); err != nil {
-		return fmt.Errorf("failed to upload to S3: %w", err)
+	if configRanges != nil {
+		ApplyConfigRanges(aggregatedRanges, configRanges, configURL, s.logger.WithField("network", networkName))
 	}
 
-	s.logger.WithFields(logrus.Fields{
-		"network":    networkName,
-		"validators": aggregatedRanges.Validators.TotalCount,
-		"nodes":      len(aggregatedRanges.Nodes),
-	}).Info("Successfully processed network")
+	aggregatedRanges.Metadata.NetworkName = networkName
 
-	return nil
+	return aggregatedRanges
 }
 
 // fetchEthpandaopsRanges fetches validator ranges from the ethpandaops repository.
@@ -204,6 +232,16 @@ func (s *Service) fetchAdditionalRanges(ctx context.Context, networkName string)
 	}
 
 	return allRanges, nil
+}
+
+// fetchConfigRanges fetches the on-chain validator ranges a network's config service publishes.
+func (s *Service) fetchConfigRanges(ctx context.Context, url string) (map[string][]*ValidatorRange, error) {
+	content, err := s.fetcher.FetchInventoryFile(ctx, url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch config ranges: %w", err)
+	}
+
+	return ParseConfigRanges(content)
 }
 
 // uploadToS3 uploads validator ranges data to S3.

@@ -32,7 +32,7 @@ func newValidatorRangesCmd(log *logrus.Logger) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "validator-ranges",
 		Short: "Generate validator ranges for discovered networks",
-		Long:  `Downloads networks.json and generates validator range data from Ansible inventory files`,
+		Long:  `Downloads networks.json and generates validator range data from Ansible inventory files and network config services`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			v := viper.New()
 
