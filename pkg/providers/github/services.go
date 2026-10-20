@@ -26,6 +26,7 @@ var servicePatterns = map[string]string{
 	"syncoor":         "https://syncoor.%s",
 	"spamoor":         "https://spamoor.%s",
 	"buildoor":        "https://buildoor.%s",
+	"rolloor":         "https://rolloor.%s",
 }
 
 // Special case services with custom patterns.
@@ -177,6 +178,8 @@ func (p *Provider) getServiceURLs(ctx context.Context, domain string) *discovery
 				services.Spamoor = result.url
 			case "buildoor":
 				services.Buildoor = result.url
+			case "rolloor":
+				services.Rolloor = result.url
 			}
 		}
 	}
