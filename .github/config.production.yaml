@@ -241,15 +241,6 @@ discovery:
                 prysm: "6.1.3"
                 teku: "25.10.0"
                 tysm: "0.43.0"
-            gloas:
-              epoch: 132352
-              minClientVersions:
-                grandine: "3.0.0-rc.1"
-                lodestar: "1.50.0"
-                nimbus: "26.10.1"
-                prysm: "7.3.0"
-                teku: "26.10.1"
-                tysm: "1.1.3"
         blobSchedule:
         - epoch: 52480
           maxBlobsPerBlock: 15
