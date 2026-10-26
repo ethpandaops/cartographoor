@@ -11,7 +11,7 @@ func TestInventoryDirName(t *testing.T) {
 		{network: "fusaka-devnet-5", repo: "ethpandaops/fusaka-devnets", want: "devnet-5"},
 		{network: "glamsterdam-devnet-8", repo: "ethpandaops/glamsterdam-devnets", want: "devnet-8"},
 		{network: "glamsterdam-msf-1", repo: "ethpandaops/glamsterdam-devnets", want: "msf-1"},
-		{network: "focil-devnet-1", repo: "ethpandaops/focil-devnets", want: "devnet-1"},
+		{network: "heze-devnet-1", repo: "ethpandaops/heze-devnets", want: "devnet-1"},
 		{network: "mainnet", repo: "ethpandaops/ansible", want: "mainnet"},
 		{network: "hoodi", repo: "", want: "hoodi"},
 		{network: "other-devnet-0", repo: "ethpandaops/glamsterdam-devnets", want: "other-devnet-0"},
