@@ -237,14 +237,8 @@ discovery:
         description: "Daisugi is an experimental post-quantum transaction fork on top of Electra: native frame transactions (EIP-8141) with keyed nonces (EIP-8250), and recursive STARK proof aggregation of post-quantum signatures (EIP-8288)."
         image: https://ethpandaops.io/img/bal.jpg
         links:
-          - title: "EIP-8141: Frame Transaction"
-            url: "https://eips.ethereum.org/EIPS/eip-8141"
-          - title: "EIP-8250: Keyed Nonces"
-            url: "https://eips.ethereum.org/EIPS/eip-8250"
           - title: "EIP-8288: Recursive STARK proof of post-quantum signatures"
             url: "https://eips.ethereum.org/EIPS/eip-8288"
-          - title: "daisugi-devnet-0 spec"
-            url: "https://notes.ethereum.org/@pk910/daisugi-devnet-0"
       - name: ethpandaops/pq-devnets
         namePrefix: pq-
         displayName: PQ Devnets
