@@ -231,6 +231,10 @@ discovery:
   github:
     # List of repositories to check for networks
     repositories:
+      - name: ethpandaops/daisugi-devnets
+        namePrefix: daisugi-
+        displayName: Daisugi Devnets
+        image: https://ethpandaops.io/img/bal.jpg
       - name: ethpandaops/pq-devnets
         namePrefix: pq-
         displayName: PQ Devnets

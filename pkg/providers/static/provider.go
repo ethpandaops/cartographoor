@@ -82,6 +82,8 @@ func (p *Provider) Discover(ctx context.Context, config discovery.Config) (map[s
 				serviceURLs.Spamoor = value
 			case "buildoor":
 				serviceURLs.Buildoor = value
+			case "upgradoor":
+				serviceURLs.Upgradoor = value
 			}
 		}
 
